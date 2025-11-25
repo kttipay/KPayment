@@ -2,10 +2,12 @@ package com.kttipay.payment.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitView
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -39,37 +41,34 @@ actual fun ApplePayButton(
     type: ApplePayButtonType,
     cornerRadius: Dp,
     enabled: Boolean,
-    backgroundColor: Color,
 ) {
     ApplePayButton(
         modifier = modifier,
         type = type.toPKType(),
         style = style.toPKStyle(),
         radius = cornerRadius.toIosPoints(),
-        backgroundColor = backgroundColor.toUIColor(),
         enabled = enabled,
         onClick = onClick
     )
 }
 
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ApplePayButton(
     modifier: Modifier = Modifier,
     type: PKPaymentButtonType,
     style: PKPaymentButtonStyle,
     radius: Double = 0.0,
-    backgroundColor: UIColor,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     val clickHandler = remember { MyClickHandler(onClick) }
 
     UIKitView(
+        properties = UIKitInteropProperties(placedAsOverlay = true),
         modifier = modifier,
         factory = {
             val container = UIView().apply {
-                this.backgroundColor = backgroundColor
                 layer.masksToBounds = true
                 this.opaque = true
                 clipsToBounds = true
@@ -106,7 +105,6 @@ fun ApplePayButton(
         },
         update = { view ->
             view.apply {
-                this.backgroundColor = backgroundColor
                 (subviews.firstOrNull() as? PKPaymentButton)?.let { btn ->
                     btn.layer.cornerRadius = radius
                 }
