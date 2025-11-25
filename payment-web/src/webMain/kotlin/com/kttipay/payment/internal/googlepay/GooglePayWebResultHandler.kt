@@ -1,6 +1,6 @@
 package com.kttipay.payment.internal.googlepay
 
-import org.kimplify.cedar.logging.Cedar
+import com.kttipay.payment.internal.logging.KPaymentLogger
 import com.kttipay.payment.api.PaymentErrorReason
 
 internal interface GooglePayWebResultHandler {
@@ -19,7 +19,7 @@ internal class DefaultPaymentResultHandler(
     }
 
     override fun onCancelled() {
-        Cedar.tag(TAG).d("Payment cancelled by user")
+        KPaymentLogger.tag(TAG).d("Payment cancelled by user")
         callback(GooglePayWebResult.Cancelled)
     }
 
@@ -31,7 +31,7 @@ internal class DefaultPaymentResultHandler(
             append(error.message ?: error.toString())
             error.cause?.message?.let { append(" | Cause: ").append(it) }
         }
-        Cedar.tag(TAG).e(errorMessage, error)
+        KPaymentLogger.tag(TAG).e(errorMessage, error)
         callback(
             GooglePayWebResult.Error(
                 reason = PaymentErrorReason.Unknown,
@@ -41,7 +41,7 @@ internal class DefaultPaymentResultHandler(
     }
 
     override fun onNotAvailable() {
-        Cedar.tag(TAG).d("Google Pay not available")
+        KPaymentLogger.tag(TAG).d("Google Pay not available")
         callback(
             GooglePayWebResult.Error(
                 reason = PaymentErrorReason.NotAvailable,

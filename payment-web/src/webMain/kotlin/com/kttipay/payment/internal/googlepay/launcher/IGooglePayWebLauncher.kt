@@ -1,6 +1,6 @@
 package com.kttipay.payment.internal.googlepay.launcher
 
-import com.kttipay.common.deci.Deci
+import org.kimplify.deci.Deci
 
 interface IGooglePayWebLauncher {
     fun launch(amount: Deci)

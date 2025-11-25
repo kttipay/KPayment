@@ -39,6 +39,11 @@ fun interface KPaymentLogCallback {
  * KPaymentLogger.enabled = true
  * ```
  *
+ * **Log Isolation Guarantee:**
+ * When [enabled] is false, KPayment library logs are completely suppressed
+ * and will NOT appear in user-planted Cedar trees. This ensures complete
+ * logging isolation between the library and consuming applications.
+ *
  * To receive log events in your own logging system, provide a [callback]:
  * ```kotlin
  * KPaymentLogger.callback = object : KPaymentLogCallback {

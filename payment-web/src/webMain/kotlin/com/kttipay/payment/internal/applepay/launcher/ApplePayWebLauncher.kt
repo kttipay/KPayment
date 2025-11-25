@@ -1,7 +1,6 @@
 package com.kttipay.payment.internal.applepay.launcher
 
-import org.kimplify.cedar.logging.Cedar
-import com.kttipay.common.deci.Deci
+import com.kttipay.payment.internal.logging.KPaymentLogger
 import com.kttipay.payment.api.config.ApplePayWebConfig
 import com.kttipay.payment.internal.applepay.ApplePaySessionManager
 import com.kttipay.payment.internal.applepay.ApplePayWebResult
@@ -15,6 +14,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
+import org.kimplify.deci.Deci
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 
@@ -25,7 +25,7 @@ internal class ApplePayWebLauncher(
     private val onResult: (ApplePayWebResult) -> Unit
 ) : IApplePayWebLauncher {
 
-    private val logger = Cedar.tag("ApplePayWebLauncher")
+    private val logger = KPaymentLogger.tag("ApplePayWebLauncher")
 
     override fun launch(amount: Deci) {
         val paymentRequestJson = buildPaymentRequest(amount.toString())
@@ -52,10 +52,10 @@ internal class ApplePayWebLauncher(
             put("countryCode", config.countryCode)
             put("currencyCode", config.currencyCode)
             putJsonArray("supportedNetworks") {
-                config.supportedNetworks.map { JsonPrimitive(it) }.forEach(::add)
+                config.supportedNetworks.map { JsonPrimitive(it.value) }.forEach(::add)
             }
             putJsonArray("merchantCapabilities") {
-                config.merchantCapabilities.map { JsonPrimitive(it) }.forEach(::add)
+                config.merchantCapabilities.map { JsonPrimitive(it.value) }.forEach(::add)
             }
             putJsonObject("total") {
                 put("label", config.merchantName)

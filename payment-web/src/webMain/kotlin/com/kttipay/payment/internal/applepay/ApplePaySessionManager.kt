@@ -1,6 +1,6 @@
 package com.kttipay.payment.internal.applepay
 
-import org.kimplify.cedar.logging.Cedar
+import com.kttipay.payment.internal.logging.KPaymentLogger
 import com.kttipay.payment.api.config.ApplePayWebConfig
 import kotlin.js.JsAny
 import kotlin.js.unsafeCast
@@ -25,7 +25,7 @@ internal class ApplePayMerchantValidationOrchestrator(
 
     override suspend fun validate(validationUrl: String, domain: String): JsAny {
         val fullUrl = buildValidationUrl(validationUrl, domain)
-        Cedar.tag(TAG).d("Merchant validation API URL: $fullUrl")
+        KPaymentLogger.tag(TAG).d("Merchant validation API URL: $fullUrl")
         return httpClient.fetchJson(fullUrl, "POST")
     }
 
@@ -65,7 +65,7 @@ internal class ApplePaySessionManager(
         }
 
         session.onCancel = {
-            Cedar.tag(TAG).d("Payment cancelled by user")
+            KPaymentLogger.tag(TAG).d("Payment cancelled by user")
             onCancel()
         }
     }
@@ -78,24 +78,24 @@ internal class ApplePaySessionManager(
     ) {
         runCatching {
             val rawValidationUrl = getValidationURL(event)
-            Cedar.tag(TAG).d("Raw merchant validation URL: $rawValidationUrl")
+            KPaymentLogger.tag(TAG).d("Raw merchant validation URL: $rawValidationUrl")
 
             val decodedValidationUrl = decodeURIComponent(rawValidationUrl)
-            Cedar.tag(TAG).d("Decoded merchant validation URL: $decodedValidationUrl")
+            KPaymentLogger.tag(TAG).d("Decoded merchant validation URL: $decodedValidationUrl")
 
             CoroutineScope(Dispatchers.Default).launch {
                 runCatching {
                     val sessionData = validationOrchestrator.validate(decodedValidationUrl, domain)
-                    Cedar.tag(TAG).d("Merchant validation succeeded: $sessionData")
+                    KPaymentLogger.tag(TAG).d("Merchant validation succeeded: $sessionData")
                     session.completeMerchantValidation(sessionData)
                 }.onFailure { error ->
-                    Cedar.tag(TAG).e("Merchant validation failed", error)
+                    KPaymentLogger.tag(TAG).e("Merchant validation failed", error)
                     session.abort()
                     onError()
                 }
             }
         }.onFailure { ex ->
-            Cedar.tag(TAG).d("Merchant validation failed: $ex")
+            KPaymentLogger.tag(TAG).d("Merchant validation failed: $ex")
             session.abort()
             onError()
         }
@@ -110,11 +110,11 @@ internal class ApplePaySessionManager(
         runCatching {
             val tokenJs = getPaymentToken(event)
             val tokenJsonString = JSON.stringify(tokenJs.unsafeCast<JsAny>())
-            Cedar.tag(TAG).d("Payment authorized successfully")
+            KPaymentLogger.tag(TAG).d("Payment authorized successfully")
             session.completePayment(ApplePaySession.STATUS_SUCCESS)
             onPaymentAuthorized(tokenJsonString)
         }.onFailure { error ->
-            Cedar.tag(TAG).e("Payment token retrieval failed", error)
+            KPaymentLogger.tag(TAG).e("Payment token retrieval failed", error)
             session.completePayment(ApplePaySession.STATUS_FAILURE)
             onError()
         }

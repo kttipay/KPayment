@@ -1,8 +1,8 @@
 package com.kttipay.payment.internal.googlepay
 
-import org.kimplify.cedar.logging.Cedar
-import com.kttipay.common.deci.Deci
+import com.kttipay.payment.internal.logging.KPaymentLogger
 import com.kttipay.payment.api.config.GooglePayWebConfig
+import org.kimplify.deci.Deci
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 import kotlin.js.JsPromiseError
@@ -28,25 +28,25 @@ internal class GooglePayPaymentClientImpl(
         onSuccess: (GooglePayToken) -> Unit,
         onError: (Throwable) -> Unit
     ) {
-        Cedar.d("GooglePayPaymentClientImpl.requestPayment amount=$amount")
+        KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment amount=$amount")
         val paymentRequest = loadPaymentDataRequestWithDefaults(amount.toString(), config = config)
-        Cedar.d("GooglePayPaymentClientImpl.requestPayment request=$paymentRequest")
+        KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment request=$paymentRequest")
 
         paymentsClient
             .loadPaymentData(paymentRequest)
             .then(
                 onFulfilled = { data: JsAny ->
-                    Cedar.d("GooglePayPaymentClientImpl.requestPayment onFulfilled raw=$data")
+                    KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment onFulfilled raw=$data")
                     val paymentData = data.unsafeCast<PaymentData>()
                     val token = paymentData.paymentMethodData.tokenizationData.token
-                    Cedar.d("GooglePayPaymentClientImpl.requestPayment token=$token")
+                    KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment token=$token")
                     onSuccess(GooglePayToken(token))
                     null
                 },
                 onRejected = { error: JsPromiseError ->
-                    Cedar.d("GooglePayPaymentClientImpl.requestPayment onRejected raw=$error")
+                    KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment onRejected raw=$error")
                     val parsed = parsePaymentError(error)
-                    Cedar.d("GooglePayPaymentClientImpl.requestPayment parsedError=${parsed::class.simpleName} message=${parsed.message}")
+                    KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment parsedError=${parsed::class.simpleName} message=${parsed.message}")
                     onError(parsed)
                     null
                 }
@@ -72,13 +72,13 @@ private fun parsePaymentError(error: JsPromiseError): PaymentException {
     val googlePayError = runCatching {
         error.unsafeCast<GooglePayErrorLike>()
     }.onFailure {
-        Cedar.d("parsePaymentError unsafeCast failed: $it")
+        KPaymentLogger.d("parsePaymentError unsafeCast failed: $it")
     }.getOrNull()
 
     val statusCode = googlePayError?.statusCode
     val statusMessage = googlePayError?.statusMessage.orEmpty()
 
-    Cedar.tag("GooglePayPaymentClient").w("parsePaymentError extracted statusCode=$statusCode statusMessage=$statusMessage")
+    KPaymentLogger.tag("GooglePayPaymentClient").w("parsePaymentError extracted statusCode=$statusCode statusMessage=$statusMessage")
 
     return when {
         statusCode.equals("CANCELED", ignoreCase = true) ->

@@ -21,14 +21,13 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.paymentCore)
-//            implementation(projects.common)
 
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.ui)
 
-//            implementation(libs.kotlinx.serialization)
-//            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization)
+            implementation(libs.kotlinx.coroutines.core)
         }
 
         webMain.dependencies {

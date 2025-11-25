@@ -14,7 +14,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -24,6 +24,25 @@ kotlin {
             isStatic = true
         }
     }
+
+    js(IR) {
+        browser {
+            commonWebpackConfig {
+                outputFileName = "kpayment-sample.js"
+            }
+        }
+        binaries.executable()
+    }
+
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+        browser {
+            commonWebpackConfig {
+                outputFileName = "kpayment-sample-wasm.js"
+            }
+        }
+        binaries.executable()
+    }
     
     sourceSets {
         androidMain.dependencies {
@@ -31,6 +50,18 @@ kotlin {
             implementation(libs.androidx.activity.compose)
         }
         iosMain.dependencies {
+        }
+        val webMain by creating {
+            dependsOn(commonMain.get())
+            dependencies {
+                implementation(project(":payment-web"))
+            }
+        }
+        jsMain {
+            dependsOn(webMain)
+        }
+        wasmJsMain {
+            dependsOn(webMain)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

@@ -6,7 +6,7 @@ import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.kttipay.payment.ui.NativePaymentHelper
 import kotlinx.coroutines.suspendCancellableCoroutine
-import org.kimplify.cedar.logging.Cedar
+import com.kttipay.payment.internal.logging.KPaymentLogger
 import kotlin.coroutines.resume
 
 class GooglePaymentHelper(
@@ -29,7 +29,7 @@ class GooglePaymentHelper(
                 if (continuation.isActive) {
                     continuation.resume(false)
                 }
-                Cedar.tag("GooglePaymentHelper").e("isReadyToPay failed", error)
+                KPaymentLogger.tag("GooglePaymentHelper").e("isReadyToPay failed", error)
             }
         }
     }

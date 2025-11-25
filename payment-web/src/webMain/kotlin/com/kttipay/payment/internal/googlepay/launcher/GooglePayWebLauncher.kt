@@ -1,7 +1,7 @@
 package com.kttipay.payment.internal.googlepay.launcher
 
-import org.kimplify.cedar.logging.Cedar
-import com.kttipay.common.deci.Deci
+import com.kttipay.payment.internal.logging.KPaymentLogger
+import org.kimplify.deci.Deci
 import com.kttipay.payment.internal.googlepay.GooglePayPaymentClient
 import com.kttipay.payment.internal.googlepay.GooglePayWebResultHandler
 import com.kttipay.payment.internal.googlepay.PaymentException
@@ -17,7 +17,7 @@ internal class GooglePayWebLauncher(
         runCatching {
             executePaymentFlow(amount)
         }.onFailure { error ->
-            Cedar.tag("GooglePayWebLauncher").d("launch error: $error")
+            KPaymentLogger.tag("GooglePayWebLauncher").d("launch error: $error")
             handlePaymentError(error)
         }
     }
@@ -33,14 +33,14 @@ internal class GooglePayWebLauncher(
                 resultHandler.onSuccess(token)
             },
             onError = { error ->
-                Cedar.tag("GooglePayWebLauncher").d("requestPaymentFromClient: $error")
+                KPaymentLogger.tag("GooglePayWebLauncher").d("requestPaymentFromClient: $error")
                 handlePaymentError(error)
             }
         )
     }
 
     private fun handlePaymentError(error: Throwable) {
-        Cedar.tag("GooglePayWebLauncher").d("handlePaymentError: $error")
+        KPaymentLogger.tag("GooglePayWebLauncher").d("handlePaymentError: $error")
         when (error) {
             is PaymentException.CancelledException -> resultHandler.onCancelled()
             else -> resultHandler.onError(error)

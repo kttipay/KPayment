@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.kimplify.cedar.logging.Cedar
+import com.kttipay.payment.internal.logging.KPaymentLogger
 
 /**
  * Default implementation of MobilePaymentManager.
@@ -44,7 +44,7 @@ class MobilePaymentManagerImpl(
 ) : MobilePaymentManager {
 
     init {
-        Cedar.tag("MobilePaymentManager")
+        KPaymentLogger.tag("MobilePaymentManager")
             .d("Initializing Mobile Payment - Environment: ${config.environment.name}")
 
         platformSetup.setupPlatformPayments(config)
@@ -71,7 +71,7 @@ class MobilePaymentManagerImpl(
             try {
                 refreshCapabilitiesInternal()
             } catch (e: Exception) {
-                Cedar.tag("MobilePaymentManager").e("Capability check failed", e)
+                KPaymentLogger.tag("MobilePaymentManager").e("Capability check failed", e)
                 handleCapabilityCheckFailure(e)
             }
         }
@@ -94,7 +94,7 @@ class MobilePaymentManagerImpl(
     }
 
     override suspend fun refreshCapabilities(): PaymentCapabilities {
-        Cedar.tag("MobilePaymentManager").d("Refreshing payment capabilities")
+        KPaymentLogger.tag("MobilePaymentManager").d("Refreshing payment capabilities")
         return refreshCapabilitiesInternal()
     }
 
@@ -118,7 +118,7 @@ class MobilePaymentManagerImpl(
             applePay = appleStatus
         )
         _capabilitiesFlow.value = capabilities
-        Cedar.tag("MobilePaymentManager")
+        KPaymentLogger.tag("MobilePaymentManager")
             .d("Capabilities — GooglePay: $googleStatus, ApplePay: $appleStatus")
         return capabilities
     }
