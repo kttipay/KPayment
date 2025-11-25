@@ -3,13 +3,9 @@ package com.kttipay.payment
 import android.content.Context
 import com.kttipay.payment.api.config.MobilePaymentConfig
 import com.kttipay.payment.internal.capability.AndroidCapabilityChecker
-import com.kttipay.payment.internal.capability.CapabilityChecker
 import com.kttipay.payment.internal.googlepay.GooglePayService
 import com.kttipay.payment.internal.googlepay.GooglePayServiceImpl
 import com.kttipay.payment.internal.setup.AndroidPlatformSetup
-import com.kttipay.payment.internal.setup.PlatformSetup
-import com.kttipay.payment.internal.validation.AndroidPlatformValidator
-import com.kttipay.payment.internal.validation.PlatformValidator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -49,7 +45,6 @@ fun createMobilePaymentManager(
             context = context.applicationContext
         ),
         platformSetup = AndroidPlatformSetup(sharedGooglePayService),
-        platformValidator = AndroidPlatformValidator(),
         scope = scope
     )
 }
