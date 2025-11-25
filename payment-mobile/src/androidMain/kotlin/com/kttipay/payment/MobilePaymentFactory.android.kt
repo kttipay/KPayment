@@ -6,6 +6,9 @@ import com.kttipay.payment.internal.capability.AndroidCapabilityChecker
 import com.kttipay.payment.internal.googlepay.GooglePayService
 import com.kttipay.payment.internal.googlepay.GooglePayServiceImpl
 import com.kttipay.payment.internal.setup.AndroidPlatformSetup
+import com.kttipay.payment.strategy.MobileCapabilityCheckStrategy
+import com.kttipay.payment.strategy.MobileConfigAccessor
+import com.kttipay.payment.strategy.MobilePlatformSetupStrategy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -13,7 +16,7 @@ import kotlinx.coroutines.SupervisorJob
 private val sharedGooglePayService = GooglePayServiceImpl()
 
 /**
- * Android-specific factory that creates a MobilePaymentManager with the given configuration.
+ * Android-specific factory that creates a PaymentManager with the given configuration.
  *
  * The manager is configured at construction time and capabilities are checked
  * lazily when the flow is first collected.
@@ -37,15 +40,20 @@ fun createMobilePaymentManager(
     config: MobilePaymentConfig,
     context: Context,
     scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-): MobilePaymentManager {
-    return MobilePaymentManagerImpl(
+): PaymentManager {
+    val capabilityChecker = AndroidCapabilityChecker(
+        googlePayService = sharedGooglePayService,
+        context = context.applicationContext
+    )
+    val platformSetup = AndroidPlatformSetup(sharedGooglePayService)
+
+    return PaymentManagerImpl(
         config = config,
-        capabilityChecker = AndroidCapabilityChecker(
-            googlePayService = sharedGooglePayService,
-            context = context.applicationContext
-        ),
-        platformSetup = AndroidPlatformSetup(sharedGooglePayService),
-        scope = scope
+        capabilityCheckStrategy = MobileCapabilityCheckStrategy(capabilityChecker),
+        platformSetupStrategy = MobilePlatformSetupStrategy(platformSetup),
+        configAccessor = MobileConfigAccessor(),
+        scope = scope,
+        logTag = "MobilePaymentManager"
     )
 }
 

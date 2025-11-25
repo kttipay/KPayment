@@ -1,17 +1,15 @@
 package com.kttipay.payment
 
 import com.kttipay.payment.api.PaymentProvider
-import com.kttipay.payment.api.config.ApplePayWebConfig
-import com.kttipay.payment.api.config.GooglePayWebConfig
 import com.kttipay.payment.capability.PaymentCapabilities
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Interface for managing web payment capabilities and configuration.
+ * Unified interface for managing payment capabilities and configuration.
  *
  * This manager handles capability checking and configuration
- * for Google Pay and Apple Pay on web platforms (browser).
+ * for Google Pay and Apple Pay across all platforms (Mobile & Web).
  *
  * The manager is configured at construction time and capabilities are checked
  * lazily when [capabilitiesFlow] is first collected.
@@ -20,12 +18,15 @@ import kotlinx.coroutines.flow.StateFlow
  * - Constructor-based configuration (immutable)
  * - Reactive state updates via Kotlin Flow
  * - Lazy capability checking
+ * - Platform-agnostic API
  *
- * Use [WebPaymentManagerImpl] for the default implementation.
+ * Use platform-specific factory functions to create instances:
+ * - `createMobilePaymentManager()` for Android/iOS
+ * - `createWebPaymentManager()` for Web
  *
- * @see WebPaymentManagerImpl
+ * @see com.kttipay.payment.PaymentManagerImpl
  */
-interface WebPaymentManager {
+interface PaymentManager {
     /**
      * Flow that emits current payment capabilities.
      *
@@ -67,18 +68,4 @@ interface WebPaymentManager {
      * @return Flow that emits true when provider is ready, false otherwise
      */
     fun observeAvailability(provider: PaymentProvider): Flow<Boolean>
-
-    /**
-     * Returns the Apple Pay configuration.
-     *
-     * @return Apple Pay config or null if not configured
-     */
-    fun applePayConfig(): ApplePayWebConfig?
-
-    /**
-     * Returns the Google Pay configuration.
-     *
-     * @return Google Pay config or null if not configured
-     */
-    fun googlePayConfig(): GooglePayWebConfig?
 }

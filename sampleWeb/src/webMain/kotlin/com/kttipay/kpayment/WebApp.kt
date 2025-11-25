@@ -28,11 +28,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,10 +45,9 @@ import com.kttipay.payment.api.logging.KPaymentLogger
 import com.kttipay.payment.capability.CapabilityStatus
 import com.kttipay.payment.internal.googlepay.GooglePayWebResult
 import com.kttipay.payment.ui.LocalWebPaymentManager
+import com.kttipay.payment.ui.PaymentManagerProvider
 import com.kttipay.payment.ui.launcher.rememberGooglePayWebLauncher
-import com.kttipay.payment.ui.rememberWebPaymentManager
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import org.kimplify.cedar.logging.Cedar
 import org.kimplify.cedar.logging.trees.PlatformLogTree
 import org.kimplify.deci.Deci
@@ -81,9 +78,7 @@ fun WebApp() {
         )
     }
 
-    val paymentManager = rememberWebPaymentManager(config)
-
-    CompositionLocalProvider(LocalWebPaymentManager provides paymentManager) {
+    PaymentManagerProvider(config = config) {
         WebAppContent()
     }
 }
@@ -91,7 +86,6 @@ fun WebApp() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WebAppContent() {
-    val scope = rememberCoroutineScope()
     val paymentManager = LocalWebPaymentManager.current
 
     val isGooglePayAvailable by paymentManager.capabilitiesFlow.map { it.googlePay }
@@ -150,9 +144,7 @@ private fun WebAppContent() {
                         icon = "💳",
                         provider = PaymentProvider.GooglePay,
                         onTest = {
-                            scope.launch {
-                                googleButton?.launch(Deci(1))
-                            }
+                            googleButton?.launch(Deci(1))
                         }
                     )
 
@@ -162,10 +154,8 @@ private fun WebAppContent() {
                         icon = "🍎",
                         provider = PaymentProvider.ApplePay,
                         onTest = {
-                            scope.launch {
-                                Cedar.i("Testing Apple Pay payment...")
-                                // Launch Apple Pay payment flow here
-                            }
+                            Cedar.i("Testing Apple Pay payment...")
+                            // Launch Apple Pay payment flow here when implemented
                         }
                     )
 

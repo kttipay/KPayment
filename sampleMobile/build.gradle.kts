@@ -54,11 +54,11 @@ kotlin {
 }
 
 android {
-    namespace = "com.kttipay.dev"
+    namespace = "com.kttipay.kpayment"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.kttipay.dev"
+        applicationId = "com.kttipay.kpayment"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1

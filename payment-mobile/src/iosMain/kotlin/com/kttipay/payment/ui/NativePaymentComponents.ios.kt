@@ -34,8 +34,8 @@ actual fun PaymentButton(
 actual fun rememberNativePaymentLauncher(
     onResult: (PaymentResult) -> Unit
 ): PaymentLauncher {
-    val paymentManager = LocalMobilePaymentManager.current
-    return if (paymentManager.applePayConfig() != null) {
+    val config = LocalMobilePaymentConfig.current
+    return if (config.applePayMobile != null) {
         rememberApplePayLauncher(onResult)
     } else {
         NotConfiguredLauncher(onResult)

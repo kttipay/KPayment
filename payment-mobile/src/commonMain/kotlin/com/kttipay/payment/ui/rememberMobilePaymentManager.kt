@@ -1,14 +1,14 @@
 package com.kttipay.payment.ui
 
 import androidx.compose.runtime.Composable
-import com.kttipay.payment.MobilePaymentManager
+import com.kttipay.payment.PaymentManager
 import com.kttipay.payment.api.config.MobilePaymentConfig
 
 /**
- * Creates and remembers a MobilePaymentManager instance with the given configuration.
+ * Creates and remembers a PaymentManager instance with the given mobile configuration.
  *
  * This is a platform-specific composable that automatically creates the appropriate
- * MobilePaymentManager implementation for Android or iOS. The instance is remembered
+ * PaymentManager implementation for Android or iOS. The instance is remembered
  * across recompositions based on the config.
  *
  * The manager is configured at construction time and capabilities are checked
@@ -38,7 +38,7 @@ import com.kttipay.payment.api.config.MobilePaymentConfig
  * On iOS, no context is needed.
  *
  * @param config The payment configuration (Google Pay and/or Apple Pay)
- * @return A platform-specific MobilePaymentManager instance
+ * @return A platform-specific PaymentManager instance
  */
 @Composable
-expect fun rememberMobilePaymentManager(config: MobilePaymentConfig): MobilePaymentManager
+expect fun rememberMobilePaymentManager(config: MobilePaymentConfig): PaymentManager

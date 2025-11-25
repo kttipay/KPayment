@@ -5,44 +5,51 @@ import androidx.compose.runtime.remember
 import com.kttipay.payment.internal.applepay.ApplePayWebResult
 import com.kttipay.payment.internal.applepay.launcher.ApplePayWebLauncher
 import com.kttipay.payment.internal.applepay.launcher.IApplePayWebLauncher
-import com.kttipay.payment.ui.LocalWebPaymentManager
+import com.kttipay.payment.ui.LocalWebPaymentConfig
 
 /**
- * Creates and remembers an Apple Pay Web launcher.
+ * Returns an ApplePayWebLauncher for web platforms.
  *
- * This composable automatically accesses the WebPaymentManager from the composition
- * to retrieve Apple Pay configuration. If Apple Pay is not configured, returns null.
+ * Requires LocalWebPaymentConfig to be provided via CompositionLocalProvider.
+ * Use PaymentManagerProvider to automatically provide both manager and config.
  *
- * Example usage:
+ * Usage:
  * ```kotlin
- * @Composable
- * fun PaymentScreen() {
- *     val applePayLauncher = rememberApplePayWebLauncher { result ->
+ * val applePayLauncher = rememberApplePayWebLauncher(
+ *     onResult = { result ->
  *         when (result) {
- *             is ApplePayWebResult.Success -> handleSuccess(result.token)
- *             is ApplePayWebResult.Canceled -> handleCanceled()
- *             is ApplePayWebResult.Error -> handleError(result.message)
+ *             is ApplePayWebResult.Success -> println("Token: ${result.token}")
+ *             ApplePayWebResult.Failure -> println("Failed")
+ *             ApplePayWebResult.Cancelled -> println("Cancelled")
  *         }
  *     }
+ * )
  *
- *     applePayLauncher?.launch(amount = Deci("99.99"))
+ * // Launch payment
+ * Button(onClick = { applePayLauncher?.launch(Deci(100)) }) {
+ *     Text("Pay with Apple Pay")
  * }
  * ```
  *
- * @param onResult Callback invoked when the Apple Pay flow completes
- * @return An Apple Pay launcher instance, or null if Apple Pay is not configured
+ * @param onResult Callback for payment result
+ * @return ApplePayWebLauncher instance or null if not configured
  */
 @Composable
 fun rememberApplePayWebLauncher(
     onResult: (ApplePayWebResult) -> Unit
 ): IApplePayWebLauncher? {
-    val paymentManager = LocalWebPaymentManager.current
-    val config = remember(paymentManager) {
-        paymentManager.applePayConfig()
+    val config = LocalWebPaymentConfig.current
+
+    val applePayConfig = remember(config) {
+        config.applePayWeb
     }
-    return config?.let {
-        remember(config, onResult) {
-            ApplePayWebLauncher(config, onResult)
+
+    return remember(applePayConfig, onResult) {
+        applePayConfig?.let {
+            ApplePayWebLauncher(
+                config = it,
+                onResult = onResult
+            )
         }
     }
 }

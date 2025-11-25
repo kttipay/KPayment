@@ -1,55 +1,56 @@
 package com.kttipay.payment.ui.launcher
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import com.kttipay.payment.api.config.toGooglePayWebConfig
 import com.kttipay.payment.internal.googlepay.GooglePayWebLauncherFactory
 import com.kttipay.payment.internal.googlepay.GooglePayWebResult
 import com.kttipay.payment.internal.googlepay.launcher.IGooglePayWebLauncher
-import com.kttipay.payment.internal.utils.ScriptLoader
-import com.kttipay.payment.ui.LocalWebPaymentManager
-import kotlin.js.ExperimentalWasmJsInterop
+import com.kttipay.payment.ui.LocalWebPaymentConfig
 
 /**
- * Creates and remembers a Google Pay Web launcher.
+ * Returns a GooglePayWebLauncher for web platforms.
  *
- * This composable automatically accesses the WebPaymentManager from the composition
- * to retrieve Google Pay configuration. If Google Pay is not configured, returns null.
+ * Requires LocalWebPaymentConfig to be provided via CompositionLocalProvider.
+ * Use PaymentManagerProvider to automatically provide both manager and config.
  *
- * Example usage:
+ * Usage:
  * ```kotlin
- * @Composable
- * fun PaymentScreen() {
- *     val googlePayLauncher = rememberGooglePayWebLauncher { result ->
+ * val googlePayLauncher = rememberGooglePayWebLauncher(
+ *     onResult = { result ->
  *         when (result) {
- *             is GooglePayWebResult.Success -> handleSuccess(result.paymentData)
- *             is GooglePayWebResult.Canceled -> handleCanceled()
- *             is GooglePayWebResult.Error -> handleError(result.message)
+ *             is GooglePayWebResult.Success -> println("Token: ${result.token}")
+ *             is GooglePayWebResult.Error -> println("Error: ${result.message}")
+ *             GooglePayWebResult.Cancelled -> println("Cancelled")
  *         }
  *     }
+ * )
  *
- *     googlePayLauncher?.launch(amount = Deci("99.99"))
+ * // Launch payment
+ * Button(onClick = { googlePayLauncher?.launch(Deci(100)) }) {
+ *     Text("Pay with Google Pay")
  * }
  * ```
  *
- * @param onResult Callback invoked when the Google Pay flow completes
- * @return A Google Pay launcher instance, or null if Google Pay is not configured
+ * @param onResult Callback for payment result
+ * @return GooglePayWebLauncher instance or null if not configured
  */
-@OptIn(ExperimentalWasmJsInterop::class)
 @Composable
 fun rememberGooglePayWebLauncher(
     onResult: (GooglePayWebResult) -> Unit
 ): IGooglePayWebLauncher? {
-    val paymentManager = LocalWebPaymentManager.current
-    val config = remember(paymentManager) {
-        paymentManager.googlePayConfig()
+    val config = LocalWebPaymentConfig.current
+
+    val googlePayConfig = remember(config) {
+        config.googlePay?.toGooglePayWebConfig(config.environment)
     }
-    LaunchedEffect(Unit) {
-        ScriptLoader.loadGooglePayScript()
-    }
-    return config?.let {
-        remember(config, onResult) {
-            GooglePayWebLauncherFactory().create(config, onResult)
+
+    return remember(googlePayConfig, onResult) {
+        googlePayConfig?.let {
+            GooglePayWebLauncherFactory().create(
+                config = it,
+                onResult = onResult
+            )
         }
     }
 }

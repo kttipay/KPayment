@@ -12,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,9 +24,8 @@ import com.kttipay.kpayment.screens.PaymentScreen
 import com.kttipay.payment.api.PaymentEnvironment
 import com.kttipay.payment.api.config.MobilePaymentConfig
 import com.kttipay.payment.api.logging.KPaymentLogger
-import com.kttipay.payment.ui.LocalMobilePaymentManager
+import com.kttipay.payment.ui.PaymentManagerProvider
 import com.kttipay.payment.ui.currentNativePaymentProvider
-import com.kttipay.payment.ui.rememberMobilePaymentManager
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.kimplify.cedar.logging.Cedar
 import org.kimplify.cedar.logging.trees.PlatformLogTree
@@ -57,12 +55,9 @@ fun App() {
         )
     }
 
-    val paymentManager = rememberMobilePaymentManager(paymentConfig)
-
-
     Cedar.d(message = "KPayment library initialized successfully")
 
-    CompositionLocalProvider(LocalMobilePaymentManager provides paymentManager) {
+    PaymentManagerProvider(config = paymentConfig) {
         MaterialTheme {
             var selectedTabIndex by remember { mutableStateOf(0) }
 
