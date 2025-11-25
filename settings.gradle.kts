@@ -29,7 +29,8 @@ dependencyResolutionManagement {
 }
 
 include(
-    ":sample",
+    ":sampleMobile",
+    ":sampleWeb",
     ":payment-core",
     ":payment-mobile",
     ":payment-web",

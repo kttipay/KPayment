@@ -8,7 +8,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.unsafeCast
 
-internal object ScriptLoader {
+object ScriptLoader {
     private val loadedScripts = mutableSetOf<String>()
     
     @OptIn(ExperimentalWasmJsInterop::class)
@@ -39,7 +39,7 @@ internal object ScriptLoader {
         }
     }
     
-    suspend fun loadGooglePayScript(): Result<Unit> {
+    internal suspend fun loadGooglePayScript(): Result<Unit> {
         return loadScript("https://pay.google.com/gp/p/js/pay.js")
     }
 }
