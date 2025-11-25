@@ -18,7 +18,6 @@ actual fun PaymentButton(
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier,
-    backgroundColor: Color,
     radius: Dp
 ) {
     ApplePayButton(
@@ -28,7 +27,6 @@ actual fun PaymentButton(
         type = type.toAppleType(),
         cornerRadius = radius,
         enabled = enabled,
-        backgroundColor = backgroundColor
     )
 }
 

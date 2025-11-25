@@ -2,7 +2,6 @@ package com.kttipay.payment.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 
 @Composable
@@ -13,7 +12,6 @@ actual fun ApplePayButton(
     type: ApplePayButtonType,
     cornerRadius: Dp,
     enabled: Boolean,
-    backgroundColor: Color
 ) {
     //No-op
 }

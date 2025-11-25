@@ -42,7 +42,6 @@ expect fun PaymentButton(
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    backgroundColor: Color,
     radius: Dp
 )
 

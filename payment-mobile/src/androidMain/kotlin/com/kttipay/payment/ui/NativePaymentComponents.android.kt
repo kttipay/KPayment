@@ -16,7 +16,6 @@ actual fun PaymentButton(
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier,
-    backgroundColor: Color,
     radius: Dp
 ) {
     GooglePayButton(
