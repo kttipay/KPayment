@@ -5,8 +5,12 @@ package com.kttipay.payment.api.config
  */
 data class ApplePayBaseConfig(
     override val merchantName: String,
-    override val supportedNetworks: List<String> = listOf("visa", "masterCard", "amex"),
-    override val merchantCapabilities: List<String> = listOf("supports3DS", "supportsDebit"),
+    override val supportedNetworks: Set<ApplePayNetwork> = setOf(
+        ApplePayNetwork.VISA,
+        ApplePayNetwork.MASTERCARD,
+        ApplePayNetwork.AMEX
+    ),
+    override val merchantCapabilities: Set<ApplePayMerchantCapability> = ApplePayMerchantCapability.DEFAULT,
     override val currencyCode: String = "AUD",
     override val countryCode: String = "AU"
 ) : ApplePayConfig

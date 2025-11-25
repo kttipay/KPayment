@@ -1,8 +1,9 @@
 package com.kttipay.kpayment.config
 
 import com.kttipay.payment.api.config.ApplePayBaseConfig
-import com.kttipay.payment.api.config.ApplePayConfig
+import com.kttipay.payment.api.config.ApplePayMerchantCapability
 import com.kttipay.payment.api.config.ApplePayMobileConfig
+import com.kttipay.payment.api.config.ApplePayNetwork
 import com.kttipay.payment.api.config.GooglePayConfig
 
 /**
@@ -21,8 +22,6 @@ import com.kttipay.payment.api.config.GooglePayConfig
  * - Configure merchant identity certificate in Xcode
  */
 object PaymentConfig {
-
-    // MARK: - Google Pay Configuration
 
     /**
      * Google Pay merchant name displayed during payment.
@@ -88,13 +87,22 @@ object PaymentConfig {
     )
 
     /**
-     * Apple Pay supported networks (lowercase).
+     * Apple Pay supported networks.
      */
-    val APPLE_PAY_NETWORKS = listOf(
-        "visa",
-        "masterCard",
-        "amex",
-        "discover"
+    val APPLE_PAY_NETWORKS = setOf(
+        ApplePayNetwork.VISA,
+        ApplePayNetwork.MASTERCARD,
+        ApplePayNetwork.AMEX,
+        ApplePayNetwork.DISCOVER
+    )
+
+    /**
+     * Apple Pay merchant capabilities.
+     */
+    val APPLE_PAY_MERCHANT_CAPABILITIES = setOf(
+        ApplePayMerchantCapability.CAPABILITY_3DS,
+        ApplePayMerchantCapability.CAPABILITY_DEBIT,
+        ApplePayMerchantCapability.CAPABILITY_CREDIT
     )
 
     /**
@@ -130,7 +138,7 @@ object PaymentConfig {
                 currencyCode = currencyCode,
                 countryCode = countryCode,
                 supportedNetworks = APPLE_PAY_NETWORKS,
-                merchantCapabilities = listOf("3DS", "debit", "credit")
+                merchantCapabilities = APPLE_PAY_MERCHANT_CAPABILITIES
             ),
         )
     }

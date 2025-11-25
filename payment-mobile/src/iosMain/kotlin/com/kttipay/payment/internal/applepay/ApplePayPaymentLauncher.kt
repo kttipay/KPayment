@@ -29,11 +29,12 @@ internal class ApplePayPaymentLauncher(
                 countryCode = baseConfig.countryCode,
                 currencyCode = baseConfig.currencyCode,
                 supportedNetworks = baseConfig.supportedNetworks,
-                merchantCapabilities3DS = baseConfig.merchantCapabilities.contains("supports3DS"),
+                merchantCapabilities = baseConfig.merchantCapabilities,
                 summaryItems = listOf(
                     SummaryItem(
                         label = baseConfig.merchantName,
-                        amount = amount
+                        amount = amount,
+                        isFinal = true
                     )
                 )
             ),
@@ -57,8 +58,17 @@ private fun ApplePayResult.toPaymentResult(): PaymentResult {
 
         is ApplePayResult.Failure -> PaymentResult.Error(
             provider = PaymentProvider.ApplePay,
-            reason = PaymentErrorReason.Unknown,
+            reason = errorCode.toPaymentErrorReason(),
             message = message
         )
+    }
+}
+
+private fun ApplePayErrorCode.toPaymentErrorReason(): PaymentErrorReason {
+    return when (this) {
+        ApplePayErrorCode.PRESENT_FAILED -> PaymentErrorReason.NotAvailable
+        ApplePayErrorCode.TOKEN_EXTRACTION_FAILED -> PaymentErrorReason.InternalError
+        ApplePayErrorCode.AUTHORIZATION_FAILED -> PaymentErrorReason.DeveloperError
+        ApplePayErrorCode.UNKNOWN -> PaymentErrorReason.Unknown
     }
 }

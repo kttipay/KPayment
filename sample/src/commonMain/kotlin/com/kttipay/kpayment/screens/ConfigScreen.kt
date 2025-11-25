@@ -41,7 +41,6 @@ fun ConfigScreen() {
 
         Divider()
 
-        // Google Pay Configuration
         Text(
             text = "Google Pay Configuration",
             style = MaterialTheme.typography.titleLarge
@@ -96,7 +95,6 @@ fun ConfigScreen() {
 
         Divider()
 
-        // Apple Pay Configuration
         Text(
             text = "Apple Pay Configuration",
             style = MaterialTheme.typography.titleLarge
@@ -134,7 +132,6 @@ fun ConfigScreen() {
 
         Divider()
 
-        // Common Configuration
         Text(
             text = "Common Settings",
             style = MaterialTheme.typography.titleLarge

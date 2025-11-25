@@ -1,27 +1,42 @@
 package com.kttipay.payment.internal.applepay
 
+import com.kttipay.payment.api.config.ApplePayMerchantCapability
+import com.kttipay.payment.api.config.ApplePayNetwork
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
-import org.kimplify.cedar.logging.Cedar
 import platform.Foundation.NSDecimalNumber
 import platform.Foundation.create
-import platform.PassKit.*
-import platform.UIKit.UIApplication
+import platform.PassKit.PKMerchantCapability3DS
+import platform.PassKit.PKMerchantCapabilityCredit
+import platform.PassKit.PKMerchantCapabilityDebit
+import platform.PassKit.PKMerchantCapabilityEMV
+import platform.PassKit.PKPassLibrary
+import platform.PassKit.PKPayment
+import platform.PassKit.PKPaymentAuthorizationController
+import platform.PassKit.PKPaymentAuthorizationControllerDelegateProtocol
+import platform.PassKit.PKPaymentAuthorizationResult
+import platform.PassKit.PKPaymentAuthorizationStatus
+import platform.PassKit.PKPaymentNetworkAmex
+import platform.PassKit.PKPaymentNetworkDiscover
+import platform.PassKit.PKPaymentNetworkJCB
+import platform.PassKit.PKPaymentNetworkMasterCard
+import platform.PassKit.PKPaymentNetworkVisa
+import platform.PassKit.PKPaymentRequest
+import platform.PassKit.PKPaymentSummaryItem
+import platform.PassKit.PKPaymentSummaryItemType
+import platform.PassKit.PKPaymentToken
 import platform.darwin.NSObject
 import platform.darwin.dispatch_async
 import platform.darwin.dispatch_get_main_queue
 
 /**
- * Pure Kotlin/Native implementation of ApplePayFactory using PassKit.
+ * Kotlin/Native implementation of ApplePayFactory using PassKit.
  *
  * This implementation uses Kotlin/Native's direct interop with iOS frameworks,
  * requiring no Swift or Objective-C code.
  */
 @OptIn(ExperimentalForeignApi::class)
 class KotlinNativeApplePayFactory : ApplePayFactory {
-
-    private val cedar = Cedar.tag("ApplePayFactory")
-
     private var currentCompletion: ((ApplePayResult) -> Unit)? = null
     private var currentController: PKPaymentAuthorizationController? = null
     private var currentDelegate: ApplePayDelegate? = null
@@ -34,7 +49,8 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
             PKPaymentNetworkMasterCard,
             PKPaymentNetworkVisa
         )
-        val canSetup = PKPaymentAuthorizationController.canMakePaymentsUsingNetworks(defaultNetworks)
+        val canSetup =
+            PKPaymentAuthorizationController.canMakePaymentsUsingNetworks(defaultNetworks)
 
         return ApplePayStatus(
             canMakePayments = canPay,
@@ -51,20 +67,22 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
             countryCode = request.countryCode
             currencyCode = request.currencyCode
 
-            merchantCapabilities = if (request.merchantCapabilities3DS) {
-                PKMerchantCapability3DS or PKMerchantCapabilityDebit or PKMerchantCapabilityCredit
-            } else {
-                PKMerchantCapabilityDebit or PKMerchantCapabilityCredit
+            merchantCapabilities = request.merchantCapabilities.fold(0UL) { acc, capability ->
+                acc or when (capability) {
+                    ApplePayMerchantCapability.CAPABILITY_3DS -> PKMerchantCapability3DS
+                    ApplePayMerchantCapability.CAPABILITY_DEBIT -> PKMerchantCapabilityDebit
+                    ApplePayMerchantCapability.CAPABILITY_CREDIT -> PKMerchantCapabilityCredit
+                    ApplePayMerchantCapability.CAPABILITY_EMV -> PKMerchantCapabilityEMV
+                }
             }
 
-            supportedNetworks = request.supportedNetworks.mapNotNull { network ->
-                when (network.lowercase()) {
-                    "amex" -> PKPaymentNetworkAmex
-                    "discover" -> PKPaymentNetworkDiscover
-                    "mastercard" -> PKPaymentNetworkMasterCard
-                    "visa" -> PKPaymentNetworkVisa
-                    "jcb" -> PKPaymentNetworkJCB
-                    else -> null
+            supportedNetworks = request.supportedNetworks.map { network ->
+                when (network) {
+                    ApplePayNetwork.AMEX -> PKPaymentNetworkAmex
+                    ApplePayNetwork.DISCOVER -> PKPaymentNetworkDiscover
+                    ApplePayNetwork.MASTERCARD -> PKPaymentNetworkMasterCard
+                    ApplePayNetwork.VISA -> PKPaymentNetworkVisa
+                    ApplePayNetwork.JCB -> PKPaymentNetworkJCB
                 }
             }
 
@@ -90,14 +108,13 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
         currentController = controller
         currentCompletion = onResult
 
-        cedar.d("[ApplePay] Using merchantId=${request.merchantId}")
-
         controller.presentWithCompletion { presented ->
             if (!presented) {
-                onResult(ApplePayResult.Failure(
-                    message = "Failed to present Apple Pay",
-                    errorCode = "present_failed"
-                ))
+                onResult(
+                    ApplePayResult.Failure(
+                        errorCode = ApplePayErrorCode.PRESENT_FAILED
+                    )
+                )
                 cleanup()
             }
         }
@@ -124,18 +141,11 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
         private var paymentToken: PKPaymentToken? = null
         private var hasCompletedPayment = false
 
-        override fun paymentAuthorizationControllerWillAuthorizePayment(
-            controller: PKPaymentAuthorizationController
-        ) {
-            cedar.d("[ApplePay] Will authorize payment (sheet about to ask FaceID/TouchID/passcode)")
-        }
-
         override fun paymentAuthorizationController(
             controller: PKPaymentAuthorizationController,
             didAuthorizePayment: PKPayment,
             handler: (PKPaymentAuthorizationResult?) -> Unit
         ) {
-            cedar.d("[ApplePay] Payment authorized, storing token")
             paymentToken = didAuthorizePayment.token
             hasCompletedPayment = true
 
@@ -144,47 +154,38 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
                 errors = null
             )
             handler(result)
-            cedar.d("[ApplePay] Authorization result sent to Apple Pay")
         }
 
         override fun paymentAuthorizationControllerDidFinish(
             controller: PKPaymentAuthorizationController
         ) {
-            cedar.d("[ApplePay] Payment authorization finished, dismissing...")
-
             controller.dismissWithCompletion {
-                cedar.d("[ApplePay] Dismiss completed, processing result on main queue...")
 
                 dispatch_async(dispatch_get_main_queue()) {
-                    cedar.d("[ApplePay] On main queue, checking token...")
                     val token = paymentToken
 
                     if (token != null && hasCompletedPayment) {
-                        cedar.d("[ApplePay] Processing successful payment token")
                         val tokenData = token.paymentData
                         val jsonString = tokenData.toKString()
 
                         if (jsonString != null) {
-                            cedar.d("[ApplePay] Token extracted successfully (length: ${jsonString.length}), calling onResult")
-                            onResult(ApplePayResult.Success(
-                                tokenJson = jsonString,
-                                transactionIdentifier = token.transactionIdentifier
-                            ))
+                            onResult(
+                                ApplePayResult.Success(
+                                    tokenJson = jsonString,
+                                    transactionIdentifier = token.transactionIdentifier
+                                )
+                            )
                         } else {
-                            cedar.d("[ApplePay] ERROR: Failed to convert token data to string")
-                            onResult(ApplePayResult.Failure(
-                                message = "Failed to extract payment token",
-                                errorCode = "token_extraction_failed"
-                            ))
+                            onResult(
+                                ApplePayResult.Failure(
+                                    errorCode = ApplePayErrorCode.TOKEN_EXTRACTION_FAILED
+                                )
+                            )
                         }
                     } else {
-                        // User cancelled or no payment was authorized
-                        cedar.d("[ApplePay] Payment was cancelled by user (token: ${token != null}, completed: $hasCompletedPayment)")
                         onResult(ApplePayResult.Cancelled)
                     }
 
-                    cedar.d("[ApplePay] Cleaning up resources")
-                    // Cleanup on the outer class, not just the delegate
                     this@KotlinNativeApplePayFactory.cleanup()
                 }
             }
