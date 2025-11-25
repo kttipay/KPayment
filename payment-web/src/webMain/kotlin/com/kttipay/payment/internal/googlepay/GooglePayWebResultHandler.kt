@@ -1,6 +1,6 @@
 package com.kttipay.payment.internal.googlepay
 
-import com.chilinoodles.cedar.logging.Cedar
+import org.kimplify.cedar.logging.Cedar
 import com.kttipay.payment.api.PaymentErrorReason
 
 internal interface GooglePayWebResultHandler {

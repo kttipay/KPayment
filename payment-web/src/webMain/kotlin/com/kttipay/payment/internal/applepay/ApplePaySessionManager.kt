@@ -1,6 +1,6 @@
 package com.kttipay.payment.internal.applepay
 
-import com.chilinoodles.cedar.logging.Cedar
+import org.kimplify.cedar.logging.Cedar
 import com.kttipay.payment.api.config.ApplePayWebConfig
 import kotlin.js.JsAny
 import kotlin.js.unsafeCast

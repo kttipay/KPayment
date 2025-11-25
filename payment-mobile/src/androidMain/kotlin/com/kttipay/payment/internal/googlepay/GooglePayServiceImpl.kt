@@ -66,10 +66,10 @@ internal class GooglePayServiceImpl : GooglePayService {
         }
 
         private val allowedCardNetworks: JSONArray
-            get() = JSONArray(config.allowedCardNetworks)
+            get() = JSONArray(config.allowedCardNetworks.map { it.value })
 
         private val allowedCardAuthMethods: JSONArray
-            get() = JSONArray(config.allowedAuthMethods)
+            get() = JSONArray(config.allowedAuthMethods.map { it.value })
 
         private fun baseCardPaymentMethod(): JSONObject {
             return JSONObject().apply {

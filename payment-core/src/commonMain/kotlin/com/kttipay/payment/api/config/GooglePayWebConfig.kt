@@ -8,8 +8,8 @@ data class GooglePayWebConfig(
     val googlePayGatewayMerchantId: String,
     val googlePayMerchantId: String,
     val googlePayMerchantName: String,
-    val allowedCardNetworks: List<String>,
-    val allowedAuthMethods: List<String>,
+    val allowedCardNetworks: Set<GooglePayCardNetwork>,
+    val allowedAuthMethods: Set<GooglePayAuthMethod>,
     val allowCreditCards: Boolean,
     val currencyCode: String,
     val countryCode: String

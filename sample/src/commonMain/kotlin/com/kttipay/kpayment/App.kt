@@ -21,9 +21,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.kttipay.kpayment.config.PaymentConfig
 import com.kttipay.kpayment.screens.ConfigScreen
+import com.kttipay.kpayment.screens.PaymentScreen
 import com.kttipay.payment.api.PaymentEnvironment
 import com.kttipay.payment.api.config.MobilePaymentConfig
+import com.kttipay.payment.api.logging.KPaymentLogger
 import com.kttipay.payment.ui.LocalMobilePaymentManager
+import com.kttipay.payment.ui.currentNativePaymentProvider
 import com.kttipay.payment.ui.rememberMobilePaymentManager
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.kimplify.cedar.logging.Cedar
@@ -43,6 +46,7 @@ fun App() {
     SideEffect {
         Cedar.plant(PlatformLogTree())
         Cedar.i(message = "Initializing KPayment library...")
+        KPaymentLogger.enabled = true
     }
 
     val paymentConfig = remember {
@@ -91,7 +95,7 @@ fun App() {
                     }
 
                     when (selectedTabIndex) {
-                        0 -> PlatformPaymentScreen()
+                        0 -> PaymentScreen(currentNativePaymentProvider())
                         1 -> ConfigScreen()
                     }
                 }
@@ -99,10 +103,3 @@ fun App() {
         }
     }
 }
-
-/**
- * Platform-specific payment screen.
- * Shows Google Pay on Android, Apple Pay on iOS.
- */
-@Composable
-expect fun PlatformPaymentScreen()

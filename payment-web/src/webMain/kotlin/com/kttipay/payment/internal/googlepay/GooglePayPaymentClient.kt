@@ -1,6 +1,6 @@
 package com.kttipay.payment.internal.googlepay
 
-import com.chilinoodles.cedar.logging.Cedar
+import org.kimplify.cedar.logging.Cedar
 import com.kttipay.common.deci.Deci
 import com.kttipay.payment.api.config.GooglePayWebConfig
 import kotlin.js.ExperimentalWasmJsInterop

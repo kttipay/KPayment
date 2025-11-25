@@ -1,6 +1,6 @@
 package com.kttipay.payment.internal.applepay.launcher
 
-import com.chilinoodles.cedar.logging.Cedar
+import org.kimplify.cedar.logging.Cedar
 import com.kttipay.common.deci.Deci
 import com.kttipay.payment.api.config.ApplePayWebConfig
 import com.kttipay.payment.internal.applepay.ApplePaySessionManager

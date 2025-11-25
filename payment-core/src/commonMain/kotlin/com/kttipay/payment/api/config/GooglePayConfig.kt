@@ -5,8 +5,11 @@ data class GooglePayConfig(
     val merchantName: String,
     val gateway: String,
     val gatewayMerchantId: String,
-    val allowedCardNetworks: List<String> = listOf("MASTERCARD", "VISA"),
-    val allowedAuthMethods: List<String> = listOf("PAN_ONLY", "CRYPTOGRAM_3DS"),
+    val allowedCardNetworks: Set<GooglePayCardNetwork> = setOf(
+        GooglePayCardNetwork.MASTERCARD,
+        GooglePayCardNetwork.VISA
+    ),
+    val allowedAuthMethods: Set<GooglePayAuthMethod> = GooglePayAuthMethod.DEFAULT,
     val allowCreditCards: Boolean = false,
     val assuranceDetailsRequired: Boolean = false,
     val currencyCode: String = "AUD",

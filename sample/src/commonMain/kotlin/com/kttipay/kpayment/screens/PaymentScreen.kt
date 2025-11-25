@@ -1,5 +1,6 @@
 package com.kttipay.kpayment.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key.Companion.N
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kttipay.kpayment.config.PaymentConfig
@@ -65,9 +65,7 @@ fun PaymentScreen(provider: PaymentProvider) {
                 }
 
                 is PaymentResult.Error -> {
-                    logger.i(
-                        message = "Payment failed: ${result.message}",
-                    )
+                    logger.i(message = "Payment failed: ${result.message}",)
                     isLoading = false
                     paymentResult = result
                 }
@@ -97,7 +95,6 @@ fun PaymentScreen(provider: PaymentProvider) {
             color = MaterialTheme.colorScheme.primary
         )
 
-        // Capability Status Card
         StatusCard(
             provider = provider,
             isAvailable = isAvailable
@@ -131,7 +128,7 @@ fun PaymentScreen(provider: PaymentProvider) {
         }
 
 
-        if (isLoading) {
+        AnimatedVisibility (isLoading) {
             CircularProgressIndicator(
                 color = MaterialTheme.colorScheme.primary
             )

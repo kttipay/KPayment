@@ -4,6 +4,8 @@ import com.kttipay.payment.api.config.ApplePayBaseConfig
 import com.kttipay.payment.api.config.ApplePayMerchantCapability
 import com.kttipay.payment.api.config.ApplePayMobileConfig
 import com.kttipay.payment.api.config.ApplePayNetwork
+import com.kttipay.payment.api.config.GooglePayAuthMethod
+import com.kttipay.payment.api.config.GooglePayCardNetwork
 import com.kttipay.payment.api.config.GooglePayConfig
 
 /**
@@ -77,14 +79,19 @@ object PaymentConfig {
     const val COUNTRY_CODE = "AU"
 
     /**
-     * Allowed card networks for payments.
+     * Google Pay allowed card networks.
      */
-    val ALLOWED_CARD_NETWORKS = listOf(
-        "VISA",
-        "MASTERCARD",
-        "AMEX",
-        "DISCOVER"
+    val GOOGLE_PAY_CARD_NETWORKS = setOf(
+        GooglePayCardNetwork.VISA,
+        GooglePayCardNetwork.MASTERCARD,
+        GooglePayCardNetwork.AMEX,
+        GooglePayCardNetwork.DISCOVER
     )
+
+    /**
+     * Google Pay authentication methods.
+     */
+    val GOOGLE_PAY_AUTH_METHODS = GooglePayAuthMethod.DEFAULT
 
     /**
      * Apple Pay supported networks.
@@ -119,8 +126,8 @@ object PaymentConfig {
             gateway = GOOGLE_PAY_GATEWAY,
             currencyCode = currencyCode,
             countryCode = countryCode,
-            allowedCardNetworks = ALLOWED_CARD_NETWORKS,
-            allowedAuthMethods = listOf("PAN_ONLY", "CRYPTOGRAM_3DS"),
+            allowedCardNetworks = GOOGLE_PAY_CARD_NETWORKS,
+            allowedAuthMethods = GOOGLE_PAY_AUTH_METHODS
         )
     }
 
