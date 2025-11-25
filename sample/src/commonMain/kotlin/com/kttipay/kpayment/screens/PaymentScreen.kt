@@ -111,7 +111,6 @@ fun PaymentScreen(provider: PaymentProvider) {
                 type = NativePaymentType.TopUp,
                 enabled = true,
                 radius = 16.dp,
-                backgroundColor = Color.LightGray,
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = 48.dp)

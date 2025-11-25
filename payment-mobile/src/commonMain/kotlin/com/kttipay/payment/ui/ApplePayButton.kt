@@ -14,4 +14,3 @@ expect fun ApplePayButton(
     cornerRadius: Dp = 4.dp,
     enabled: Boolean = true,
 )
-
