@@ -41,4 +41,4 @@ import com.kttipay.payment.api.config.WebPaymentConfig
  * @return A platform-specific PaymentManager instance
  */
 @Composable
-expect fun rememberWebPaymentManager(config: WebPaymentConfig): PaymentManager
+expect fun rememberWebPaymentManager(config: WebPaymentConfig): PaymentManager<WebPaymentConfig>

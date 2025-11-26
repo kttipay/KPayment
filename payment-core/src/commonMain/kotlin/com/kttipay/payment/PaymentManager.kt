@@ -1,6 +1,7 @@
 package com.kttipay.payment
 
 import com.kttipay.payment.api.PaymentProvider
+import com.kttipay.payment.api.config.PlatformPaymentConfig
 import com.kttipay.payment.capability.PaymentCapabilities
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +27,9 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * @see com.kttipay.payment.PaymentManagerImpl
  */
-interface PaymentManager {
+interface PaymentManager<T: PlatformPaymentConfig> {
+    val config: T
+
     /**
      * Flow that emits current payment capabilities.
      *

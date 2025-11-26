@@ -5,15 +5,15 @@ import androidx.compose.runtime.remember
 import com.kttipay.payment.api.PaymentLauncher
 import com.kttipay.payment.api.PaymentResult
 import com.kttipay.payment.internal.applepay.ApplePayPaymentLauncher
-import com.kttipay.payment.ui.LocalMobilePaymentConfig
+import com.kttipay.payment.ui.LocalMobilePaymentManager
 
 @Composable
 actual fun rememberApplePayLauncher(
     onResult: (PaymentResult) -> Unit
 ): PaymentLauncher {
-    val mobileConfig = LocalMobilePaymentConfig.current
-    val config = remember(mobileConfig) {
-        mobileConfig.applePayMobile
+    val manager = LocalMobilePaymentManager.current
+    val config = remember(manager) {
+        manager.config.applePayMobile
             ?: error(
                 "Apple Pay not configured. " +
                 "Provide applePayMobile in MobilePaymentConfig."

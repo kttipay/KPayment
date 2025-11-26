@@ -35,14 +35,14 @@ import kotlinx.coroutines.launch
  * @param scope CoroutineScope for async capability checking
  * @param logTag Log tag for this manager instance (defaults to "PaymentManager")
  */
-class PaymentManagerImpl(
-    private val config: PlatformPaymentConfig,
+class PaymentManagerImpl<T: PlatformPaymentConfig>(
+    override val config: T,
     private val capabilityCheckStrategy: CapabilityCheckStrategy,
     private val platformSetupStrategy: PlatformSetupStrategy,
     private val configAccessor: ConfigAccessor,
     private val scope: CoroutineScope,
     private val logTag: String = "PaymentManager"
-) : PaymentManager {
+) : PaymentManager<T> {
 
     init {
         KPaymentLogger.tag(logTag)

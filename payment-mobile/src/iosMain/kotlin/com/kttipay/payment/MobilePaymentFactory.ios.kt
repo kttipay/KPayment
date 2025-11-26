@@ -32,7 +32,7 @@ import kotlinx.coroutines.SupervisorJob
 fun createMobilePaymentManager(
     config: MobilePaymentConfig,
     scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-): PaymentManager {
+): PaymentManager<MobilePaymentConfig> {
     val capabilityChecker = IosCapabilityChecker()
     val platformSetup = IosPlatformSetup()
 

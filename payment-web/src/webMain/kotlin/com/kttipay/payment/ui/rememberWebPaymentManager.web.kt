@@ -18,7 +18,7 @@ import com.kttipay.payment.createWebPaymentManager
  * @return A PaymentManager instance configured for web
  */
 @Composable
-actual fun rememberWebPaymentManager(config: WebPaymentConfig): PaymentManager {
+actual fun rememberWebPaymentManager(config: WebPaymentConfig): PaymentManager<WebPaymentConfig> {
     val scope = rememberCoroutineScope()
     return remember(config) {
         createWebPaymentManager(config, scope)

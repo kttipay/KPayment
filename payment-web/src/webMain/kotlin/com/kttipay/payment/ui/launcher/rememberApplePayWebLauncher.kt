@@ -5,7 +5,7 @@ import androidx.compose.runtime.remember
 import com.kttipay.payment.internal.applepay.ApplePayWebResult
 import com.kttipay.payment.internal.applepay.launcher.ApplePayWebLauncher
 import com.kttipay.payment.internal.applepay.launcher.IApplePayWebLauncher
-import com.kttipay.payment.ui.LocalWebPaymentConfig
+import com.kttipay.payment.ui.LocalWebPaymentManager
 
 /**
  * Returns an ApplePayWebLauncher for web platforms.
@@ -35,21 +35,17 @@ import com.kttipay.payment.ui.LocalWebPaymentConfig
  * @return ApplePayWebLauncher instance or null if not configured
  */
 @Composable
-fun rememberApplePayWebLauncher(
-    onResult: (ApplePayWebResult) -> Unit
-): IApplePayWebLauncher? {
-    val config = LocalWebPaymentConfig.current
-
-    val applePayConfig = remember(config) {
-        config.applePayWeb
+fun rememberApplePayWebLauncher(onResult: (ApplePayWebResult) -> Unit): IApplePayWebLauncher {
+    val manager = LocalWebPaymentManager.current
+    val applePayWebConfig = manager.config.applePayWeb
+    require(applePayWebConfig != null) {
+        "Apple Pay Web configuration not found!"
     }
 
-    return remember(applePayConfig, onResult) {
-        applePayConfig?.let {
-            ApplePayWebLauncher(
-                config = it,
-                onResult = onResult
-            )
-        }
+    return remember(applePayWebConfig, onResult) {
+        ApplePayWebLauncher(
+            config = applePayWebConfig,
+            onResult = onResult,
+        )
     }
 }

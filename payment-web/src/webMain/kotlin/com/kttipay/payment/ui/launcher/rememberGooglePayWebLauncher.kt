@@ -6,7 +6,7 @@ import com.kttipay.payment.api.config.toGooglePayWebConfig
 import com.kttipay.payment.internal.googlepay.GooglePayWebLauncherFactory
 import com.kttipay.payment.internal.googlepay.GooglePayWebResult
 import com.kttipay.payment.internal.googlepay.launcher.IGooglePayWebLauncher
-import com.kttipay.payment.ui.LocalWebPaymentConfig
+import com.kttipay.payment.ui.LocalWebPaymentManager
 
 /**
  * Returns a GooglePayWebLauncher for web platforms.
@@ -38,19 +38,19 @@ import com.kttipay.payment.ui.LocalWebPaymentConfig
 @Composable
 fun rememberGooglePayWebLauncher(
     onResult: (GooglePayWebResult) -> Unit
-): IGooglePayWebLauncher? {
-    val config = LocalWebPaymentConfig.current
-
-    val googlePayConfig = remember(config) {
-        config.googlePay?.toGooglePayWebConfig(config.environment)
+): IGooglePayWebLauncher {
+    val manager = LocalWebPaymentManager.current
+    val googleWebConfig = manager.config.googlePay
+    require(googleWebConfig != null) {
+        "Google Pay configuration not found!"
     }
 
+    val googlePayConfig = googleWebConfig.toGooglePayWebConfig(manager.config.environment)
+
     return remember(googlePayConfig, onResult) {
-        googlePayConfig?.let {
-            GooglePayWebLauncherFactory().create(
-                config = it,
-                onResult = onResult
-            )
-        }
+        GooglePayWebLauncherFactory().create(
+            config = googlePayConfig,
+            onResult = onResult
+        )
     }
 }

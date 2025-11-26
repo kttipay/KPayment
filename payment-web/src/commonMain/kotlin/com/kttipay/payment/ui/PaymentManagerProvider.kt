@@ -2,6 +2,7 @@ package com.kttipay.payment.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import com.kttipay.payment.PaymentManager
 import com.kttipay.payment.api.config.WebPaymentConfig
 
 /**
@@ -32,17 +33,14 @@ import com.kttipay.payment.api.config.WebPaymentConfig
  * @param config The web payment configuration
  * @param content The composable content that will have access to the payment manager and config
  */
+
 @Composable
 fun PaymentManagerProvider(
-    config: WebPaymentConfig,
+    manager: PaymentManager<WebPaymentConfig>,
     content: @Composable () -> Unit
 ) {
-    val manager = rememberWebPaymentManager(config)
-
-    CompositionLocalProvider(
-        LocalWebPaymentManager provides manager,
-        LocalWebPaymentConfig provides config
-    ) {
+    CompositionLocalProvider(LocalWebPaymentManager provides manager) {
         content()
     }
 }
+

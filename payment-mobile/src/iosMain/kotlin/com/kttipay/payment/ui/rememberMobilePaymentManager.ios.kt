@@ -18,7 +18,7 @@ import com.kttipay.payment.createMobilePaymentManager
  * @return A PaymentManager instance configured for iOS
  */
 @Composable
-actual fun rememberMobilePaymentManager(config: MobilePaymentConfig): PaymentManager {
+actual fun rememberMobilePaymentManager(config: MobilePaymentConfig): PaymentManager<MobilePaymentConfig> {
     val scope = rememberCoroutineScope()
     return remember(config) {
         createMobilePaymentManager(config, scope)

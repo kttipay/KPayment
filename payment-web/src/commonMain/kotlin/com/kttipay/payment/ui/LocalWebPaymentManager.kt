@@ -2,6 +2,7 @@ package com.kttipay.payment.ui
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.kttipay.payment.PaymentManager
+import com.kttipay.payment.api.config.WebPaymentConfig
 
 /**
  * CompositionLocal for providing WebPaymentManager to Compose UI.
@@ -24,7 +25,7 @@ import com.kttipay.payment.PaymentManager
  * }
  * ```
  */
-val LocalWebPaymentManager = staticCompositionLocalOf<PaymentManager> {
+val LocalWebPaymentManager = staticCompositionLocalOf<PaymentManager<WebPaymentConfig>> {
     error(
         "No WebPaymentManager provided. Make sure to provide it using " +
         "CompositionLocalProvider(LocalWebPaymentManager provides paymentManager) " +

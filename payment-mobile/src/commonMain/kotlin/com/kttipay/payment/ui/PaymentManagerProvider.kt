@@ -2,6 +2,7 @@ package com.kttipay.payment.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import com.kttipay.payment.PaymentManager
 import com.kttipay.payment.api.config.MobilePaymentConfig
 
 /**
@@ -34,15 +35,10 @@ import com.kttipay.payment.api.config.MobilePaymentConfig
  */
 @Composable
 fun PaymentManagerProvider(
-    config: MobilePaymentConfig,
+    manager: PaymentManager<MobilePaymentConfig>,
     content: @Composable () -> Unit
 ) {
-    val manager = rememberMobilePaymentManager(config)
-
-    CompositionLocalProvider(
-        LocalMobilePaymentManager provides manager,
-        LocalMobilePaymentConfig provides config
-    ) {
+    CompositionLocalProvider(LocalMobilePaymentManager provides manager) {
         content()
     }
 }
