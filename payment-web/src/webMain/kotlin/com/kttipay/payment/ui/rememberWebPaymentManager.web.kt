@@ -3,7 +3,7 @@ package com.kttipay.payment.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import com.kttipay.payment.PaymentManager
+import com.kttipay.payment.WebPaymentManager
 import com.kttipay.payment.api.config.WebPaymentConfig
 import com.kttipay.payment.createWebPaymentManager
 
@@ -18,7 +18,7 @@ import com.kttipay.payment.createWebPaymentManager
  * @return A PaymentManager instance configured for web
  */
 @Composable
-actual fun rememberWebPaymentManager(config: WebPaymentConfig): PaymentManager<WebPaymentConfig> {
+actual fun rememberWebPaymentManager(config: WebPaymentConfig): WebPaymentManager {
     val scope = rememberCoroutineScope()
     return remember(config) {
         createWebPaymentManager(config, scope)

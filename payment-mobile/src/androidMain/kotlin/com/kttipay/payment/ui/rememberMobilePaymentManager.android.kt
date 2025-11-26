@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import com.kttipay.payment.PaymentManager
+import com.kttipay.payment.MobilePaymentManager
 import com.kttipay.payment.api.config.MobilePaymentConfig
 import com.kttipay.payment.createMobilePaymentManager
 
@@ -19,7 +19,7 @@ import com.kttipay.payment.createMobilePaymentManager
  * @return A PaymentManager instance configured for Android
  */
 @Composable
-actual fun rememberMobilePaymentManager(config: MobilePaymentConfig): PaymentManager<MobilePaymentConfig> {
+actual fun rememberMobilePaymentManager(config: MobilePaymentConfig): MobilePaymentManager {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     return remember(context, config) {

@@ -1,8 +1,7 @@
 package com.kttipay.payment.ui
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.kttipay.payment.PaymentManager
-import com.kttipay.payment.api.config.MobilePaymentConfig
+import com.kttipay.payment.MobilePaymentManager
 
 /**
  * CompositionLocal for providing MobilePaymentManager to Compose UI.
@@ -25,7 +24,7 @@ import com.kttipay.payment.api.config.MobilePaymentConfig
  * }
  * ```
  */
-val LocalMobilePaymentManager = staticCompositionLocalOf<PaymentManager<MobilePaymentConfig>> {
+val LocalMobilePaymentManager = staticCompositionLocalOf<MobilePaymentManager> {
     error(
         "No MobilePaymentManager provided. Make sure to provide it using " +
         "CompositionLocalProvider(LocalMobilePaymentManager provides paymentManager) " +

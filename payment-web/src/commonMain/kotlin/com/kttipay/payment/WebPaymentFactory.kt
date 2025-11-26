@@ -31,7 +31,7 @@ import kotlinx.coroutines.SupervisorJob
 fun createWebPaymentManager(
     config: WebPaymentConfig,
     scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-): PaymentManager<WebPaymentConfig> {
+): WebPaymentManager {
     return PaymentManagerImpl(
         config = config,
         capabilityCheckStrategy = WebCapabilityCheckStrategy(),

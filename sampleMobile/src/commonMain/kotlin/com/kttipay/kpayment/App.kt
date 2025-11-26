@@ -26,6 +26,7 @@ import com.kttipay.payment.api.config.MobilePaymentConfig
 import com.kttipay.payment.api.logging.KPaymentLogger
 import com.kttipay.payment.ui.PaymentManagerProvider
 import com.kttipay.payment.ui.currentNativePaymentProvider
+import com.kttipay.payment.ui.rememberMobilePaymentManager
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.kimplify.cedar.logging.Cedar
 import org.kimplify.cedar.logging.trees.PlatformLogTree
@@ -55,9 +56,11 @@ fun App() {
         )
     }
 
+    val paymentManager = rememberMobilePaymentManager(paymentConfig)
+
     Cedar.d(message = "KPayment library initialized successfully")
 
-    PaymentManagerProvider(config = paymentConfig) {
+    PaymentManagerProvider(manager = paymentManager) {
         MaterialTheme {
             var selectedTabIndex by remember { mutableStateOf(0) }
 

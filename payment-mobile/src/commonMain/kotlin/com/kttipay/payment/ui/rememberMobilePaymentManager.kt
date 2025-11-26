@@ -1,7 +1,7 @@
 package com.kttipay.payment.ui
 
 import androidx.compose.runtime.Composable
-import com.kttipay.payment.PaymentManager
+import com.kttipay.payment.MobilePaymentManager
 import com.kttipay.payment.api.config.MobilePaymentConfig
 
 /**
@@ -41,4 +41,4 @@ import com.kttipay.payment.api.config.MobilePaymentConfig
  * @return A platform-specific PaymentManager instance
  */
 @Composable
-expect fun rememberMobilePaymentManager(config: MobilePaymentConfig): PaymentManager<MobilePaymentConfig>
+expect fun rememberMobilePaymentManager(config: MobilePaymentConfig): MobilePaymentManager

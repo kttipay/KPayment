@@ -3,7 +3,7 @@ package com.kttipay.payment.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import com.kttipay.payment.PaymentManager
+import com.kttipay.payment.MobilePaymentManager
 import com.kttipay.payment.api.config.MobilePaymentConfig
 import com.kttipay.payment.createMobilePaymentManager
 
@@ -18,7 +18,7 @@ import com.kttipay.payment.createMobilePaymentManager
  * @return A PaymentManager instance configured for iOS
  */
 @Composable
-actual fun rememberMobilePaymentManager(config: MobilePaymentConfig): PaymentManager<MobilePaymentConfig> {
+actual fun rememberMobilePaymentManager(config: MobilePaymentConfig): MobilePaymentManager {
     val scope = rememberCoroutineScope()
     return remember(config) {
         createMobilePaymentManager(config, scope)

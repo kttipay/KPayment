@@ -47,6 +47,7 @@ import com.kttipay.payment.internal.googlepay.GooglePayWebResult
 import com.kttipay.payment.ui.LocalWebPaymentManager
 import com.kttipay.payment.ui.PaymentManagerProvider
 import com.kttipay.payment.ui.launcher.rememberGooglePayWebLauncher
+import com.kttipay.payment.ui.rememberWebPaymentManager
 import kotlinx.coroutines.flow.map
 import org.kimplify.cedar.logging.Cedar
 import org.kimplify.cedar.logging.trees.PlatformLogTree
@@ -78,7 +79,9 @@ fun WebApp() {
         )
     }
 
-    PaymentManagerProvider(config = config) {
+    val paymentManager = rememberWebPaymentManager(config)
+
+    PaymentManagerProvider(manager = paymentManager) {
         WebAppContent()
     }
 }

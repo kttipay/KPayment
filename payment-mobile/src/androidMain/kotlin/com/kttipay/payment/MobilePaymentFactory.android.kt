@@ -40,7 +40,7 @@ fun createMobilePaymentManager(
     config: MobilePaymentConfig,
     context: Context,
     scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-): PaymentManager<MobilePaymentConfig> {
+): MobilePaymentManager {
     val capabilityChecker = AndroidCapabilityChecker(
         googlePayService = sharedGooglePayService,
         context = context.applicationContext
