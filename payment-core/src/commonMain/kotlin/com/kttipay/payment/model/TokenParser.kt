@@ -1,14 +1,14 @@
 package com.kttipay.payment.model
 
-import kotlinx.serialization.json.Json
 import com.kttipay.payment.internal.logging.KPaymentLogger
+import kotlinx.serialization.json.Json
 
 private val json = Json {
     ignoreUnknownKeys = true
     explicitNulls = false
 }
 
-object ApplePayTokenParser {
+private object ApplePayTokenParser {
     private val supportedVersions = setOf("EC_v1", "RSA_v1")
 
     fun parse(jsonString: String): Result<ApplePaymentData> = runCatching {
@@ -23,7 +23,7 @@ object ApplePayTokenParser {
     }
 }
 
-object GooglePayTokenParser {
+private object GooglePayTokenParser {
     private const val SUPPORTED_PROTOCOL_VERSION = "ECv2"
 
     fun parse(jsonString: String): Result<GooglePayTokenPayload> = runCatching {
