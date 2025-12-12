@@ -58,7 +58,7 @@ android {
 mavenPublishing {
     publishToMavenCentral()
 //    signAllPublications()
-    coordinates("com.kttipay", "payment-web", libs.versions.appVersionName.get())
+    coordinates("com.kttipay", "kpayment-web", libs.versions.appVersionName.get())
 
     pom {
         name = libs.versions.libraryName.get()
