@@ -1,18 +1,23 @@
+import com.android.build.api.dsl.androidLibrary
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.maven.publish)
-    alias(libs.plugins.androidLibrary)
 }
 
 kotlin {
     jvmToolchain(libs.versions.javaVersion.get().toInt())
 
-    androidTarget()
+    androidLibrary {
+        namespace = "com.kttipay.payment.web"
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        minSdk = libs.versions.minSdk.get().toInt()
+    }
 
     js { browser() }
 
@@ -37,21 +42,6 @@ kotlin {
     }
 }
 
-
-android {
-    namespace = "com.kttipay.payment.web"
-
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-}
 
 //Publishing your Kotlin Multiplatform library to Maven Central
 //https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html

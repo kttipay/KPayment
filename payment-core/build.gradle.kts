@@ -1,23 +1,24 @@
 @file:OptIn(ExperimentalWasmDsl::class)
 
+import com.android.build.api.dsl.androidLibrary
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.maven.publish)
-    alias(libs.plugins.androidLibrary)
 }
 
 kotlin {
     jvmToolchain(libs.versions.javaVersion.get().toInt())
 
     jvm()
-    
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
-        }
+
+    androidLibrary {
+        namespace = "com.kttipay.payment.core"
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        minSdk = libs.versions.minSdk.get().toInt()
     }
 
     listOf(
@@ -40,20 +41,6 @@ kotlin {
             api(libs.cedar)
             api(libs.deci)
         }
-    }
-}
-
-android {
-    namespace = "com.kttipay.payment.core"
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
     }
 }
 

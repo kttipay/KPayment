@@ -1,7 +1,7 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.android.build.api.dsl.androidLibrary
 
 plugins {
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.maven.publish)
@@ -11,12 +11,10 @@ plugins {
 kotlin {
     jvmToolchain(libs.versions.javaVersion.get().toInt())
 
-    androidTarget {
-        compilations.configureEach {
-            compileTaskProvider.get().compilerOptions {
-                jvmTarget.set(JvmTarget.valueOf(libs.versions.jvmVersion.get()))
-            }
-        }
+    androidLibrary {
+        namespace = "com.kttipay.payment.mobile"
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        minSdk = libs.versions.minSdk.get().toInt()
     }
 
     listOf(
@@ -32,15 +30,11 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.paymentCore)
-//            implementation(projects.common)
-            
+
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
-            
-//            implementation(project.dependencies.platform(libs.koin.bom))
-//            implementation(libs.bundles.koin)
         }
 
         androidMain.dependencies {
@@ -48,29 +42,11 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.play.services.wallet)
             implementation(libs.compose.pay.button)
-//            implementation(libs.koin.android)
         }
 
         iosMain.dependencies {}
     }
 }
-
-android {
-    namespace = "com.kttipay.payment.mobile"
-
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-}
-
-
 
 //Publishing your Kotlin Multiplatform library to Maven Central
 //https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
