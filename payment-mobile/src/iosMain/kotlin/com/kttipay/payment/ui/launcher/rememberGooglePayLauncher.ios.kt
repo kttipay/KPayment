@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import com.kttipay.payment.api.PaymentLauncher
 import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.PaymentResult
-import org.kimplify.deci.Deci
 
 @Composable
 actual fun rememberGooglePayLauncher(onResult: (PaymentResult) -> Unit): PaymentLauncher {
@@ -12,7 +11,7 @@ actual fun rememberGooglePayLauncher(onResult: (PaymentResult) -> Unit): Payment
         override val provider: PaymentProvider
             get() = PaymentProvider.GooglePay
 
-        override fun launch(amount: Deci) {
+        override fun launch(amount: String) {
             //No-op for ios
         }
     }

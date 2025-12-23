@@ -12,7 +12,7 @@ dependencies {
 
 ## Quick start (Compose)
 
-Amounts are `Deci` values (for example, `Deci("10.00")`).
+Amounts are decimal strings (for example, `"10.00"`).
 
 ```kotlin
 val config = MobilePaymentConfig(
@@ -43,7 +43,7 @@ fun Checkout() {
             type = NativePaymentType.Pay,
             enabled = manager.canUse(currentNativePaymentProvider()),
             radius = 12.dp,
-            onClick = { launcher.launch(Deci("10.00")) }
+            onClick = { launcher.launch("10.00") }
         )
     }
 }

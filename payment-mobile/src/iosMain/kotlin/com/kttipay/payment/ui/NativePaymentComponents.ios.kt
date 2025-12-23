@@ -9,7 +9,6 @@ import com.kttipay.payment.api.PaymentLauncher
 import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.PaymentResult
 import com.kttipay.payment.ui.launcher.rememberApplePayLauncher
-import org.kimplify.deci.Deci
 
 @Composable
 actual fun PaymentButton(
@@ -49,7 +48,7 @@ private class NotConfiguredLauncher(
 ) : PaymentLauncher {
     override val provider: PaymentProvider = PaymentProvider.ApplePay
 
-    override fun launch(amount: Deci) {
+    override fun launch(amount: String) {
         onResult(
             PaymentResult.Error(
                 provider = provider,

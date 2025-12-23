@@ -39,7 +39,6 @@ kotlin {
             implementation(libs.kotlinx.serialization)
             implementation(libs.kotlinx.coroutines.core)
             api(libs.cedar)
-            api(libs.deci)
         }
     }
 }

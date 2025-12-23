@@ -11,6 +11,7 @@ data class GooglePayWebConfig(
     val allowedCardNetworks: Set<GooglePayCardNetwork>,
     val allowedAuthMethods: Set<GooglePayAuthMethod>,
     val allowCreditCards: Boolean,
+    val assuranceDetailsRequired: Boolean = false,
     val currencyCode: String,
     val countryCode: String
 )
@@ -28,6 +29,7 @@ fun GooglePayConfig.toGooglePayWebConfig(environment: PaymentEnvironment): Googl
         allowedCardNetworks = allowedCardNetworks,
         allowedAuthMethods = allowedAuthMethods,
         allowCreditCards = allowCreditCards,
+        assuranceDetailsRequired = assuranceDetailsRequired,
         currencyCode = currencyCode,
         countryCode = countryCode
     )

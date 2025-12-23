@@ -51,7 +51,6 @@ import com.kttipay.payment.ui.rememberWebPaymentManager
 import kotlinx.coroutines.flow.map
 import org.kimplify.cedar.logging.Cedar
 import org.kimplify.cedar.logging.trees.PlatformLogTree
-import org.kimplify.deci.Deci
 
 /**
  * Main web application demonstrating KPayment library for web platforms.
@@ -147,7 +146,7 @@ private fun WebAppContent() {
                         icon = "💳",
                         provider = PaymentProvider.GooglePay,
                         onTest = {
-                            googleButton?.launch(Deci(1))
+                            googleButton.launch("1.00")
                         }
                     )
 

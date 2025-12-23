@@ -2,7 +2,6 @@ package com.kttipay.payment.internal.googlepay
 
 import com.kttipay.payment.internal.logging.KPaymentLogger
 import com.kttipay.payment.api.config.GooglePayWebConfig
-import org.kimplify.deci.Deci
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 import kotlin.js.JsPromiseError
@@ -10,7 +9,7 @@ import kotlin.js.unsafeCast
 
 internal interface GooglePayPaymentClient {
     fun requestPayment(
-        amount: Deci,
+        amount: String,
         onSuccess: (GooglePayToken) -> Unit,
         onError: (Throwable) -> Unit
     )
@@ -24,12 +23,12 @@ internal class GooglePayPaymentClientImpl(
     private val paymentsClient by lazy { createPaymentsClient(config.googlePayEnvironment) }
 
     override fun requestPayment(
-        amount: Deci,
+        amount: String,
         onSuccess: (GooglePayToken) -> Unit,
         onError: (Throwable) -> Unit
     ) {
         KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment amount=$amount")
-        val paymentRequest = loadPaymentDataRequestWithDefaults(amount.toString(), config = config)
+        val paymentRequest = loadPaymentDataRequestWithDefaults(amount, config = config)
         KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment request=$paymentRequest")
 
         paymentsClient

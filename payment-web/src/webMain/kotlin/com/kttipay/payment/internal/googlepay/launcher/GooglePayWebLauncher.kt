@@ -1,7 +1,6 @@
 package com.kttipay.payment.internal.googlepay.launcher
 
 import com.kttipay.payment.internal.logging.KPaymentLogger
-import org.kimplify.deci.Deci
 import com.kttipay.payment.internal.googlepay.GooglePayPaymentClient
 import com.kttipay.payment.internal.googlepay.GooglePayWebResultHandler
 import com.kttipay.payment.internal.googlepay.PaymentException
@@ -13,7 +12,7 @@ internal class GooglePayWebLauncher(
     private val resultHandler: GooglePayWebResultHandler
 ) : IGooglePayWebLauncher {
 
-    override fun launch(amount: Deci) {
+    override fun launch(amount: String) {
         runCatching {
             executePaymentFlow(amount)
         }.onFailure { error ->
@@ -22,11 +21,11 @@ internal class GooglePayWebLauncher(
         }
     }
 
-    private fun executePaymentFlow(amount: Deci) {
+    private fun executePaymentFlow(amount: String) {
         requestPaymentFromClient(amount)
     }
 
-    private fun requestPaymentFromClient(amount: Deci) {
+    private fun requestPaymentFromClient(amount: String) {
         paymentClient.requestPayment(
             amount = amount,
             onSuccess = { token ->

@@ -16,7 +16,6 @@ import com.kttipay.payment.api.PaymentErrorReason
 import com.kttipay.payment.api.PaymentLauncher
 import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.PaymentResult
-import org.kimplify.deci.Deci
 
 @Composable
 fun rememberGooglePayLauncher(
@@ -67,7 +66,7 @@ private class AndroidPaymentLauncher(
 ) : PaymentLauncher {
     override val provider: PaymentProvider = PaymentProvider.GooglePay
 
-    override fun launch(amount: Deci) {
+    override fun launch(amount: String) {
         val requestJson = GooglePayEnvironment.paymentDataRequest(amount)
         val request = PaymentDataRequest.fromJson(requestJson.toString())
         val task = paymentsClient.loadPaymentData(request)

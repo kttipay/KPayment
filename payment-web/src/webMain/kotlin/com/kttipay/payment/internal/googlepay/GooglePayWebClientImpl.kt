@@ -16,7 +16,7 @@ internal class GooglePayWebClientImpl(
         onSuccess: (Boolean) -> Unit,
         onError: (Throwable) -> Unit
     ) {
-        val readyRequest = getIsReadyToPayRequest()
+        val readyRequest = getIsReadyToPayRequest(config)
 
         paymentsClient
             .isReadyToPay(readyRequest)

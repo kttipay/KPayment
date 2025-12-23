@@ -27,7 +27,7 @@ import com.kttipay.payment.ui.LocalWebPaymentManager
  * )
  *
  * // Launch payment
- * Button(onClick = { googlePayLauncher?.launch(Deci(100)) }) {
+ * Button(onClick = { googlePayLauncher?.launch("100.00") }) {
  *     Text("Pay with Google Pay")
  * }
  * ```

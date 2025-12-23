@@ -24,7 +24,6 @@ import com.kttipay.payment.ui.NativePaymentType
 import com.kttipay.payment.ui.PaymentButton
 import com.kttipay.payment.ui.rememberNativePaymentLauncher
 import org.kimplify.cedar.logging.Cedar
-import org.kimplify.deci.Deci
 
 /**
  * Unified payment demonstration screen for both Android and iOS.
@@ -121,7 +120,7 @@ fun PaymentScreen(provider: PaymentProvider) {
                     )
                     isLoading = true
                     paymentResult = null
-                    launcher.launch(Deci(amount))
+                    launcher.launch(amount.toString())
                 }
             )
         }

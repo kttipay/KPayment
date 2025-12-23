@@ -106,7 +106,7 @@ kotlin {
 
 ## Quick Start
 
-Amounts are `Deci` values (for example, `Deci("10.00")`).
+Amounts are decimal strings (for example, `"10.00"`).
 
 ### Android
 
@@ -136,7 +136,7 @@ fun PaymentScreen() {
             type = NativePaymentType.Pay,
             enabled = manager.canUse(currentNativePaymentProvider()),
             radius = 12.dp,
-            onClick = { launcher.launch(Deci("10.00")) }
+            onClick = { launcher.launch("10.00") }
         )
     }
 }
@@ -168,7 +168,7 @@ fun PaymentScreen() {
             type = NativePaymentType.Pay,
             enabled = manager.canUse(currentNativePaymentProvider()),
             radius = 12.dp,
-            onClick = { launcher.launch(Deci("10.00")) }
+            onClick = { launcher.launch("10.00") }
         )
     }
 }
@@ -204,7 +204,7 @@ fun PaymentScreen() {
             // handle GooglePayWebResult.Success, .Error, .Cancelled
         }
 
-        Button(onClick = { googlePay.launch(Deci("10.00")) }) {
+        Button(onClick = { googlePay.launch("10.00") }) {
             Text("Pay with Google Pay")
         }
     }

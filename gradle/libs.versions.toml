@@ -31,7 +31,6 @@ maven-publish = "0.35.0"
 
 kotlinxBrowser = "0.5.0"
 cedar = "0.2.2"
-deci = "0.1.0"
 
 kotlinSerialization = "1.9.0"
 coroutines = "1.10.2"
@@ -43,7 +42,6 @@ compose-pay-button = { module = "com.google.pay.button:compose-pay-button", vers
 kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.ref = "kotlinxBrowser" }
 
 cedar = { module = "org.kimplify:cedar-logging", version.ref = "cedar" }
-deci = { module = "org.kimplify:deci", version.ref = "deci" }
 
 kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }

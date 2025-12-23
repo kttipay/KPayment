@@ -5,7 +5,6 @@ import com.kttipay.payment.api.PaymentLauncher
 import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.PaymentResult
 import com.kttipay.payment.api.config.ApplePayMobileConfig
-import org.kimplify.deci.Deci
 
 /**
  * Payment launcher for Apple Pay on iOS.
@@ -21,7 +20,7 @@ internal class ApplePayPaymentLauncher(
         IosApplePayManager.getFactory()
     }
 
-    override fun launch(amount: Deci) {
+    override fun launch(amount: String) {
         val baseConfig = config.base
         factory.startPayment(
             ApplePayRequest(

@@ -6,7 +6,6 @@ import com.kttipay.payment.api.PaymentEnvironment
 import com.kttipay.payment.api.config.GooglePayConfig
 import com.kttipay.payment.getSharedGooglePayService
 import org.json.JSONObject
-import org.kimplify.deci.Deci
 
 /**
  * Facade for GooglePayService that maintains backward compatibility.
@@ -60,7 +59,7 @@ internal object GooglePayEnvironment {
      * @param amount Payment amount
      * @return JSON object for payment request
      */
-    fun paymentDataRequest(amount: Deci): JSONObject = getService().paymentDataRequest(amount)
+    fun paymentDataRequest(amount: String): JSONObject = getService().paymentDataRequest(amount)
 
     /**
      * Creates a PaymentsClient for interacting with Google Pay.

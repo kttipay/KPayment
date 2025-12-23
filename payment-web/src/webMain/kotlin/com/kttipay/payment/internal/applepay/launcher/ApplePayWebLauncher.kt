@@ -14,7 +14,6 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
-import org.kimplify.deci.Deci
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 
@@ -27,8 +26,8 @@ internal class ApplePayWebLauncher(
 
     private val logger = KPaymentLogger.tag("ApplePayWebLauncher")
 
-    override fun launch(amount: Deci) {
-        val paymentRequestJson = buildPaymentRequest(amount.toString())
+    override fun launch(amount: String) {
+        val paymentRequestJson = buildPaymentRequest(amount)
         val paymentRequestJs = parseJsonToJs(paymentRequestJson)
 
         startApplePayFlow(

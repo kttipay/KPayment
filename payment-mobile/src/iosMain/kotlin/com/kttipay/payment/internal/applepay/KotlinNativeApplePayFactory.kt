@@ -89,7 +89,7 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
             paymentSummaryItems = request.summaryItems.map { item ->
                 PKPaymentSummaryItem.summaryItemWithLabel(
                     label = item.label,
-                    amount = NSDecimalNumber(item.amount.toString()),
+                    amount = NSDecimalNumber(item.amount),
                     type = if (item.isFinal) {
                         PKPaymentSummaryItemType.PKPaymentSummaryItemTypeFinal
                     } else {

@@ -6,7 +6,6 @@ import com.kttipay.payment.api.PaymentErrorReason
 import com.kttipay.payment.api.PaymentLauncher
 import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.PaymentResult
-import org.kimplify.deci.Deci
 
 @Composable
 actual fun rememberApplePayLauncher(
@@ -15,7 +14,7 @@ actual fun rememberApplePayLauncher(
     object : PaymentLauncher {
         override val provider: PaymentProvider = PaymentProvider.ApplePay
 
-        override fun launch(amount: Deci) {
+        override fun launch(amount: String) {
             onResult(
                 PaymentResult.Error(
                     provider = provider,
