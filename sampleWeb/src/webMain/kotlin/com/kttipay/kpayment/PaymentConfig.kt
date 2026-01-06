@@ -32,19 +32,19 @@ object PaymentConfig {
      * Google Pay merchant name displayed during payment.
      * Replace with your actual business name.
      */
-    const val GOOGLE_PAY_MERCHANT_NAME = ""
+    const val GOOGLE_PAY_MERCHANT_NAME = "YOUR_MERCHANT_NAME_HERE"
 
     /**
      * Google Pay gateway merchant ID.
      * Get this from your payment gateway provider (e.g., Stripe, Braintree, etc.)
      */
-    const val GOOGLE_PAY_GATEWAY_MERCHANT_ID = ""
+    const val GOOGLE_PAY_GATEWAY_MERCHANT_ID = "YOUR_GATEWAY_MERCHANT_ID_HERE"
 
     /**
      * Payment gateway identifier.
      * Examples: "stripe", "braintree", "checkout", etc.
      */
-    const val GOOGLE_PAY_GATEWAY = ""
+    const val GOOGLE_PAY_GATEWAY = "stripe"
 
     /**
      * Google Pay environment.
@@ -59,18 +59,18 @@ object PaymentConfig {
      * Create this in your Apple Developer account.
      * Format: merchant.com.yourcompany.yourapp
      */
-    const val APPLE_PAY_MERCHANT_ID = ""
+    const val APPLE_PAY_MERCHANT_ID = "merchant.com.yourcompany.yourapp"
 
     /**
      * Apple Pay merchant validation endpoint exposed by your backend.
      * This is required for both Web and iOS.
      */
-    const val APPLE_PAY_MERCHANT_VALIDATION_ENDPOINT = ""
+    const val APPLE_PAY_MERCHANT_VALIDATION_ENDPOINT = "https://your-backend.com/apple-pay/validate"
 
     /**
      * Base URL of your hosted payment page/backend, used by Apple Pay on Web.
      */
-    const val APPLE_PAY_BASE_URL = ""
+    const val APPLE_PAY_BASE_URL = "https://your-backend.com"
 
     /**
      * Domain where the Apple Pay JS integration is hosted.
@@ -110,7 +110,7 @@ object PaymentConfig {
     /**
      * Google Pay authentication methods.
      */
-    val GOOGLE_PAY_AUTH_METHODS = GooglePayAuthMethod.Companion.DEFAULT
+    val GOOGLE_PAY_AUTH_METHODS = GooglePayAuthMethod.DEFAULT
 
     /**
      * Apple Pay supported networks.
@@ -130,6 +130,31 @@ object PaymentConfig {
         ApplePayMerchantCapability.CAPABILITY_DEBIT,
         ApplePayMerchantCapability.CAPABILITY_CREDIT
     )
+
+    sealed interface ConfigValidation {
+        data object Valid : ConfigValidation
+        data class Invalid(val message: String) : ConfigValidation
+    }
+
+    fun validateGooglePayConfig(): ConfigValidation {
+        return when {
+            GOOGLE_PAY_MERCHANT_NAME == "YOUR_MERCHANT_NAME_HERE" ->
+                ConfigValidation.Invalid("Please configure Google Pay merchant name in PaymentConfig.kt")
+            GOOGLE_PAY_GATEWAY_MERCHANT_ID == "YOUR_GATEWAY_MERCHANT_ID_HERE" ->
+                ConfigValidation.Invalid("Please configure Google Pay gateway merchant ID in PaymentConfig.kt")
+            else -> ConfigValidation.Valid
+        }
+    }
+
+    fun validateApplePayConfig(): ConfigValidation {
+        return when {
+            APPLE_PAY_MERCHANT_ID == "merchant.com.yourcompany.yourapp" ->
+                ConfigValidation.Invalid("Please configure Apple Pay merchant ID in PaymentConfig.kt")
+            APPLE_PAY_MERCHANT_VALIDATION_ENDPOINT == "https://your-backend.com/apple-pay/validate" ->
+                ConfigValidation.Invalid("Please configure Apple Pay merchant validation endpoint in PaymentConfig.kt")
+            else -> ConfigValidation.Valid
+        }
+    }
 
     /**
      * Creates a Google Pay configuration with current settings.

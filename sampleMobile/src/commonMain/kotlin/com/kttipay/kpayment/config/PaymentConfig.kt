@@ -131,6 +131,31 @@ object PaymentConfig {
         ApplePayMerchantCapability.CAPABILITY_CREDIT
     )
 
+    sealed interface ConfigValidation {
+        data object Valid : ConfigValidation
+        data class Invalid(val message: String) : ConfigValidation
+    }
+
+    fun validateGooglePayConfig(): ConfigValidation {
+        return when {
+            GOOGLE_PAY_MERCHANT_NAME == "YOUR_MERCHANT_NAME_HERE" ->
+                ConfigValidation.Invalid("Please configure Google Pay merchant name in PaymentConfig.kt")
+            GOOGLE_PAY_GATEWAY_MERCHANT_ID == "YOUR_GATEWAY_MERCHANT_ID_HERE" ->
+                ConfigValidation.Invalid("Please configure Google Pay gateway merchant ID in PaymentConfig.kt")
+            else -> ConfigValidation.Valid
+        }
+    }
+
+    fun validateApplePayConfig(): ConfigValidation {
+        return when {
+            APPLE_PAY_MERCHANT_ID == "merchant.com.yourcompany.yourapp" ->
+                ConfigValidation.Invalid("Please configure Apple Pay merchant ID in PaymentConfig.kt")
+            APPLE_PAY_MERCHANT_VALIDATION_ENDPOINT == "https://your-backend.com/apple-pay/validate" ->
+                ConfigValidation.Invalid("Please configure Apple Pay merchant validation endpoint in PaymentConfig.kt")
+            else -> ConfigValidation.Valid
+        }
+    }
+
     /**
      * Creates a Google Pay configuration with current settings.
      */
@@ -138,9 +163,6 @@ object PaymentConfig {
         currencyCode: String = CURRENCY_CODE,
         countryCode: String = COUNTRY_CODE
     ): GooglePayConfig {
-        require(GOOGLE_PAY_MERCHANT_NAME != "YOUR_MERCHANT_NAME_HERE") {
-            "Please configure Google Pay credentials in PaymentConfig.kt"
-        }
         return GooglePayConfig(
             merchantId = "",
             merchantName = GOOGLE_PAY_MERCHANT_NAME,
@@ -160,9 +182,6 @@ object PaymentConfig {
         currencyCode: String = CURRENCY_CODE,
         countryCode: String = COUNTRY_CODE
     ): ApplePayMobileConfig {
-        require(APPLE_PAY_MERCHANT_ID != "merchant.com.yourcompany.yourapp") {
-            "Please configure Apple Pay credentials in PaymentConfig.kt"
-        }
         return ApplePayMobileConfig(
             merchantId = APPLE_PAY_MERCHANT_ID,
             base = ApplePayBaseConfig(
