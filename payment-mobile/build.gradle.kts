@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.maven.publish)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ktlint)
 }
 
 kotlin {
@@ -15,6 +16,11 @@ kotlin {
         namespace = "com.kttipay.payment.mobile"
         compileSdk = libs.versions.compileSdk.get().toInt()
         minSdk = libs.versions.minSdk.get().toInt()
+
+        optimization {
+            consumerKeepRules.publish = true
+            consumerKeepRules.files.add(project.file("proguard-rules.pro"))
+        }
     }
 
     listOf(
@@ -48,8 +54,8 @@ kotlin {
     }
 }
 
-//Publishing your Kotlin Multiplatform library to Maven Central
-//https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
+// Publishing your Kotlin Multiplatform library to Maven Central
+// https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
@@ -59,7 +65,6 @@ mavenPublishing {
         name = libs.versions.libraryName.get()
         description = libs.versions.libraryDescription.get()
         url = libs.versions.libraryUrl.get()
-
 
         licenses {
             license {
@@ -86,4 +91,8 @@ mavenPublishing {
             url = libs.versions.libraryUrl.get()
         }
     }
+}
+
+ktlint {
+    version.set("1.8.0")
 }

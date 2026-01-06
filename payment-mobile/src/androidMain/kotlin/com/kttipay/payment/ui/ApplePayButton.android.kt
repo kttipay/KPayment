@@ -13,5 +13,5 @@ actual fun ApplePayButton(
     cornerRadius: Dp,
     enabled: Boolean,
 ) {
-    //No-op
+    // No-op
 }

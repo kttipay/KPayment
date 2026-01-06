@@ -8,7 +8,6 @@ import kotlin.js.JsAny
 import kotlin.js.JsBoolean
 import kotlin.js.Promise
 
-
 internal external interface PaymentMethodTokenizationData : JsAny {
     val token: String
 }
@@ -26,6 +25,7 @@ external fun createPaymentsClient(googlePayEnvironment: String): PaymentsClient
 
 external interface PaymentsClient : JsAny {
     fun isReadyToPay(request: JsAny): Promise<JsBoolean>
+
     fun loadPaymentData(request: JsAny): Promise<JsAny>
 }
 

@@ -46,14 +46,18 @@ fun rememberGooglePayLauncher(
                 }
             }
 
-            CommonStatusCodes.CANCELED -> onResult(PaymentResult.Cancelled(provider))
-            else -> onResult(
-                PaymentResult.Error(
-                    provider = provider,
-                    reason = statusToPaymentErrorReason(taskResult.status.statusCode),
-                    message = taskResult.status.statusMessage
+            CommonStatusCodes.CANCELED -> {
+                onResult(PaymentResult.Cancelled(provider))
+            }
+            else -> {
+                onResult(
+                    PaymentResult.Error(
+                        provider = provider,
+                        reason = statusToPaymentErrorReason(taskResult.status.statusCode),
+                        message = taskResult.status.statusMessage
+                    )
                 )
-            )
+            }
         }
     }
 

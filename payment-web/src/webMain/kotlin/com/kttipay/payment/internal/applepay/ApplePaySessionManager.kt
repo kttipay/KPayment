@@ -1,14 +1,14 @@
 package com.kttipay.payment.internal.applepay
 
-import com.kttipay.payment.internal.logging.KPaymentLogger
 import com.kttipay.payment.api.config.ApplePayWebConfig
-import kotlin.js.JsAny
-import kotlin.js.unsafeCast
+import com.kttipay.payment.internal.logging.KPaymentLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.JsFun
+import kotlin.js.ExperimentalWasmJsInterop
+import kotlin.js.JsAny
+import kotlin.js.unsafeCast
 
 private const val TAG = "ApplePaySessionManager"
 

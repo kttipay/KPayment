@@ -36,5 +36,6 @@ object AmountValidator {
 
 sealed interface ValidationResult {
     data class Valid(val amount: String) : ValidationResult
+
     data class Error(val message: String) : ValidationResult
 }

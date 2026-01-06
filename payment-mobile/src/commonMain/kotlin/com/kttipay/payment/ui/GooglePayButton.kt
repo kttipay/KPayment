@@ -14,4 +14,3 @@ expect fun GooglePayButton(
     cornerRadius: Dp = 4.dp,
     enabled: Boolean = true
 )
-

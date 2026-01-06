@@ -4,9 +4,9 @@ import android.content.Context
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
+import com.kttipay.payment.internal.logging.KPaymentLogger
 import com.kttipay.payment.ui.NativePaymentHelper
 import kotlinx.coroutines.suspendCancellableCoroutine
-import com.kttipay.payment.internal.logging.KPaymentLogger
 import kotlin.coroutines.resume
 
 class GooglePaymentHelper(
