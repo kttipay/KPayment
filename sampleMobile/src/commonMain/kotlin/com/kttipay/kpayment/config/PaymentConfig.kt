@@ -10,6 +10,7 @@ import com.kttipay.payment.api.config.GooglePayCardNetwork
 import com.kttipay.payment.api.config.GooglePayConfig
 import com.kttipay.payment.api.config.WebPaymentConfig
 import com.kttipay.payment.api.PaymentEnvironment
+import org.kimplify.cedar.logging.Cedar
 
 /**
  * Payment configuration for the sample app.
@@ -136,24 +137,85 @@ object PaymentConfig {
         data class Invalid(val message: String) : ConfigValidation
     }
 
-    fun validateGooglePayConfig(): ConfigValidation {
-        return when {
-            GOOGLE_PAY_MERCHANT_NAME == "YOUR_MERCHANT_NAME_HERE" ->
-                ConfigValidation.Invalid("Please configure Google Pay merchant name in PaymentConfig.kt")
-            GOOGLE_PAY_GATEWAY_MERCHANT_ID == "YOUR_GATEWAY_MERCHANT_ID_HERE" ->
-                ConfigValidation.Invalid("Please configure Google Pay gateway merchant ID in PaymentConfig.kt")
-            else -> ConfigValidation.Valid
+    private fun validateGooglePayConfig(): ConfigValidation {
+        val errors = mutableListOf<String>()
+
+        if (GOOGLE_PAY_MERCHANT_NAME == "YOUR_MERCHANT_NAME_HERE") {
+            errors.add("Please configure Google Pay merchant name in PaymentConfig.kt")
+        }
+
+        if (GOOGLE_PAY_GATEWAY_MERCHANT_ID == "YOUR_GATEWAY_MERCHANT_ID_HERE") {
+            errors.add("Please configure Google Pay gateway merchant ID in PaymentConfig.kt")
+        }
+
+        return if (errors.isEmpty()) {
+            ConfigValidation.Valid
+        } else {
+            ConfigValidation.Invalid(errors.joinToString("\n"))
         }
     }
 
-    fun validateApplePayConfig(): ConfigValidation {
-        return when {
-            APPLE_PAY_MERCHANT_ID == "merchant.com.yourcompany.yourapp" ->
-                ConfigValidation.Invalid("Please configure Apple Pay merchant ID in PaymentConfig.kt")
-            APPLE_PAY_MERCHANT_VALIDATION_ENDPOINT == "https://your-backend.com/apple-pay/validate" ->
-                ConfigValidation.Invalid("Please configure Apple Pay merchant validation endpoint in PaymentConfig.kt")
-            else -> ConfigValidation.Valid
+    private fun validateApplePayConfig(): ConfigValidation {
+        val errors = mutableListOf<String>()
+
+        if (APPLE_PAY_MERCHANT_ID == "merchant.com.yourcompany.yourapp") {
+            errors.add("Please configure Apple Pay merchant ID in PaymentConfig.kt")
         }
+
+        if (APPLE_PAY_MERCHANT_VALIDATION_ENDPOINT == "https://your-backend.com/apple-pay/validate") {
+            errors.add("Please configure Apple Pay merchant validation endpoint in PaymentConfig.kt")
+        }
+
+        return if (errors.isEmpty()) {
+            ConfigValidation.Valid
+        } else {
+            ConfigValidation.Invalid(errors.joinToString("\n"))
+        }
+    }
+
+    /**
+     * Builds a Google Pay configuration after validation.
+     * Returns a type-safe ConfigResult instead of a Pair.
+     *
+     * @return ConfigResult with either a valid config or validation errors
+     */
+    fun buildGooglePayConfig(): ConfigResult<GooglePayConfig> {
+        return when (val validation = validateGooglePayConfig()) {
+            is ConfigValidation.Valid -> ConfigResult.Success(createGooglePayConfig())
+            is ConfigValidation.Invalid -> ConfigResult.Failure(
+                providerName = "Google Pay",
+                errors = validation.message.split("\n")
+            )
+        }
+    }
+
+    /**
+     * Builds an Apple Pay mobile configuration after validation.
+     * Returns a type-safe ConfigResult instead of a Pair.
+     *
+     * @return ConfigResult with either a valid config or validation errors
+     */
+    fun buildApplePayConfig(): ConfigResult<ApplePayMobileConfig> {
+        return when (val validation = validateApplePayConfig()) {
+            is ConfigValidation.Valid -> ConfigResult.Success(createApplePayConfig())
+            is ConfigValidation.Invalid -> ConfigResult.Failure(
+                providerName = "Apple Pay",
+                errors = validation.message.split("\n")
+            )
+        }
+    }
+
+    /**
+     * Logs configuration failures to Cedar.
+     * Can be chained with build functions for automatic error logging.
+     *
+     * Example: `buildGooglePayConfig().logIfFailure()`
+     */
+    private fun <T> ConfigResult<T>.logIfFailure(): ConfigResult<T> {
+        onFailure { provider, errors ->
+            Cedar.e("$provider configuration error: ${errors.joinToString(", ")}")
+        }
+        return this
     }
 
     /**
