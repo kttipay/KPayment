@@ -23,4 +23,3 @@ data class ApplePayHeader(
     @SerialName("transactionId")
     val transactionId: String
 )
-

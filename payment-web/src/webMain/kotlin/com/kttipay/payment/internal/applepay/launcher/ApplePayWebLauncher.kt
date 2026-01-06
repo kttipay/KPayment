@@ -1,12 +1,12 @@
 package com.kttipay.payment.internal.applepay.launcher
 
-import com.kttipay.payment.internal.logging.KPaymentLogger
 import com.kttipay.payment.api.config.ApplePayWebConfig
 import com.kttipay.payment.internal.applepay.ApplePaySessionManager
 import com.kttipay.payment.internal.applepay.ApplePayWebResult
 import com.kttipay.payment.internal.applepay.createApplePaySession
 import com.kttipay.payment.internal.applepay.parseJsonToJs
 import com.kttipay.payment.internal.config.ApplePayApiConstants
+import com.kttipay.payment.internal.logging.KPaymentLogger
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
@@ -16,7 +16,6 @@ import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
-
 
 @OptIn(ExperimentalWasmJsInterop::class)
 internal class ApplePayWebLauncher(

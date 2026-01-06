@@ -39,4 +39,3 @@ enum class PaymentEnvironment {
     val isDebug: Boolean
         get() = this != Production
 }
-

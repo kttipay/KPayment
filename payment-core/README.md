@@ -7,9 +7,19 @@ This module does not call any platform payment APIs. Use `kpayment-mobile` or
 
 ## Includes
 
-- `PaymentManager` interface and capability flow
+- `PaymentManager` interface with reactive and suspend APIs
 - Config models: `GooglePayConfig`, `ApplePayBaseConfig`, `MobilePaymentConfig`, `WebPaymentConfig`
 - Results and tokens: `PaymentResult`, `GooglePayToken`, `ApplePayToken`
+
+## PaymentManager API
+
+| Method | Type | Description |
+|--------|------|-------------|
+| `config` | Property | The payment configuration |
+| `capabilitiesFlow` | `StateFlow` | Reactive stream of payment capabilities |
+| `awaitCapabilities()` | `suspend` | Wait for initial check, returns capabilities |
+| `refreshCapabilities()` | `suspend` | Force re-check, returns updated capabilities |
+| `observeAvailability(provider)` | `Flow<Boolean>` | Observe specific provider availability |
 
 ## Install
 

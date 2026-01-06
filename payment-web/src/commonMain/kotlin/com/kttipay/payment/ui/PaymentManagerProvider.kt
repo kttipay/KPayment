@@ -42,4 +42,3 @@ fun PaymentManagerProvider(
         content()
     }
 }
-

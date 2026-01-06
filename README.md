@@ -27,7 +27,8 @@ A Kotlin Multiplatform library for seamless payment processing across Android, i
 - **Google Pay Integration** - Android and Web support
 - **Apple Pay Integration** - iOS and Safari (Web) support
 - **Compose Support** - Payment button + launcher helpers
-- **Capability Detection** - Reactive availability checks via Flows
+- **Capability Detection** - Reactive availability checks via `StateFlow` and `Flow`
+- **Suspend API** - `awaitCapabilities()` for async initialization
 - **Type-Safe API** - Shared config and model types across platforms
 - **Serializable Tokens** - kotlinx.serialization support for payment tokens
 
@@ -166,6 +167,8 @@ val config = MobilePaymentConfig(
 @Composable
 fun PaymentScreen() {
     val manager = rememberMobilePaymentManager(config)
+    val isReady by manager.observeAvailability(currentNativePaymentProvider())
+        .collectAsState(initial = false)
 
     PaymentManagerProvider(manager) {
         val launcher = rememberNativePaymentLauncher { result ->
@@ -175,7 +178,7 @@ fun PaymentScreen() {
         PaymentButton(
             theme = NativePaymentTheme.Dark,
             type = NativePaymentType.Pay,
-            enabled = manager.canUse(currentNativePaymentProvider()),
+            enabled = isReady,
             radius = 12.dp,
             onClick = { launcher.launch("10.00") }
         )
@@ -198,6 +201,8 @@ val config = MobilePaymentConfig(
 @Composable
 fun PaymentScreen() {
     val manager = rememberMobilePaymentManager(config)
+    val isReady by manager.observeAvailability(currentNativePaymentProvider())
+        .collectAsState(initial = false)
 
     PaymentManagerProvider(manager) {
         val launcher = rememberNativePaymentLauncher { result ->
@@ -207,7 +212,7 @@ fun PaymentScreen() {
         PaymentButton(
             theme = NativePaymentTheme.Dark,
             type = NativePaymentType.Pay,
-            enabled = manager.canUse(currentNativePaymentProvider()),
+            enabled = isReady,
             radius = 12.dp,
             onClick = { launcher.launch("10.00") }
         )
@@ -258,9 +263,10 @@ fun PaymentScreen() {
 
 Shared abstractions used by all platforms:
 
-- `PaymentManager` and capability flow
+- `PaymentManager` - unified API for capability checks and configuration
 - Config models (`GooglePayConfig`, `ApplePayBaseConfig`, `MobilePaymentConfig`, `WebPaymentConfig`)
 - Result types (`PaymentResult`) and tokens (`GooglePayToken`, `ApplePayToken`)
+- Reactive capability observation via `StateFlow` and `Flow`
 
 See `payment-core/README.md` for a focused overview.
 
@@ -367,12 +373,18 @@ val applePayWeb = ApplePayWebConfig(
 ### Check Payment Capability
 
 ```kotlin
-val canUseGooglePay = manager.canUse(PaymentProvider.GooglePay)
-
+// Reactive: Observe availability changes
 manager.observeAvailability(PaymentProvider.GooglePay).collect { available ->
     // true when ready, false otherwise
 }
 
+// Suspend: Wait for initial capability check
+val capabilities = manager.awaitCapabilities()
+if (capabilities.canPayWith(PaymentProvider.GooglePay)) {
+    // Ready to launch payment
+}
+
+// Detailed capability status
 manager.capabilitiesFlow.collect { caps ->
     when (caps.googlePay) {
         CapabilityStatus.Ready -> { /* show button */ }
@@ -476,7 +488,8 @@ The payment method is not available on this device or platform.
 
 ```kotlin
 is PaymentErrorReason.NotAvailable -> {
-    if (!manager.canUse(PaymentProvider.GooglePay)) {
+    val capabilities = manager.awaitCapabilities()
+    if (!capabilities.canPayWith(PaymentProvider.GooglePay)) {
         showAlternativePaymentMethod()
     }
 }
@@ -550,7 +563,8 @@ is PaymentErrorReason.Unknown -> {
 
 1. **Always Check Capabilities First**: Before attempting payment, check if the payment method is available:
    ```kotlin
-   if (manager.canUse(PaymentProvider.GooglePay)) {
+   val capabilities = manager.awaitCapabilities()
+   if (capabilities.canPayWith(PaymentProvider.GooglePay)) {
        launchPayment()
    } else {
        showPaymentNotAvailable()
@@ -615,12 +629,27 @@ val newCapabilities = manager.refreshCapabilities()
 
 ### All PaymentManager Methods
 
+| Method | Type | Description |
+|--------|------|-------------|
+| `config` | Property | The payment configuration |
+| `capabilitiesFlow` | `StateFlow` | Reactive stream of payment capabilities |
+| `awaitCapabilities()` | `suspend` | Wait for initial check, returns capabilities |
+| `refreshCapabilities()` | `suspend` | Force re-check, returns updated capabilities |
+| `observeAvailability(provider)` | `Flow<Boolean>` | Observe specific provider availability |
+
 ```kotlin
-manager.canUse(PaymentProvider.GooglePay)
-manager.currentCapabilities()
-manager.refreshCapabilities()
-manager.observeAvailability(provider)
-manager.capabilitiesFlow
+// Reactive UI binding
+val isReady = manager.observeAvailability(PaymentProvider.GooglePay)
+    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), false)
+
+// Wait for actual capabilities
+val capabilities = manager.awaitCapabilities()
+
+// Force refresh (e.g., user added a card)
+val updated = manager.refreshCapabilities()
+
+// Quick snapshot (may be stale if check hasn't completed)
+val current = manager.capabilitiesFlow.value
 ```
 
 ## Samples

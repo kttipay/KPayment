@@ -166,7 +166,6 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
             controller: PKPaymentAuthorizationController
         ) {
             controller.dismissWithCompletion {
-
                 dispatch_async(dispatch_get_main_queue()) {
                     val token = paymentToken
 

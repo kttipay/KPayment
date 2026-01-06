@@ -12,7 +12,7 @@ actual fun rememberGooglePayLauncher(onResult: (PaymentResult) -> Unit): Payment
             get() = PaymentProvider.GooglePay
 
         override fun launch(amount: String) {
-            //No-op for ios
+            // No-op for ios
         }
     }
 }

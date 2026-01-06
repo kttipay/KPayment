@@ -1,9 +1,9 @@
 package com.kttipay.payment.internal.googlepay.launcher
 
-import com.kttipay.payment.internal.logging.KPaymentLogger
 import com.kttipay.payment.internal.googlepay.GooglePayPaymentClient
 import com.kttipay.payment.internal.googlepay.GooglePayWebResultHandler
 import com.kttipay.payment.internal.googlepay.PaymentException
+import com.kttipay.payment.internal.logging.KPaymentLogger
 import kotlin.js.ExperimentalWasmJsInterop
 
 @OptIn(ExperimentalWasmJsInterop::class)

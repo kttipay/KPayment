@@ -26,15 +26,11 @@ actual fun rememberWebPaymentManager(config: WebPaymentConfig): WebPaymentManage
             override val capabilitiesFlow: StateFlow<PaymentCapabilities> =
                 MutableStateFlow(notSupportedCapabilities)
 
-            override suspend fun refreshCapabilities(): PaymentCapabilities {
+            override suspend fun awaitCapabilities(): PaymentCapabilities {
                 return notSupportedCapabilities
             }
 
-            override fun canUse(provider: PaymentProvider): Boolean {
-                return false
-            }
-
-            override fun currentCapabilities(): PaymentCapabilities {
+            override suspend fun refreshCapabilities(): PaymentCapabilities {
                 return notSupportedCapabilities
             }
 

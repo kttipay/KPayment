@@ -64,8 +64,8 @@ kotlin {
     }
 }
 
-//Publishing your Kotlin Multiplatform library to Maven Central
-//https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
+// Publishing your Kotlin Multiplatform library to Maven Central
+// https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
@@ -75,8 +75,6 @@ mavenPublishing {
         name = libs.versions.libraryName.get()
         description = libs.versions.libraryDescription.get()
         url = libs.versions.libraryUrl.get()
-
-
         licenses {
             license {
                 name = "Apache License, Version 2.0"
@@ -99,7 +97,11 @@ mavenPublishing {
         }
 
         scm {
-            url = libs.versions.libraryUrl.get().toString()
+            url = libs.versions.libraryUrl.get()
         }
     }
+}
+
+ktlint {
+    version.set("1.8.0")
 }

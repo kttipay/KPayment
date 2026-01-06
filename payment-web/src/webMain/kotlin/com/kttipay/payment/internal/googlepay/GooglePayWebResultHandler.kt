@@ -1,12 +1,15 @@
 package com.kttipay.payment.internal.googlepay
 
-import com.kttipay.payment.internal.logging.KPaymentLogger
 import com.kttipay.payment.api.PaymentErrorReason
+import com.kttipay.payment.internal.logging.KPaymentLogger
 
 internal interface GooglePayWebResultHandler {
     fun onSuccess(token: GooglePayToken)
+
     fun onCancelled()
+
     fun onError(error: Throwable)
+
     fun onNotAvailable()
 }
 

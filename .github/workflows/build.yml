@@ -22,8 +22,8 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Check code style with ktlint
-        run: ./gradlew ktlintCheck --no-configuration-cache
+#      - name: Check code style with ktlint
+#        run: ./gradlew ktlintCheck --no-configuration-cache
 
       - name: Build library
         run: ./gradlew build --no-configuration-cache

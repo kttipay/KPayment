@@ -16,7 +16,7 @@ actual fun rememberApplePayLauncher(
         manager.config.applePayMobile
             ?: error(
                 "Apple Pay not configured. " +
-                "Provide applePayMobile in MobilePaymentConfig."
+                    "Provide applePayMobile in MobilePaymentConfig."
             )
     }
 

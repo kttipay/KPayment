@@ -29,7 +29,7 @@ actual fun GooglePayButton(
 }
 
 private fun GooglePayButtonType.toButtonType(): ButtonType {
-    return when(this) {
+    return when (this) {
         GooglePayButtonType.Buy -> ButtonType.Buy
         GooglePayButtonType.Book -> ButtonType.Book
         GooglePayButtonType.Checkout -> ButtonType.Checkout
@@ -42,13 +42,13 @@ private fun GooglePayButtonType.toButtonType(): ButtonType {
 }
 
 private fun GooglePayButtonTheme.toButtonTheme(): ButtonTheme {
-    return when(this) {
+    return when (this) {
         GooglePayButtonTheme.Dark -> ButtonTheme.Dark
         GooglePayButtonTheme.Light -> ButtonTheme.Light
     }
 }
 
-//enum class ButtonType(val value: Int) {
+// enum class ButtonType(val value: Int) {
 //    Book(ButtonConstants.ButtonType.BOOK),
 //    Buy(ButtonConstants.ButtonType.BUY),
 //    Checkout(ButtonConstants.ButtonType.CHECKOUT),
@@ -57,4 +57,4 @@ private fun GooglePayButtonTheme.toButtonTheme(): ButtonTheme {
 //    Pay(ButtonConstants.ButtonType.PAY),
 //    Plain(ButtonConstants.ButtonType.PLAIN),
 //    Subscribe(ButtonConstants.ButtonType.SUBSCRIBE),
-//}
+// }

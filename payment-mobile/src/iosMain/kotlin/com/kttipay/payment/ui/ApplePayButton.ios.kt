@@ -72,7 +72,6 @@ fun ApplePayButton(
                 layer.masksToBounds = true
                 this.opaque = true
                 clipsToBounds = true
-
             }
 
             val button = PKPaymentButton(paymentButtonType = type, paymentButtonStyle = style)

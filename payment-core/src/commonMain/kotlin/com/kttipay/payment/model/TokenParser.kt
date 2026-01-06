@@ -38,4 +38,3 @@ private object GooglePayTokenParser {
         KPaymentLogger.tag("GooglePayTokenParser").w("Error parsing Google Pay token", it)
     }
 }
-

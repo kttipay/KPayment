@@ -29,4 +29,3 @@ sealed interface PaymentProvider {
      */
     data object ApplePay : PaymentProvider
 }
-

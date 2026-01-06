@@ -1,14 +1,14 @@
 package com.kttipay.payment.internal.applepay
 
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.RuntimeException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 import kotlin.js.Promise
 import kotlin.js.definedExternally
 import kotlin.js.unsafeCast
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.js.ExperimentalWasmJsInterop
 
 @OptIn(ExperimentalWasmJsInterop::class)
 interface ApplePayHttpClient {
@@ -52,6 +52,6 @@ private external fun makeFetchInit(method: String): JsAny
 private external interface JsResponse : JsAny {
     val ok: Boolean
     val status: Int
+
     fun json(): Promise<JsAny>
 }
-
