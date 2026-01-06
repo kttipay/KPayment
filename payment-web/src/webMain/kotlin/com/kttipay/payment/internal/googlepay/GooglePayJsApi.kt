@@ -35,8 +35,8 @@ internal external interface IsReadyToPayResponse : JsAny {
 
 internal fun getIsReadyToPayRequest(config: GooglePayWebConfig): JsAny {
     val cardPaymentMethod = buildCardPaymentMethod(
-        allowedAuthMethods = config.allowedAuthMethods.map { it.value }.toTypedArray(),
-        allowedCardNetworks = config.allowedCardNetworks.map { it.value }.toTypedArray(),
+        allowedAuthMethods = config.allowedAuthMethods.map { it.value },
+        allowedCardNetworks = config.allowedCardNetworks.map { it.value },
         assuranceDetailsRequired = config.assuranceDetailsRequired,
         allowCreditCards = config.allowCreditCards
     )
@@ -48,8 +48,8 @@ private fun buildPaymentDataRequest(
     config: GooglePayWebConfig
 ): JsAny {
     val cardPaymentMethod = buildCardPaymentMethod(
-        allowedAuthMethods = config.allowedAuthMethods.map { it.value }.toTypedArray(),
-        allowedCardNetworks = config.allowedCardNetworks.map { it.value }.toTypedArray(),
+        allowedAuthMethods = config.allowedAuthMethods.map { it.value },
+        allowedCardNetworks = config.allowedCardNetworks.map { it.value },
         assuranceDetailsRequired = config.assuranceDetailsRequired,
         allowCreditCards = config.allowCreditCards
     )
@@ -68,14 +68,30 @@ private fun buildPaymentDataRequest(
     )
 }
 
+private fun buildCardPaymentMethod(
+    allowedAuthMethods: List<String>,
+    allowedCardNetworks: List<String>,
+    assuranceDetailsRequired: Boolean,
+    allowCreditCards: Boolean
+): JsAny {
+    val authMethodsJson = allowedAuthMethods.joinToString(",") { "\"$it\"" }
+    val cardNetworksJson = allowedCardNetworks.joinToString(",") { "\"$it\"" }
+    return buildCardPaymentMethodJs(
+        authMethodsJson,
+        cardNetworksJson,
+        assuranceDetailsRequired,
+        allowCreditCards
+    )
+}
+
 @JsFun(
     """
     function(allowedAuthMethods, allowedCardNetworks, assuranceDetailsRequired, allowCreditCards) {
         return {
             type: 'CARD',
             parameters: {
-                allowedAuthMethods: allowedAuthMethods,
-                allowedCardNetworks: allowedCardNetworks,
+                allowedAuthMethods: JSON.parse('[' + allowedAuthMethods + ']'),
+                allowedCardNetworks: JSON.parse('[' + allowedCardNetworks + ']'),
                 assuranceDetailsRequired: assuranceDetailsRequired,
                 allowCreditCards: allowCreditCards
             }
@@ -83,9 +99,9 @@ private fun buildPaymentDataRequest(
     }
 """
 )
-private external fun buildCardPaymentMethod(
-    allowedAuthMethods: Array<String>,
-    allowedCardNetworks: Array<String>,
+private external fun buildCardPaymentMethodJs(
+    allowedAuthMethods: String,
+    allowedCardNetworks: String,
     assuranceDetailsRequired: Boolean,
     allowCreditCards: Boolean
 ): JsAny

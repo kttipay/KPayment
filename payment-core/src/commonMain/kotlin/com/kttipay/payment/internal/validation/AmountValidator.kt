@@ -1,6 +1,6 @@
 package com.kttipay.payment.internal.validation
 
-internal object AmountValidator {
+object AmountValidator {
 
     private val AMOUNT_REGEX = Regex("""^\d+(\.\d{1,2})?$""")
 
@@ -34,7 +34,7 @@ internal object AmountValidator {
     }
 }
 
-internal sealed interface ValidationResult {
+sealed interface ValidationResult {
     data class Valid(val amount: String) : ValidationResult
     data class Error(val message: String) : ValidationResult
 }
