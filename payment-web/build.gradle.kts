@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
@@ -10,6 +11,12 @@ plugins {
 
 kotlin {
     jvmToolchain(libs.versions.javaVersion.get().toInt())
+
+    androidLibrary {
+        namespace = "com.kttipay.payment.web"
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        minSdk = libs.versions.minSdk.get().toInt()
+    }
 
     js { browser() }
 
