@@ -16,6 +16,8 @@ import com.kttipay.payment.api.PaymentErrorReason
 import com.kttipay.payment.api.PaymentLauncher
 import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.PaymentResult
+import com.kttipay.payment.internal.validation.AmountValidator
+import com.kttipay.payment.internal.validation.ValidationResult
 
 @Composable
 fun rememberGooglePayLauncher(
@@ -65,12 +67,29 @@ private class AndroidPaymentLauncher(
     private val paymentsClient: PaymentsClient,
 ) : PaymentLauncher {
     override val provider: PaymentProvider = PaymentProvider.GooglePay
+    private var isProcessing: Boolean = false
 
     override fun launch(amount: String) {
-        val requestJson = GooglePayEnvironment.paymentDataRequest(amount)
-        val request = PaymentDataRequest.fromJson(requestJson.toString())
-        val task = paymentsClient.loadPaymentData(request)
-        task.addOnCompleteListener(launcher::launch)
+        if (isProcessing) {
+            return
+        }
+        isProcessing = true
+
+        when (val validationResult = AmountValidator.validate(amount)) {
+            is ValidationResult.Error -> {
+                isProcessing = false
+                throw IllegalArgumentException(validationResult.message)
+            }
+            is ValidationResult.Valid -> {
+                val requestJson = GooglePayEnvironment.paymentDataRequest(validationResult.amount)
+                val request = PaymentDataRequest.fromJson(requestJson.toString())
+                val task = paymentsClient.loadPaymentData(request)
+                task.addOnCompleteListener {
+                    isProcessing = false
+                    launcher.launch(it)
+                }
+            }
+        }
     }
 }
 

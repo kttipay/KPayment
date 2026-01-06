@@ -76,33 +76,74 @@ KPayment/
 
 ## Installation
 
+### Add Maven Central Repository
+
+Ensure Maven Central is in your repository list (usually already configured):
+
+```kotlin
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+}
+```
+
+### Add Dependencies
+
 Add the KPayment dependencies to your `build.gradle.kts`:
 
 ```kotlin
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.kttipay:kpayment-core:<version>")
+            implementation("com.kttipay:kpayment-core:0.1.0")
         }
 
         androidMain.dependencies {
-            implementation("com.kttipay:kpayment-mobile:<version>")
+            implementation("com.kttipay:kpayment-mobile:0.1.0")
         }
 
         iosMain.dependencies {
-            implementation("com.kttipay:kpayment-mobile:<version>")
+            implementation("com.kttipay:kpayment-mobile:0.1.0")
         }
 
         jsMain.dependencies {
-            implementation("com.kttipay:kpayment-web:<version>")
+            implementation("com.kttipay:kpayment-web:0.1.0")
         }
 
         wasmJsMain.dependencies {
-            implementation("com.kttipay:kpayment-web:<version>")
+            implementation("com.kttipay:kpayment-web:0.1.0")
         }
     }
 }
 ```
+
+## Platform-Specific Setup
+
+### Android
+
+No additional configuration required. Google Play Services Wallet is included as a dependency.
+
+### iOS
+
+1. **Add Apple Pay Capability:**
+   - In Xcode, select your target
+   - Go to "Signing & Capabilities"
+   - Click "+ Capability" and add "Apple Pay"
+   - Select your merchant ID
+
+2. **Configure Merchant ID:**
+   - Create a merchant ID in your [Apple Developer account](https://developer.apple.com/account/resources/identifiers/list/merchant)
+   - Format: `merchant.com.yourcompany.yourapp`
+
+### Web
+
+**For Apple Pay on Web:**
+- Register your domain with Apple
+- Implement merchant validation endpoint on your backend
+- Host domain verification file
+
+See [Apple Pay on the Web documentation](https://developer.apple.com/documentation/apple_pay_on_the_web)
 
 ## Quick Start
 
@@ -243,6 +284,22 @@ Web implementation for JS/Wasm:
 
 See `payment-web/README.md` for setup and platform-specific details.
 
+## Logging
+
+KPayment includes an optional logging system for debugging:
+
+```kotlin
+KPaymentLogger.enabled = true
+
+KPaymentLogger.callback = object : KPaymentLogCallback {
+    override fun onLog(event: LogEvent) {
+        println("[${event.tag}] ${event.message}")
+    }
+}
+```
+
+By default, logging is **disabled** and will not interfere with your app's logging.
+
 ## Configuration
 
 ### Google Pay Configuration
@@ -262,6 +319,18 @@ val googlePay = GooglePayConfig(
     countryCode = "AU"
 )
 ```
+
+#### Advanced Google Pay Options
+
+```kotlin
+val googlePay = GooglePayConfig(
+    allowCreditCards = true,
+    assuranceDetailsRequired = true
+)
+```
+
+- `allowCreditCards`: Set to `true` to allow credit card transactions (default: `false`)
+- `assuranceDetailsRequired`: Set to `true` to request additional cardholder verification (default: `false`)
 
 ### Apple Pay Configuration
 
@@ -321,15 +390,41 @@ manager.capabilitiesFlow.collect { caps ->
 when (val result = paymentResult) {
     is PaymentResult.Success -> {
         val token = result.token
-        // Send token to your backend for processing
     }
     is PaymentResult.Error -> {
-        // Show error message
+        when (result.reason) {
+            PaymentErrorReason.Timeout -> {}
+            PaymentErrorReason.NetworkError -> {}
+            PaymentErrorReason.DeveloperError -> {}
+            PaymentErrorReason.InternalError -> {}
+            PaymentErrorReason.NotAvailable -> {}
+            PaymentErrorReason.SignInRequired -> {}
+            PaymentErrorReason.ApiNotConnected -> {}
+            PaymentErrorReason.ConnectionSuspendedDuringCall -> {}
+            PaymentErrorReason.Interrupted -> {}
+            PaymentErrorReason.Unknown -> {}
+        }
     }
-    is PaymentResult.Cancelled -> {
-        // User cancelled payment
-    }
+    is PaymentResult.Cancelled -> {}
 }
+```
+
+### Refresh Capabilities
+
+Re-check payment availability when user conditions change:
+
+```kotlin
+val newCapabilities = manager.refreshCapabilities()
+```
+
+### All PaymentManager Methods
+
+```kotlin
+manager.canUse(PaymentProvider.GooglePay)
+manager.currentCapabilities()
+manager.refreshCapabilities()
+manager.observeAvailability(provider)
+manager.capabilitiesFlow
 ```
 
 ## Samples

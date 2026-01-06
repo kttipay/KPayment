@@ -18,7 +18,10 @@ import org.json.JSONObject
  * This facade will be removed in a future version.
  */
 @Deprecated(
-    message = "Use GooglePayService with dependency injection instead",
+    message = "Use GooglePayService with dependency injection instead. " +
+              "GooglePayEnvironment will be removed in v0.2.0. " +
+              "Migrate by using MobilePaymentManager which provides GooglePayService internally.",
+    replaceWith = ReplaceWith("getSharedGooglePayService()"),
     level = DeprecationLevel.WARNING
 )
 internal object GooglePayEnvironment {

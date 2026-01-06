@@ -32,19 +32,19 @@ object PaymentConfig {
      * Google Pay merchant name displayed during payment.
      * Replace with your actual business name.
      */
-    const val GOOGLE_PAY_MERCHANT_NAME = ""
+    const val GOOGLE_PAY_MERCHANT_NAME = "YOUR_MERCHANT_NAME_HERE"
 
     /**
      * Google Pay gateway merchant ID.
      * Get this from your payment gateway provider (e.g., Stripe, Braintree, etc.)
      */
-    const val GOOGLE_PAY_GATEWAY_MERCHANT_ID = ""
+    const val GOOGLE_PAY_GATEWAY_MERCHANT_ID = "YOUR_GATEWAY_MERCHANT_ID_HERE"
 
     /**
      * Payment gateway identifier.
      * Examples: "stripe", "braintree", "checkout", etc.
      */
-    const val GOOGLE_PAY_GATEWAY = ""
+    const val GOOGLE_PAY_GATEWAY = "stripe"
 
     /**
      * Google Pay environment.
@@ -59,18 +59,18 @@ object PaymentConfig {
      * Create this in your Apple Developer account.
      * Format: merchant.com.yourcompany.yourapp
      */
-    const val APPLE_PAY_MERCHANT_ID = ""
+    const val APPLE_PAY_MERCHANT_ID = "merchant.com.yourcompany.yourapp"
 
     /**
      * Apple Pay merchant validation endpoint exposed by your backend.
      * This is required for both Web and iOS.
      */
-    const val APPLE_PAY_MERCHANT_VALIDATION_ENDPOINT = ""
+    const val APPLE_PAY_MERCHANT_VALIDATION_ENDPOINT = "https://your-backend.com/apple-pay/validate"
 
     /**
      * Base URL of your hosted payment page/backend, used by Apple Pay on Web.
      */
-    const val APPLE_PAY_BASE_URL = ""
+    const val APPLE_PAY_BASE_URL = "https://your-backend.com"
 
     /**
      * Domain where the Apple Pay JS integration is hosted.
@@ -138,6 +138,9 @@ object PaymentConfig {
         currencyCode: String = CURRENCY_CODE,
         countryCode: String = COUNTRY_CODE
     ): GooglePayConfig {
+        require(GOOGLE_PAY_MERCHANT_NAME != "YOUR_MERCHANT_NAME_HERE") {
+            "Please configure Google Pay credentials in PaymentConfig.kt"
+        }
         return GooglePayConfig(
             merchantId = "",
             merchantName = GOOGLE_PAY_MERCHANT_NAME,
@@ -157,6 +160,9 @@ object PaymentConfig {
         currencyCode: String = CURRENCY_CODE,
         countryCode: String = COUNTRY_CODE
     ): ApplePayMobileConfig {
+        require(APPLE_PAY_MERCHANT_ID != "merchant.com.yourcompany.yourapp") {
+            "Please configure Apple Pay credentials in PaymentConfig.kt"
+        }
         return ApplePayMobileConfig(
             merchantId = APPLE_PAY_MERCHANT_ID,
             base = ApplePayBaseConfig(
