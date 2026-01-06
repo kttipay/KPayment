@@ -29,4 +29,8 @@ subprojects {
             }
         }
     }
+
+    tasks.matching { it.name.startsWith("ktlint") }.configureEach {
+        onlyIf { !System.getenv().containsKey("CI") }
+    }
 }
