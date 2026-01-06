@@ -20,7 +20,7 @@ subprojects {
             outputColorName.set("RED")
             ignoreFailures.set(false)
             enableExperimentalRules.set(false)
-            
+
             filter {
                 exclude("**/build/**")
                 exclude("**/generated/**")
