@@ -3,7 +3,6 @@ package com.kttipay.payment.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import com.google.android.gms.wallet.button.ButtonConstants
 import com.google.pay.button.ButtonTheme
 import com.google.pay.button.ButtonType
 import com.google.pay.button.PayButton
@@ -47,14 +46,3 @@ private fun GooglePayButtonTheme.toButtonTheme(): ButtonTheme {
         GooglePayButtonTheme.Light -> ButtonTheme.Light
     }
 }
-
-// enum class ButtonType(val value: Int) {
-//    Book(ButtonConstants.ButtonType.BOOK),
-//    Buy(ButtonConstants.ButtonType.BUY),
-//    Checkout(ButtonConstants.ButtonType.CHECKOUT),
-//    Donate(ButtonConstants.ButtonType.DONATE),
-//    Order(ButtonConstants.ButtonType.ORDER),
-//    Pay(ButtonConstants.ButtonType.PAY),
-//    Plain(ButtonConstants.ButtonType.PLAIN),
-//    Subscribe(ButtonConstants.ButtonType.SUBSCRIBE),
-// }
