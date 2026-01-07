@@ -54,10 +54,23 @@ fun Checkout() {
 - Android: `createMobilePaymentManager(config, context)`
 - iOS: `createMobilePaymentManager(config)`
 
+## Track Payment State
+
+```kotlin
+val launcher = rememberNativePaymentLauncher { result -> /* handle */ }
+val isProcessing by launcher.isProcessing.collectAsState()
+
+PaymentButton(
+    enabled = !isProcessing,
+    onClick = { launcher.launch("10.00") }
+)
+```
+
 ## Notes
 
 - Apple Pay requires a physical iOS device and a valid merchant ID.
 - Google Pay requires Google Play services and an eligible device.
+- Concurrent launch attempts return `PaymentErrorReason.AlreadyInProgress`.
 
 ## License
 

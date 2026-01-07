@@ -5,22 +5,34 @@ import com.kttipay.payment.api.PaymentLauncher
 import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.PaymentResult
 import com.kttipay.payment.api.config.ApplePayMobileConfig
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-/**
- * Payment launcher for Apple Pay on iOS.
- * Uses KotlinNativeApplePayFactory by default, or a custom factory if set via IosApplePayManager.
- */
 internal class ApplePayPaymentLauncher(
     private val config: ApplePayMobileConfig,
     private val onResult: (PaymentResult) -> Unit,
 ) : PaymentLauncher {
     override val provider: PaymentProvider = PaymentProvider.ApplePay
+    private val _isProcessing = MutableStateFlow(false)
+    override val isProcessing: StateFlow<Boolean> = _isProcessing.asStateFlow()
 
     private val factory: ApplePayFactory by lazy {
         IosApplePayManager.getFactory()
     }
 
     override fun launch(amount: String) {
+        if (!_isProcessing.compareAndSet(expect = false, update = true)) {
+            onResult(
+                PaymentResult.Error(
+                    provider = provider,
+                    reason = PaymentErrorReason.AlreadyInProgress,
+                    message = "A payment is already in progress"
+                )
+            )
+            return
+        }
+
         val baseConfig = config.base
         factory.startPayment(
             ApplePayRequest(
@@ -38,6 +50,7 @@ internal class ApplePayPaymentLauncher(
                 )
             ),
             onResult = { result ->
+                _isProcessing.value = false
                 onResult(result.toPaymentResult())
             }
         )

@@ -10,3 +10,4 @@
 -keepclassmembers class kotlinx.serialization.json.** {
     *;
 }
+

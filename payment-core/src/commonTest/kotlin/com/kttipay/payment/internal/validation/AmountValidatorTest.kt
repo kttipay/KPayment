@@ -106,3 +106,4 @@ class AmountValidatorTest {
         assertTrue(result.message.contains("Invalid amount format"))
     }
 }
+

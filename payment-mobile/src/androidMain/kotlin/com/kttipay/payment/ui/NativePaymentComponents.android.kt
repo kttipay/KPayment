@@ -2,13 +2,14 @@ package com.kttipay.payment.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import com.kttipay.payment.api.PaymentErrorReason
 import com.kttipay.payment.api.PaymentLauncher
 import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.PaymentResult
 import com.kttipay.payment.ui.launcher.rememberGooglePayLauncher
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 actual fun PaymentButton(
@@ -47,6 +48,7 @@ private class NotConfiguredLauncher(
     private val onResult: (PaymentResult) -> Unit
 ) : PaymentLauncher {
     override val provider: PaymentProvider = PaymentProvider.GooglePay
+    override val isProcessing: StateFlow<Boolean> = MutableStateFlow(false)
 
     override fun launch(amount: String) {
         onResult(

@@ -131,6 +131,12 @@ enum class PaymentErrorReason {
     NotAvailable,
 
     /**
+     * A payment is already in progress.
+     * Wait for the current payment to complete before starting a new one.
+     */
+    AlreadyInProgress,
+
+    /**
      * An unknown error occurred.
      * Check the error message for additional details if available.
      */

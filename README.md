@@ -411,6 +411,7 @@ when (val result = paymentResult) {
             PaymentErrorReason.DeveloperError -> {}
             PaymentErrorReason.InternalError -> {}
             PaymentErrorReason.NotAvailable -> {}
+            PaymentErrorReason.AlreadyInProgress -> {}
             PaymentErrorReason.SignInRequired -> {}
             PaymentErrorReason.ApiNotConnected -> {}
             PaymentErrorReason.ConnectionSuspendedDuringCall -> {}
@@ -495,6 +496,17 @@ is PaymentErrorReason.NotAvailable -> {
 }
 ```
 
+#### AlreadyInProgress
+A payment is already being processed.
+
+**Recommended Action**: Observe `launcher.isProcessing` to disable the button during payment, or ignore this error.
+
+```kotlin
+is PaymentErrorReason.AlreadyInProgress -> {
+    // Payment already in progress, ignore or show message
+}
+```
+
 #### SignInRequired
 User sign-in is required to complete the payment.
 
@@ -557,6 +569,20 @@ is PaymentErrorReason.Unknown -> {
     // Check error message for details
     handleUnknownError(result.message)
 }
+```
+
+### Track Payment State
+
+The launcher exposes `isProcessing: StateFlow<Boolean>` to track whether a payment is in progress:
+
+```kotlin
+val launcher = rememberNativePaymentLauncher { result -> /* handle */ }
+val isProcessing by launcher.isProcessing.collectAsState()
+
+PaymentButton(
+    enabled = isReady && !isProcessing,
+    onClick = { launcher.launch("10.00") }
+)
 ```
 
 ### Error Handling Best Practices
