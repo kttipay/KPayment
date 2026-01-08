@@ -6,7 +6,8 @@ import com.kttipay.payment.api.PaymentErrorReason
 import com.kttipay.payment.api.PaymentLauncher
 import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.PaymentResult
-import org.kimplify.deci.Deci
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 actual fun rememberApplePayLauncher(
@@ -14,8 +15,9 @@ actual fun rememberApplePayLauncher(
 ): PaymentLauncher = remember {
     object : PaymentLauncher {
         override val provider: PaymentProvider = PaymentProvider.ApplePay
+        override val isProcessing: StateFlow<Boolean> = MutableStateFlow(false)
 
-        override fun launch(amount: Deci) {
+        override fun launch(amount: String) {
             onResult(
                 PaymentResult.Error(
                     provider = provider,

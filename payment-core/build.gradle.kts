@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.maven.publish)
+    alias(libs.plugins.ktlint)
 }
 
 kotlin {
@@ -19,6 +20,19 @@ kotlin {
         namespace = "com.kttipay.payment.core"
         compileSdk = libs.versions.compileSdk.get().toInt()
         minSdk = libs.versions.minSdk.get().toInt()
+
+        withDeviceTest {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+            execution = "ANDROIDX_TEST_ORCHESTRATOR"
+        }
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
+
+        optimization {
+            consumerKeepRules.publish = true
+            consumerKeepRules.files.add(project.file("proguard-rules.pro"))
+        }
     }
 
     listOf(
@@ -39,24 +53,28 @@ kotlin {
             implementation(libs.kotlinx.serialization)
             implementation(libs.kotlinx.coroutines.core)
             api(libs.cedar)
-            api(libs.deci)
+            api("androidx.compose.runtime:runtime-annotation:1.9.0")
+        }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }
 
-//Publishing your Kotlin Multiplatform library to Maven Central
-//https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
+// Publishing your Kotlin Multiplatform library to Maven Central
+// https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
 mavenPublishing {
     publishToMavenCentral()
-//    signAllPublications()
+    signAllPublications()
     coordinates("com.kttipay", "kpayment-core", libs.versions.appVersionName.get())
 
     pom {
         name = libs.versions.libraryName.get()
         description = libs.versions.libraryDescription.get()
         url = libs.versions.libraryUrl.get()
-
-
         licenses {
             license {
                 name = "Apache License, Version 2.0"
@@ -79,7 +97,11 @@ mavenPublishing {
         }
 
         scm {
-            url = libs.versions.libraryUrl.get().toString()
+            url = libs.versions.libraryUrl.get()
         }
     }
+}
+
+ktlint {
+    version.set("1.8.0")
 }

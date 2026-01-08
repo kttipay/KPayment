@@ -27,7 +27,7 @@ import com.kttipay.payment.MobilePaymentManager
 val LocalMobilePaymentManager = staticCompositionLocalOf<MobilePaymentManager> {
     error(
         "No MobilePaymentManager provided. Make sure to provide it using " +
-        "CompositionLocalProvider(LocalMobilePaymentManager provides paymentManager) " +
-        "at the root of your Compose tree."
+            "CompositionLocalProvider(LocalMobilePaymentManager provides paymentManager) " +
+            "at the root of your Compose tree."
     )
 }

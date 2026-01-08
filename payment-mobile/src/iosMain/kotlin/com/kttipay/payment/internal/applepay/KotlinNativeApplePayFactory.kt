@@ -29,17 +29,12 @@ import platform.darwin.NSObject
 import platform.darwin.dispatch_async
 import platform.darwin.dispatch_get_main_queue
 
-/**
- * Kotlin/Native implementation of ApplePayFactory using PassKit.
- *
- * This implementation uses Kotlin/Native's direct interop with iOS frameworks,
- * requiring no Swift or Objective-C code.
- */
 @OptIn(ExperimentalForeignApi::class)
 class KotlinNativeApplePayFactory : ApplePayFactory {
     private var currentCompletion: ((ApplePayResult) -> Unit)? = null
     private var currentController: PKPaymentAuthorizationController? = null
     private var currentDelegate: ApplePayDelegate? = null
+    private var isProcessing: Boolean = false
 
     override fun applePayStatus(): ApplePayStatus {
         val canPay = PKPaymentAuthorizationController.canMakePayments()
@@ -62,6 +57,16 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
         request: ApplePayRequest,
         onResult: (ApplePayResult) -> Unit
     ) {
+        if (isProcessing) {
+            onResult(
+                ApplePayResult.Failure(
+                    errorCode = ApplePayErrorCode.PRESENT_FAILED
+                )
+            )
+            return
+        }
+        isProcessing = true
+
         val pkRequest = PKPaymentRequest().apply {
             merchantIdentifier = request.merchantId
             countryCode = request.countryCode
@@ -89,7 +94,7 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
             paymentSummaryItems = request.summaryItems.map { item ->
                 PKPaymentSummaryItem.summaryItemWithLabel(
                     label = item.label,
-                    amount = NSDecimalNumber(item.amount.toString()),
+                    amount = NSDecimalNumber(item.amount),
                     type = if (item.isFinal) {
                         PKPaymentSummaryItemType.PKPaymentSummaryItemTypeFinal
                     } else {
@@ -129,6 +134,7 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
         currentCompletion = null
         currentController = null
         currentDelegate = null
+        isProcessing = false
     }
 
     /**
@@ -160,7 +166,6 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
             controller: PKPaymentAuthorizationController
         ) {
             controller.dismissWithCompletion {
-
                 dispatch_async(dispatch_get_main_queue()) {
                     val token = paymentToken
 

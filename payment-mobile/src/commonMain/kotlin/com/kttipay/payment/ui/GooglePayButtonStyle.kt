@@ -19,4 +19,3 @@ enum class GooglePayButtonType {
     Subscribe,
     Plain
 }
-

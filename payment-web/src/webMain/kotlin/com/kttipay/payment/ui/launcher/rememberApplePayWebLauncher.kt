@@ -26,7 +26,7 @@ import com.kttipay.payment.ui.LocalWebPaymentManager
  * )
  *
  * // Launch payment
- * Button(onClick = { applePayLauncher?.launch(Deci(100)) }) {
+ * Button(onClick = { applePayLauncher?.launch("100.00") }) {
  *     Text("Pay with Apple Pay")
  * }
  * ```

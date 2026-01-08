@@ -12,6 +12,8 @@ dependencies {
 
 ## Quick start (Compose)
 
+Amounts are decimal strings (for example, `"10.00"`).
+
 ```kotlin
 val config = WebPaymentConfig(
     environment = PaymentEnvironment.Development,
@@ -38,7 +40,7 @@ fun CheckoutWeb() {
             // handle GooglePayWebResult.Success, .Error, .Cancelled
         }
 
-        Button(onClick = { googlePay.launch(Deci("10.00")) }) {
+        Button(onClick = { googlePay.launch("10.00") }) {
             Text("Pay with Google Pay")
         }
     }

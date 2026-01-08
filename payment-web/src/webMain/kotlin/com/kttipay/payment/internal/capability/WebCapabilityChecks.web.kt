@@ -15,8 +15,11 @@ internal actual fun checkApplePayAvailability(
 ): CapabilityStatus {
     return runCatching { ApplePayAvailability.canMakePayments() }
         .map { available ->
-            if (available) CapabilityStatus.Ready
-            else CapabilityStatus.Error("Apple Pay unavailable for ${config.base.merchantName}")
+            if (available) {
+                CapabilityStatus.Ready
+            } else {
+                CapabilityStatus.Error("Apple Pay unavailable for ${config.base.merchantName}")
+            }
         }
         .getOrElse { error ->
             CapabilityStatus.Error("Apple Pay availability check failed", error)

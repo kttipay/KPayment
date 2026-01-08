@@ -26,4 +26,3 @@ data class GooglePayTokenPayload(
     val token: GooglePayToken,
     val signedKey: SignedKey
 )
-

@@ -1,8 +1,10 @@
 package com.kttipay.payment.api
 
-import org.kimplify.deci.Deci
+import kotlinx.coroutines.flow.StateFlow
 
 interface PaymentLauncher {
     val provider: PaymentProvider
-    fun launch(amount: Deci)
+    val isProcessing: StateFlow<Boolean>
+
+    fun launch(amount: String)
 }

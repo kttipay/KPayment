@@ -27,7 +27,7 @@ import com.kttipay.payment.WebPaymentManager
 val LocalWebPaymentManager = staticCompositionLocalOf<WebPaymentManager> {
     error(
         "No WebPaymentManager provided. Make sure to provide it using " +
-        "CompositionLocalProvider(LocalWebPaymentManager provides paymentManager) " +
-        "at the root of your Compose tree."
+            "CompositionLocalProvider(LocalWebPaymentManager provides paymentManager) " +
+            "at the root of your Compose tree."
     )
 }

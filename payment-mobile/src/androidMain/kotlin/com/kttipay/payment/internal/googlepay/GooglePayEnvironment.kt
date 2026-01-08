@@ -6,7 +6,6 @@ import com.kttipay.payment.api.PaymentEnvironment
 import com.kttipay.payment.api.config.GooglePayConfig
 import com.kttipay.payment.getSharedGooglePayService
 import org.json.JSONObject
-import org.kimplify.deci.Deci
 
 /**
  * Facade for GooglePayService that maintains backward compatibility.
@@ -19,7 +18,10 @@ import org.kimplify.deci.Deci
  * This facade will be removed in a future version.
  */
 @Deprecated(
-    message = "Use GooglePayService with dependency injection instead",
+    message = "Use GooglePayService with dependency injection instead. " +
+        "GooglePayEnvironment will be removed in v0.2.0. " +
+        "Migrate by using MobilePaymentManager which provides GooglePayService internally.",
+    replaceWith = ReplaceWith("getSharedGooglePayService()"),
     level = DeprecationLevel.WARNING
 )
 internal object GooglePayEnvironment {
@@ -60,7 +62,7 @@ internal object GooglePayEnvironment {
      * @param amount Payment amount
      * @return JSON object for payment request
      */
-    fun paymentDataRequest(amount: Deci): JSONObject = getService().paymentDataRequest(amount)
+    fun paymentDataRequest(amount: String): JSONObject = getService().paymentDataRequest(amount)
 
     /**
      * Creates a PaymentsClient for interacting with Google Pay.

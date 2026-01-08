@@ -1,12 +1,12 @@
 package com.kttipay.payment.internal.applepay.launcher
 
-import com.kttipay.payment.internal.logging.KPaymentLogger
 import com.kttipay.payment.api.config.ApplePayWebConfig
 import com.kttipay.payment.internal.applepay.ApplePaySessionManager
 import com.kttipay.payment.internal.applepay.ApplePayWebResult
 import com.kttipay.payment.internal.applepay.createApplePaySession
 import com.kttipay.payment.internal.applepay.parseJsonToJs
 import com.kttipay.payment.internal.config.ApplePayApiConstants
+import com.kttipay.payment.internal.logging.KPaymentLogger
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
@@ -14,10 +14,8 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
-import org.kimplify.deci.Deci
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
-
 
 @OptIn(ExperimentalWasmJsInterop::class)
 internal class ApplePayWebLauncher(
@@ -27,8 +25,8 @@ internal class ApplePayWebLauncher(
 
     private val logger = KPaymentLogger.tag("ApplePayWebLauncher")
 
-    override fun launch(amount: Deci) {
-        val paymentRequestJson = buildPaymentRequest(amount.toString())
+    override fun launch(amount: String) {
+        val paymentRequestJson = buildPaymentRequest(amount)
         val paymentRequestJs = parseJsonToJs(paymentRequestJson)
 
         startApplePayFlow(

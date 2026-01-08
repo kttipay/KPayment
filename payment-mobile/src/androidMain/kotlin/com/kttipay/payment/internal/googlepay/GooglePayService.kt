@@ -5,7 +5,6 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.kttipay.payment.api.PaymentEnvironment
 import com.kttipay.payment.api.config.GooglePayConfig
 import org.json.JSONObject
-import org.kimplify.deci.Deci
 
 /**
  * Service for managing Google Pay integration.
@@ -43,11 +42,11 @@ internal interface GooglePayService {
     /**
      * Creates a payment data request for the given amount.
      *
-     * @param amount Payment amount
+     * @param amount Payment amount as a decimal string
      * @return JSON object representing the payment request
      * @throws IllegalStateException if service is not configured
      */
-    fun paymentDataRequest(amount: Deci): JSONObject
+    fun paymentDataRequest(amount: String): JSONObject
 
     /**
      * Creates a PaymentsClient for interacting with Google Pay.

@@ -2,24 +2,41 @@ package com.kttipay.payment.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import com.kttipay.payment.WebPaymentManager
+import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.config.WebPaymentConfig
-import com.kttipay.payment.createWebPaymentManager
+import com.kttipay.payment.capability.CapabilityStatus
+import com.kttipay.payment.capability.PaymentCapabilities
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 
-/**
- * Android implementation of rememberWebPaymentManager (stub for KMP support).
- *
- * This exists for Kotlin Multiplatform compilation purposes but should not
- * be used at runtime. Web payment features are only available on actual web targets.
- *
- * @param config The payment configuration (Google Pay and/or Apple Pay)
- * @return A PaymentManager instance (stub implementation)
- */
 @Composable
 actual fun rememberWebPaymentManager(config: WebPaymentConfig): WebPaymentManager {
-    val scope = rememberCoroutineScope()
     return remember(config) {
-        createWebPaymentManager(config, scope)
+        object : WebPaymentManager {
+            private val notSupportedCapabilities = PaymentCapabilities(
+                googlePay = CapabilityStatus.NotSupported,
+                applePay = CapabilityStatus.NotSupported
+            )
+
+            override val config: WebPaymentConfig = config
+
+            override val capabilitiesFlow: StateFlow<PaymentCapabilities> =
+                MutableStateFlow(notSupportedCapabilities)
+
+            override suspend fun awaitCapabilities(): PaymentCapabilities {
+                return notSupportedCapabilities
+            }
+
+            override suspend fun refreshCapabilities(): PaymentCapabilities {
+                return notSupportedCapabilities
+            }
+
+            override fun observeAvailability(provider: PaymentProvider): Flow<Boolean> {
+                return flowOf(false)
+            }
+        }
     }
 }

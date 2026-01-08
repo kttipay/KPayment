@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.maven.publish)
+    alias(libs.plugins.ktlint)
 }
 
 kotlin {
@@ -42,19 +43,17 @@ kotlin {
     }
 }
 
-
-//Publishing your Kotlin Multiplatform library to Maven Central
-//https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
+// Publishing your Kotlin Multiplatform library to Maven Central
+// https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
 mavenPublishing {
     publishToMavenCentral()
-//    signAllPublications()
+    signAllPublications()
     coordinates("com.kttipay", "kpayment-web", libs.versions.appVersionName.get())
 
     pom {
         name = libs.versions.libraryName.get()
         description = libs.versions.libraryDescription.get()
         url = libs.versions.libraryUrl.get()
-
 
         licenses {
             license {
@@ -81,4 +80,8 @@ mavenPublishing {
             url = libs.versions.libraryUrl.get().toString()
         }
     }
+}
+
+ktlint {
+    version.set("1.8.0")
 }

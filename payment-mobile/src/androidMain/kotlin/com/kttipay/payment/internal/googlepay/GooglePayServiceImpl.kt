@@ -9,7 +9,6 @@ import com.kttipay.payment.api.config.GooglePayConfig
 import com.kttipay.payment.internal.config.GooglePayApiConstants
 import org.json.JSONArray
 import org.json.JSONObject
-import org.kimplify.deci.Deci
 
 /**
  * Implementation of GooglePayService.
@@ -29,7 +28,7 @@ internal class GooglePayServiceImpl : GooglePayService {
     override fun allowedPaymentMethodsJson(): String =
         requireState().requestFactory.allowedPaymentMethodsJson()
 
-    override fun paymentDataRequest(amount: Deci): JSONObject =
+    override fun paymentDataRequest(amount: String): JSONObject =
         requireState().requestFactory.paymentDataRequest(amount)
 
     override fun createPaymentsClient(context: Context): PaymentsClient =
@@ -115,7 +114,7 @@ internal class GooglePayServiceImpl : GooglePayService {
             return JSONArray().put(cardPaymentMethod()).toString()
         }
 
-        fun paymentDataRequest(amount: Deci): JSONObject {
+        fun paymentDataRequest(amount: String): JSONObject {
             return JSONObject(baseRequest.toString()).apply {
                 put("allowedPaymentMethods", JSONArray().put(cardPaymentMethod()))
                 put("transactionInfo", transactionInfo(amount))
@@ -123,9 +122,9 @@ internal class GooglePayServiceImpl : GooglePayService {
             }
         }
 
-        private fun transactionInfo(amount: Deci): JSONObject {
+        private fun transactionInfo(amount: String): JSONObject {
             return JSONObject().apply {
-                put("totalPrice", amount.toDouble().toString())
+                put("totalPrice", amount)
                 put("totalPriceStatus", GooglePayApiConstants.TRANSACTION_PRICE_STATUS_FINAL)
                 put("countryCode", config.countryCode)
                 put("currencyCode", config.currencyCode)

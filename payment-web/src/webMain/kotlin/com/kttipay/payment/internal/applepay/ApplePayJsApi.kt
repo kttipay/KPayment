@@ -10,7 +10,9 @@ import kotlin.js.JsName
 
 external object ApplePaySession {
     fun canMakePayments(): Boolean
+
     fun supportsVersion(version: Int): Boolean
+
     val STATUS_SUCCESS: Int
     val STATUS_FAILURE: Int
 }
@@ -26,8 +28,11 @@ external class ApplePaySessionInstance {
     var onCancel: (() -> Unit)?
 
     fun begin()
+
     fun completeMerchantValidation(sessionData: JsAny)
+
     fun completePayment(status: Int)
+
     fun abort()
 }
 
@@ -59,4 +64,3 @@ external interface WindowGlobal {
 external interface LocationGlobal {
     val hostname: String
 }
-

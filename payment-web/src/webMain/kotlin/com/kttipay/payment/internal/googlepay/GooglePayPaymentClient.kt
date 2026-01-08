@@ -1,8 +1,7 @@
 package com.kttipay.payment.internal.googlepay
 
-import com.kttipay.payment.internal.logging.KPaymentLogger
 import com.kttipay.payment.api.config.GooglePayWebConfig
-import org.kimplify.deci.Deci
+import com.kttipay.payment.internal.logging.KPaymentLogger
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 import kotlin.js.JsPromiseError
@@ -10,7 +9,7 @@ import kotlin.js.unsafeCast
 
 internal interface GooglePayPaymentClient {
     fun requestPayment(
-        amount: Deci,
+        amount: String,
         onSuccess: (GooglePayToken) -> Unit,
         onError: (Throwable) -> Unit
     )
@@ -24,12 +23,12 @@ internal class GooglePayPaymentClientImpl(
     private val paymentsClient by lazy { createPaymentsClient(config.googlePayEnvironment) }
 
     override fun requestPayment(
-        amount: Deci,
+        amount: String,
         onSuccess: (GooglePayToken) -> Unit,
         onError: (Throwable) -> Unit
     ) {
         KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment amount=$amount")
-        val paymentRequest = loadPaymentDataRequestWithDefaults(amount.toString(), config = config)
+        val paymentRequest = loadPaymentDataRequestWithDefaults(amount, config = config)
         KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment request=$paymentRequest")
 
         paymentsClient
@@ -58,6 +57,7 @@ data class GooglePayToken(val value: String)
 
 sealed class PaymentException(message: String) : Exception(message) {
     class CancelledException(message: String) : PaymentException(message)
+
     class FailedException(message: String) : PaymentException(message)
 }
 
@@ -81,15 +81,20 @@ private fun parsePaymentError(error: JsPromiseError): PaymentException {
     KPaymentLogger.tag("GooglePayPaymentClient").w("parsePaymentError extracted statusCode=$statusCode statusMessage=$statusMessage")
 
     return when {
-        statusCode.equals("CANCELED", ignoreCase = true) ->
+        statusCode.equals("CANCELED", ignoreCase = true) -> {
             PaymentException.CancelledException(statusMessage)
-        statusMessage.contains("AbortError", ignoreCase = true) ->
+        }
+        statusMessage.contains("AbortError", ignoreCase = true) -> {
             PaymentException.CancelledException(statusMessage)
-        statusMessage.contains("User closed", ignoreCase = true) ->
+        }
+        statusMessage.contains("User closed", ignoreCase = true) -> {
             PaymentException.CancelledException(statusMessage)
-        statusMessage.contains("CANCELED", ignoreCase = true) ->
+        }
+        statusMessage.contains("CANCELED", ignoreCase = true) -> {
             PaymentException.CancelledException(statusMessage)
-        else ->
+        }
+        else -> {
             PaymentException.FailedException(statusMessage)
+        }
     }
 }

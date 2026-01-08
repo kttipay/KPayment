@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -25,12 +26,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,6 +42,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kttipay.kpayment.config.combineErrors
+import com.kttipay.kpayment.config.getOrNull
 import com.kttipay.payment.api.PaymentEnvironment
 import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.config.WebPaymentConfig
@@ -51,7 +57,6 @@ import com.kttipay.payment.ui.rememberWebPaymentManager
 import kotlinx.coroutines.flow.map
 import org.kimplify.cedar.logging.Cedar
 import org.kimplify.cedar.logging.trees.PlatformLogTree
-import org.kimplify.deci.Deci
 
 /**
  * Main web application demonstrating KPayment library for web platforms.
@@ -71,24 +76,36 @@ fun WebApp() {
         KPaymentLogger.enabled = true
     }
 
+    var configError by remember { mutableStateOf<String?>("") }
     val config = remember {
+        val googlePayResult = PaymentConfig.buildGooglePayConfig()
+        val applePayResult = PaymentConfig.buildApplePayWebConfig()
+
+        configError = listOf(googlePayResult, applePayResult)
+            .combineErrors()
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString("\n\n")
+
         WebPaymentConfig(
             environment = PaymentEnvironment.Development,
-            googlePay = PaymentConfig.createGooglePayConfig(),
-            applePayWeb = PaymentConfig.createApplePayWebConfig()
+            googlePay = googlePayResult.getOrNull(),
+            applePayWeb = applePayResult.getOrNull()
         )
     }
 
     val paymentManager = rememberWebPaymentManager(config)
 
     PaymentManagerProvider(manager = paymentManager) {
-        WebAppContent()
+        WebAppContent(configError = configError, onDismissError = { configError = null })
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun WebAppContent() {
+private fun WebAppContent(
+    configError: String?,
+    onDismissError: () -> Unit
+) {
     val paymentManager = LocalWebPaymentManager.current
 
     val isGooglePayAvailable by paymentManager.capabilitiesFlow.map { it.googlePay }
@@ -96,7 +113,7 @@ private fun WebAppContent() {
     val isApplePayAvailable by paymentManager.capabilitiesFlow.map { it.applePay }
         .collectAsStateWithLifecycle(CapabilityStatus.NotConfigured)
 
-    val googleButton = rememberGooglePayWebLauncher(
+    val googleButton = if (configError?.isBlank() == true) rememberGooglePayWebLauncher(
         onResult = { result ->
             when (result) {
                 is GooglePayWebResult.Success -> {
@@ -112,9 +129,27 @@ private fun WebAppContent() {
                 }
             }
         }
-    )
+    ) else null
 
     MaterialTheme {
+        configError?.let { error ->
+            AlertDialog(
+                onDismissRequest = onDismissError,
+                title = { Text("Configuration Error") },
+                text = {
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = onDismissError) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -147,7 +182,7 @@ private fun WebAppContent() {
                         icon = "💳",
                         provider = PaymentProvider.GooglePay,
                         onTest = {
-                            googleButton?.launch(Deci(1))
+                            googleButton?.launch("1.00")
                         }
                     )
 

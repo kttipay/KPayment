@@ -1,5 +1,7 @@
 package com.kttipay.kpayment
 
+import com.kttipay.kpayment.config.ConfigResult
+import com.kttipay.kpayment.config.onFailure
 import com.kttipay.payment.api.PaymentEnvironment
 import com.kttipay.payment.api.config.ApplePayBaseConfig
 import com.kttipay.payment.api.config.ApplePayMerchantCapability
@@ -10,6 +12,7 @@ import com.kttipay.payment.api.config.GooglePayAuthMethod
 import com.kttipay.payment.api.config.GooglePayCardNetwork
 import com.kttipay.payment.api.config.GooglePayConfig
 import com.kttipay.payment.api.config.WebPaymentConfig
+import org.kimplify.cedar.logging.Cedar
 
 /**
  * Payment configuration for the sample app.
@@ -32,19 +35,19 @@ object PaymentConfig {
      * Google Pay merchant name displayed during payment.
      * Replace with your actual business name.
      */
-    const val GOOGLE_PAY_MERCHANT_NAME = ""
+    const val GOOGLE_PAY_MERCHANT_NAME = "YOUR_MERCHANT_NAME_HERE"
 
     /**
      * Google Pay gateway merchant ID.
      * Get this from your payment gateway provider (e.g., Stripe, Braintree, etc.)
      */
-    const val GOOGLE_PAY_GATEWAY_MERCHANT_ID = ""
+    const val GOOGLE_PAY_GATEWAY_MERCHANT_ID = "YOUR_GATEWAY_MERCHANT_ID_HERE"
 
     /**
      * Payment gateway identifier.
      * Examples: "stripe", "braintree", "checkout", etc.
      */
-    const val GOOGLE_PAY_GATEWAY = ""
+    const val GOOGLE_PAY_GATEWAY = "stripe"
 
     /**
      * Google Pay environment.
@@ -59,18 +62,18 @@ object PaymentConfig {
      * Create this in your Apple Developer account.
      * Format: merchant.com.yourcompany.yourapp
      */
-    const val APPLE_PAY_MERCHANT_ID = ""
+    const val APPLE_PAY_MERCHANT_ID = "merchant.com.yourcompany.yourapp"
 
     /**
      * Apple Pay merchant validation endpoint exposed by your backend.
      * This is required for both Web and iOS.
      */
-    const val APPLE_PAY_MERCHANT_VALIDATION_ENDPOINT = ""
+    const val APPLE_PAY_MERCHANT_VALIDATION_ENDPOINT = "https://your-backend.com/apple-pay/validate"
 
     /**
      * Base URL of your hosted payment page/backend, used by Apple Pay on Web.
      */
-    const val APPLE_PAY_BASE_URL = ""
+    const val APPLE_PAY_BASE_URL = "https://your-backend.com"
 
     /**
      * Domain where the Apple Pay JS integration is hosted.
@@ -110,7 +113,7 @@ object PaymentConfig {
     /**
      * Google Pay authentication methods.
      */
-    val GOOGLE_PAY_AUTH_METHODS = GooglePayAuthMethod.Companion.DEFAULT
+    val GOOGLE_PAY_AUTH_METHODS = GooglePayAuthMethod.DEFAULT
 
     /**
      * Apple Pay supported networks.
@@ -130,6 +133,11 @@ object PaymentConfig {
         ApplePayMerchantCapability.CAPABILITY_DEBIT,
         ApplePayMerchantCapability.CAPABILITY_CREDIT
     )
+
+    sealed interface ConfigValidation {
+        data object Valid : ConfigValidation
+        data class Invalid(val message: String) : ConfigValidation
+    }
 
     /**
      * Creates a Google Pay configuration with current settings.
@@ -204,5 +212,86 @@ object PaymentConfig {
             applePayWeb = APPLE_PAY_MERCHANT_VALIDATION_ENDPOINT.takeIf { it.isNotBlank() }
                 ?.let { createApplePayWebConfig(currencyCode, countryCode) }
         )
+    }
+
+    private fun validateGooglePayConfig(): ConfigValidation {
+        val errors = mutableListOf<String>()
+
+        if (GOOGLE_PAY_MERCHANT_NAME == "YOUR_MERCHANT_NAME_HERE") {
+            errors.add("Please configure Google Pay merchant name in PaymentConfig.kt")
+        }
+
+        if (GOOGLE_PAY_GATEWAY_MERCHANT_ID == "YOUR_GATEWAY_MERCHANT_ID_HERE") {
+            errors.add("Please configure Google Pay gateway merchant ID in PaymentConfig.kt")
+        }
+
+        return if (errors.isEmpty()) {
+            ConfigValidation.Valid
+        } else {
+            ConfigValidation.Invalid(errors.joinToString("\n"))
+        }
+    }
+
+    private fun validateApplePayConfig(): ConfigValidation {
+        val errors = mutableListOf<String>()
+
+        if (APPLE_PAY_MERCHANT_ID == "merchant.com.yourcompany.yourapp") {
+            errors.add("Please configure Apple Pay merchant ID in PaymentConfig.kt")
+        }
+
+        if (APPLE_PAY_MERCHANT_VALIDATION_ENDPOINT == "https://your-backend.com/apple-pay/validate") {
+            errors.add("Please configure Apple Pay merchant validation endpoint in PaymentConfig.kt")
+        }
+
+        return if (errors.isEmpty()) {
+            ConfigValidation.Valid
+        } else {
+            ConfigValidation.Invalid(errors.joinToString("\n"))
+        }
+    }
+
+    /**
+     * Builds a Google Pay configuration after validation.
+     * Returns a type-safe ConfigResult instead of a Pair.
+     *
+     * @return ConfigResult with either a valid config or validation errors
+     */
+    fun buildGooglePayConfig(): ConfigResult<GooglePayConfig> {
+        return when (val validation = validateGooglePayConfig()) {
+            is ConfigValidation.Valid -> ConfigResult.Success(createGooglePayConfig())
+            is ConfigValidation.Invalid -> ConfigResult.Failure(
+                providerName = "Google Pay",
+                errors = validation.message.split("\n")
+            )
+        }
+    }
+
+    /**
+     * Builds an Apple Pay web configuration after validation.
+     * Returns a type-safe ConfigResult instead of a Pair.
+     *
+     * @return ConfigResult with either a valid config or validation errors
+     */
+    fun buildApplePayWebConfig(): ConfigResult<ApplePayWebConfig> {
+        return when (val validation = validateApplePayConfig()) {
+            is ConfigValidation.Valid -> ConfigResult.Success(createApplePayWebConfig())
+            is ConfigValidation.Invalid -> ConfigResult.Failure(
+                providerName = "Apple Pay",
+                errors = validation.message.split("\n")
+            )
+        }
+    }
+
+    /**
+     * Logs configuration failures to Cedar.
+     * Can be chained with build functions for automatic error logging.
+     *
+     * Example: `buildGooglePayConfig().logIfFailure()`
+     */
+    private fun <T> ConfigResult<T>.logIfFailure(): ConfigResult<T> {
+        onFailure { provider, errors ->
+            Cedar.e("$provider configuration error: ${errors.joinToString(", ")}")
+        }
+        return this
     }
 }

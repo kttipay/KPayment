@@ -2,11 +2,10 @@ package com.kttipay.payment.internal.applepay
 
 import com.kttipay.payment.api.config.ApplePayMerchantCapability
 import com.kttipay.payment.api.config.ApplePayNetwork
-import org.kimplify.deci.Deci
 
 data class SummaryItem(
     val label: String,
-    val amount: Deci,
+    val amount: String,
     /** Maps to PKPaymentSummaryItemType.final or .pending */
     val isFinal: Boolean = true
 )
