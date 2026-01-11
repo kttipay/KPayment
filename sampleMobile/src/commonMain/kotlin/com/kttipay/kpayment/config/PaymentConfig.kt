@@ -30,6 +30,12 @@ import org.kimplify.cedar.logging.Cedar
 object PaymentConfig {
 
     /**
+     * Google Pay merchant identifier.
+     * Replace with your actual Google Merchant ID.
+     */
+    const val GOOGLE_PAY_MERCHANT_ID = "YOUR_MERCHANT_ID_HERE"
+
+    /**
      * Google Pay merchant name displayed during payment.
      * Replace with your actual business name.
      */
@@ -140,6 +146,10 @@ object PaymentConfig {
     private fun validateGooglePayConfig(): ConfigValidation {
         val errors = mutableListOf<String>()
 
+        if(GOOGLE_PAY_MERCHANT_ID == "YOUR_MERCHANT_ID_HERE") {
+            errors.add("Please configure Google Pay merchant ID in PaymentConfig.kt")
+        }
+
         if (GOOGLE_PAY_MERCHANT_NAME == "YOUR_MERCHANT_NAME_HERE") {
             errors.add("Please configure Google Pay merchant name in PaymentConfig.kt")
         }
@@ -226,7 +236,7 @@ object PaymentConfig {
         countryCode: String = COUNTRY_CODE
     ): GooglePayConfig {
         return GooglePayConfig(
-            merchantId = "",
+            merchantId = GOOGLE_PAY_MERCHANT_ID,
             merchantName = GOOGLE_PAY_MERCHANT_NAME,
             gatewayMerchantId = GOOGLE_PAY_GATEWAY_MERCHANT_ID,
             gateway = GOOGLE_PAY_GATEWAY,
