@@ -62,6 +62,12 @@ object PaymentConfig {
     // MARK: - Apple Pay Configuration
 
     /**
+     * Apple Pay merchant name displayed during payment.
+     * Replace with your actual business name.
+     */
+    const val APPLE_PAY_MERCHANT_NAME = "YOUR_MERCHANT_NAME_HERE"
+
+    /**
      * Apple Pay merchant identifier.
      * Create this in your Apple Developer account.
      * Format: merchant.com.yourcompany.yourapp
@@ -257,7 +263,7 @@ object PaymentConfig {
         return ApplePayMobileConfig(
             merchantId = APPLE_PAY_MERCHANT_ID,
             base = ApplePayBaseConfig(
-                merchantName = "",
+                merchantName = APPLE_PAY_MERCHANT_NAME,
                 currencyCode = currencyCode,
                 countryCode = countryCode,
                 supportedNetworks = APPLE_PAY_NETWORKS,
