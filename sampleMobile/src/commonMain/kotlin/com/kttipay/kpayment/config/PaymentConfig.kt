@@ -36,6 +36,10 @@ object PaymentConfig {
     const val GOOGLE_PAY_MERCHANT_NAME = "YOUR_MERCHANT_NAME_HERE"
 
     /**
+     * Google Pay merchant ID.
+     */
+    const val GOOGLE_PAY_MERCHANT_ID = "YOUR_MERCHANT_ID_HERE"
+    /**
      * Google Pay gateway merchant ID.
      * Get this from your payment gateway provider (e.g., Stripe, Braintree, etc.)
      */
@@ -54,6 +58,12 @@ object PaymentConfig {
     const val GOOGLE_PAY_ENVIRONMENT = "TEST"
 
     // MARK: - Apple Pay Configuration
+
+    /**
+     * Apple Pay merchant name displayed during payment.
+     * Replace with your actual business name.
+     */
+    const val APPLE_PAY_MERCHANT_NAME = "YOUR_MERCHANT_NAME_HERE"
 
     /**
      * Apple Pay merchant identifier.
@@ -226,7 +236,7 @@ object PaymentConfig {
         countryCode: String = COUNTRY_CODE
     ): GooglePayConfig {
         return GooglePayConfig(
-            merchantId = "",
+            merchantId = GOOGLE_PAY_MERCHANT_ID,
             merchantName = GOOGLE_PAY_MERCHANT_NAME,
             gatewayMerchantId = GOOGLE_PAY_GATEWAY_MERCHANT_ID,
             gateway = GOOGLE_PAY_GATEWAY,
@@ -247,7 +257,7 @@ object PaymentConfig {
         return ApplePayMobileConfig(
             merchantId = APPLE_PAY_MERCHANT_ID,
             base = ApplePayBaseConfig(
-                merchantName = "",
+                merchantName = APPLE_PAY_MERCHANT_NAME,
                 currencyCode = currencyCode,
                 countryCode = countryCode,
                 supportedNetworks = APPLE_PAY_NETWORKS,
