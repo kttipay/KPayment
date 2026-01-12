@@ -1,14 +1,13 @@
 <div align="center">
 
-# 💳 KPayment
+<img src=".github/KPayment-banner.png" alt="KPayment - Kotlin Multiplatform Payment Library" width="100%"/>
 
-### Unified Payment Integration for Kotlin Multiplatform
-
-*One API. Three Platforms. Google Pay & Apple Pay.*
+### *One API. Three Platforms. Google Pay & Apple Pay.*
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.kttipay/kpayment-core)](https://central.sonatype.com/artifact/com.kttipay/kpayment-core)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-blue.svg)](https://kotlinlang.org)
+[![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.11.0-blue.svg)](https://www.jetbrains.com/lp/compose-multiplatform/)
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-green.svg)](https://github.com/kttipay/KPayment)
 
 [Quickstart](#-quickstart) • [Installation](#-installation) • [Samples](#-samples) • [Documentation](#table-of-contents)
@@ -19,11 +18,12 @@
 
 ## Overview
 
-A **Kotlin Multiplatform library** for seamless payment processing across Android, iOS, and Web platforms. KPayment provides a unified, type-safe API for integrating Google Pay and Apple Pay into your applications with reactive capability detection, comprehensive error handling, and production-ready state management.
+A **Kotlin Multiplatform library** with **Compose Multiplatform UI** for seamless payment processing across Android, iOS, and Web platforms. KPayment provides a unified, type-safe API for integrating Google Pay and Apple Pay into your applications with reactive capability detection, comprehensive error handling, and production-ready state management.
 
-Whether you're building a mobile app, web application, or cross-platform solution, KPayment offers a single, consistent API that works everywhere.
+Built on Kotlin Multiplatform for shared business logic and platform implementations, with first-class Compose Multiplatform support for UI components that work everywhere. Whether you're building a mobile app, web application, or cross-platform solution, KPayment offers a single, consistent API that works everywhere.
 
-## Table of Contents
+<details>
+<summary><strong>📑 Table of Contents</strong></summary>
 
 - [🚀 Quickstart](#-quickstart)
 - [📱 Platform Support](#-platform-support)
@@ -58,6 +58,8 @@ Whether you're building a mobile app, web application, or cross-platform solutio
 - [⭐ Star History](#-star-history)
 - [🤝 Contributing](#-contributing)
 - [📄 License](#-license)
+
+</details>
 
 ## 🚀 Quickstart
 
