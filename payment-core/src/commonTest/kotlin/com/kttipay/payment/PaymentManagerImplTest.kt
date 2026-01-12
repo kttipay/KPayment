@@ -19,7 +19,7 @@ import kotlin.test.assertTrue
 
 class PaymentManagerImplTest {
     @Test
-    fun `awaitCapabilities waits for initial check and returns capabilities`() = runTest {
+    fun `checkCapabilities returns current capabilities`() = runTest {
         val config = createTestConfig()
         val manager = createManager(
             config = config,
@@ -30,14 +30,14 @@ class PaymentManagerImplTest {
             scope = this@runTest
         )
 
-        val capabilities = manager.awaitCapabilities()
+        val capabilities = manager.checkCapabilities()
 
         assertEquals(CapabilityStatus.Ready, capabilities.googlePay)
         assertEquals(CapabilityStatus.NotConfigured, capabilities.applePay)
     }
 
     @Test
-    fun `awaitCapabilities returns cached capabilities on subsequent calls`() = runTest {
+    fun `checkCapabilities queries platform on each call`() = runTest {
         val config = createTestConfig()
         var callCount = 0
         val manager = createManager(
@@ -54,34 +54,15 @@ class PaymentManagerImplTest {
             scope = this@runTest
         )
 
-        manager.awaitCapabilities()
-        manager.awaitCapabilities()
-        manager.awaitCapabilities()
+        manager.checkCapabilities()
+        manager.checkCapabilities()
+        manager.checkCapabilities()
 
-        assertEquals(1, callCount)
+        assertEquals(3, callCount)
     }
 
     @Test
-    fun `capabilitiesFlow emits capabilities after refresh`() = runTest {
-        val config = createTestConfig()
-        val manager = createManager(
-            config = config,
-            capabilityCheckStrategy = createMockCapabilityStrategy(
-                googlePayStatus = CapabilityStatus.Ready,
-                applePayStatus = CapabilityStatus.NotConfigured
-            ),
-            scope = this@runTest
-        )
-
-        manager.refreshCapabilities()
-        val capabilities = manager.capabilitiesFlow.value
-
-        assertEquals(CapabilityStatus.Ready, capabilities.googlePay)
-        assertEquals(CapabilityStatus.NotConfigured, capabilities.applePay)
-    }
-
-    @Test
-    fun `refreshCapabilities updates capabilities`() = runTest {
+    fun `checkCapabilities reflects dynamic changes`() = runTest {
         val config = createTestConfig()
         var googlePayStatus: CapabilityStatus = CapabilityStatus.NotConfigured
         val manager = createManager(
@@ -95,11 +76,11 @@ class PaymentManagerImplTest {
             scope = this@runTest
         )
 
-        val initialCapabilities = manager.refreshCapabilities()
+        val initialCapabilities = manager.checkCapabilities()
         assertEquals(CapabilityStatus.NotConfigured, initialCapabilities.googlePay)
 
         googlePayStatus = CapabilityStatus.Ready
-        val updatedCapabilities = manager.refreshCapabilities()
+        val updatedCapabilities = manager.checkCapabilities()
         assertEquals(CapabilityStatus.Ready, updatedCapabilities.googlePay)
     }
 
@@ -115,7 +96,7 @@ class PaymentManagerImplTest {
             scope = this@runTest
         )
 
-        manager.refreshCapabilities()
+        manager.checkCapabilities()
 
         val isAvailable = manager.observeAvailability(PaymentProvider.GooglePay).first()
         assertFalse(isAvailable)
@@ -133,7 +114,7 @@ class PaymentManagerImplTest {
             scope = this@runTest
         )
 
-        manager.refreshCapabilities()
+        manager.checkCapabilities()
 
         val googlePayAvailable = manager.observeAvailability(PaymentProvider.GooglePay).first()
         val applePayAvailable = manager.observeAvailability(PaymentProvider.ApplePay).first()

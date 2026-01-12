@@ -39,24 +39,75 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kttipay.kpayment.config.combineErrors
-import com.kttipay.kpayment.config.getOrNull
+import com.kttipay.payment.api.validation.combineErrors
+import com.kttipay.payment.api.validation.getOrNull
 import com.kttipay.payment.api.PaymentEnvironment
 import com.kttipay.payment.api.PaymentProvider
+import com.kttipay.payment.api.PaymentResult
 import com.kttipay.payment.api.config.WebPaymentConfig
 import com.kttipay.payment.api.logging.KPaymentLogger
 import com.kttipay.payment.capability.CapabilityStatus
-import com.kttipay.payment.internal.googlepay.GooglePayWebResult
 import com.kttipay.payment.ui.LocalWebPaymentManager
 import com.kttipay.payment.ui.PaymentManagerProvider
 import com.kttipay.payment.ui.launcher.rememberGooglePayWebLauncher
 import com.kttipay.payment.ui.rememberWebPaymentManager
+import androidx.compose.runtime.Immutable
+import com.kttipay.payment.capability.PaymentCapabilities
 import kotlinx.coroutines.flow.map
 import org.kimplify.cedar.logging.Cedar
 import org.kimplify.cedar.logging.trees.PlatformLogTree
+
+/**
+ * Holds the result of web payment configuration initialization.
+ *
+ * @property config The payment configuration, or null if no providers are valid
+ * @property error Error message describing configuration issues, or null if valid
+ */
+@Immutable
+data class WebAppConfigState(
+    val config: WebPaymentConfig?,
+    val error: String?
+)
+
+/**
+ * Creates the web app configuration state by validating payment providers.
+ * Extracted from composable to keep remember block clean and testable.
+ */
+private fun createWebAppConfigState(): WebAppConfigState {
+    val googlePayResult = PaymentConfig.buildGooglePayConfig()
+    val applePayResult = PaymentConfig.buildApplePayWebConfig()
+
+    val googlePay = googlePayResult.getOrNull()
+    val applePay = applePayResult.getOrNull()
+
+    val validationErrors = listOf(googlePayResult, applePayResult)
+        .combineErrors()
+        .takeIf { it.isNotEmpty() }
+        ?.joinToString("\n\n")
+
+    val config = if (googlePay != null || applePay != null) {
+        WebPaymentConfig(
+            environment = PaymentEnvironment.Development,
+            googlePay = googlePay,
+            applePayWeb = applePay
+        )
+    } else {
+        null
+    }
+
+    val error = when {
+        config == null && validationErrors != null ->
+            "$validationErrors\n\nPlease configure at least one payment provider."
+
+        else -> validationErrors
+    }
+
+    return WebAppConfigState(config = config, error = error)
+}
 
 /**
  * Main web application demonstrating KPayment library for web platforms.
@@ -76,92 +127,125 @@ fun WebApp() {
         KPaymentLogger.enabled = true
     }
 
-    var configError by remember { mutableStateOf<String?>("") }
-    val config = remember {
-        val googlePayResult = PaymentConfig.buildGooglePayConfig()
-        val applePayResult = PaymentConfig.buildApplePayWebConfig()
+    val configState = remember { createWebAppConfigState() }
+    var configError by remember { mutableStateOf(configState.error) }
+    val paymentManager = configState.config?.let { rememberWebPaymentManager(it) }
 
-        configError = listOf(googlePayResult, applePayResult)
-            .combineErrors()
-            .takeIf { it.isNotEmpty() }
-            ?.joinToString("\n\n")
-
-        WebPaymentConfig(
-            environment = PaymentEnvironment.Development,
-            googlePay = googlePayResult.getOrNull(),
-            applePayWeb = applePayResult.getOrNull()
+    MaterialTheme {
+        ConfigErrorDialog(
+            error = configError,
+            onDismiss = { configError = null }
         )
+
+        if (paymentManager != null) {
+            PaymentManagerProvider(manager = paymentManager) {
+                WebAppMainContent(hasConfigError = configError?.isBlank() == true)
+            }
+        } else {
+            NotConfiguredContent()
+        }
     }
+}
 
-    val paymentManager = rememberWebPaymentManager(config)
-
-    PaymentManagerProvider(manager = paymentManager) {
-        WebAppContent(configError = configError, onDismissError = { configError = null })
+@Composable
+private fun ConfigErrorDialog(
+    error: String?,
+    onDismiss: () -> Unit
+) {
+    error?.let {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Configuration Error") },
+            text = {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun WebAppContent(
-    configError: String?,
-    onDismissError: () -> Unit
-) {
+private fun NotConfiguredContent() {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = { WebAppTopBar() }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Payment Not Configured",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Please configure at least one payment provider (Google Pay or Apple Pay) in PaymentConfig.kt",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun WebAppTopBar() {
+    TopAppBar(
+        title = { Text("KPayment Web Sample") },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun WebAppMainContent(hasConfigError: Boolean) {
     val paymentManager = LocalWebPaymentManager.current
 
-    val isGooglePayAvailable by paymentManager.capabilitiesFlow.map { it.googlePay }
-        .collectAsStateWithLifecycle(CapabilityStatus.NotConfigured)
-    val isApplePayAvailable by paymentManager.capabilitiesFlow.map { it.applePay }
-        .collectAsStateWithLifecycle(CapabilityStatus.NotConfigured)
+    val capabilities by paymentManager.observeCapabilities()
+        .collectAsStateWithLifecycle(PaymentCapabilities.initial)
 
-    val googleButton = if (configError?.isBlank() == true) rememberGooglePayWebLauncher(
+    val googleButton = if (hasConfigError) rememberGooglePayWebLauncher(
         onResult = { result ->
             when (result) {
-                is GooglePayWebResult.Success -> {
+                is PaymentResult.Success -> {
                     Cedar.i("Google Pay payment successful: ${result.token}")
                 }
 
-                is GooglePayWebResult.Error -> {
-                    Cedar.e("Google Pay payment error: ${result.reason}")
+                is PaymentResult.Error -> {
+                    Cedar.e("Google Pay payment error: ${result.message}")
                 }
 
-                GooglePayWebResult.Cancelled -> {
+                is PaymentResult.Cancelled -> {
                     Cedar.i("Google Pay payment cancelled by user")
                 }
             }
         }
     ) else null
 
-    MaterialTheme {
-        configError?.let { error ->
-            AlertDialog(
-                onDismissRequest = onDismissError,
-                title = { Text("Configuration Error") },
-                text = {
-                    Text(
-                        text = error,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                confirmButton = {
-                    TextButton(onClick = onDismissError) {
-                        Text("OK")
-                    }
-                }
-            )
-        }
-
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                TopAppBar(
-                    title = { Text("KPayment Web Sample") },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                )
-            }
-        ) { paddingValues ->
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = { WebAppTopBar() }
+    ) { paddingValues ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -178,7 +262,7 @@ private fun WebAppContent(
                 ) {
                     PaymentProviderCard(
                         providerName = "Google Pay",
-                        status = isGooglePayAvailable,
+                        status = capabilities.googlePay,
                         icon = "💳",
                         provider = PaymentProvider.GooglePay,
                         onTest = {
@@ -188,66 +272,64 @@ private fun WebAppContent(
 
                     PaymentProviderCard(
                         providerName = "Apple Pay",
-                        status = isApplePayAvailable,
+                        status = capabilities.applePay,
                         icon = "🍎",
                         provider = PaymentProvider.ApplePay,
                         onTest = {
                             Cedar.i("Testing Apple Pay payment...")
-                            // Launch Apple Pay payment flow here when implemented
                         }
                     )
 
-                    Card(
-                        modifier = Modifier.fillMaxWidth()
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "Configuration",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = "Environment: Development",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = "Currency: ${PaymentConfig.CURRENCY_CODE}",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = "Country: ${PaymentConfig.COUNTRY_CODE}",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-
-                    // Instructions
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                        Text(
+                            text = "Configuration",
+                            style = MaterialTheme.typography.titleMedium
                         )
+                        Text(
+                            text = "Environment: Development",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = "Currency: ${PaymentConfig.CURRENCY_CODE}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = "Country: ${PaymentConfig.COUNTRY_CODE}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+
+                // Instructions
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "ℹ️ Setup Instructions",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = """
+                        Text(
+                            text = "ℹ️ Setup Instructions",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = """
                                 1. Configure your merchant IDs in PaymentConfig.kt
                                 2. Set up Apple Pay domain verification
                                 3. Configure merchant validation endpoint
                                 4. Test payments in a secure context (HTTPS)
                             """.trimIndent(),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             }

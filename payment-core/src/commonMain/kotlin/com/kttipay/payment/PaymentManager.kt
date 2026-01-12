@@ -4,7 +4,6 @@ import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.config.PlatformPaymentConfig
 import com.kttipay.payment.capability.PaymentCapabilities
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Unified interface for managing payment capabilities and configuration.
@@ -12,8 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
  * This manager handles capability checking and configuration
  * for Google Pay and Apple Pay across all platforms (Mobile & Web).
  *
- * Payment capabilities are checked lazily when [observeAvailability] is first called
- * or when [awaitCapabilities] is invoked.
+ * Capabilities are checked lazily on first use. The manager delegates to platform SDKs
+ * (Google Pay API, Apple Pay API) which handle their own caching and state management.
  *
  * Features:
  * - Constructor-based configuration (immutable)
@@ -27,14 +26,14 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * Example usage:
  * ```kotlin
- * // Reactive UI binding
- * val isReady = manager.observeAvailability(PaymentProvider.GooglePay)
- *     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), false)
+ * // Reactive UI binding (most common)
+ * val isReady by manager.observeAvailability(PaymentProvider.GooglePay)
+ *     .collectAsState(initial = false)
  *
- * // Suspend when you need actual capabilities
- * val capabilities = manager.awaitCapabilities()
+ * // Explicit check when needed
+ * val capabilities = manager.checkCapabilities()
  * if (capabilities.canPayWith(PaymentProvider.GooglePay)) {
- *     // Launch payment
+ *     launcher.launch("10.00")
  * }
  * ```
  *
@@ -48,42 +47,40 @@ interface PaymentManager<T : PlatformPaymentConfig> {
     val config: T
 
     /**
-     * Flow that emits current payment capabilities.
+     * Checks current payment provider capabilities by querying platform SDKs.
      *
-     * Capabilities are checked lazily when [observeAvailability] is called.
-     * Subscribe to this flow to observe changes in payment availability.
+     * This method delegates to native payment APIs (Google Pay, Apple Pay) which
+     * manage their own caching. On first call, triggers lazy initialization.
+     * Subsequent calls return current state from platform SDKs.
      *
-     * For a quick snapshot, use [capabilitiesFlow.value], but note that
-     * capabilities may not be checked yet. Use [awaitCapabilities] to ensure
-     * the initial check has completed.
+     * Use this when you need to explicitly check capabilities at a specific point.
+     * For reactive UI updates, prefer [observeCapabilities] or [observeAvailability].
+     *
+     * @return Current payment capabilities
      */
-    val capabilitiesFlow: StateFlow<PaymentCapabilities>
+    suspend fun checkCapabilities(): PaymentCapabilities
 
     /**
-     * Waits for the initial capability check to complete and returns the result.
+     * Observes payment capabilities reactively.
      *
-     * If the check has already completed, returns immediately with cached capabilities.
-     * Use this when you need to ensure capabilities are available before proceeding.
+     * Triggers lazy capability checking on first subscription. The flow emits
+     * the latest capabilities state and updates when platform conditions change.
      *
-     * @return Current payment capabilities after initial check completes
+     * Use this for reactive UI that displays detailed capability status or
+     * needs to observe multiple providers simultaneously.
+     *
+     * @return Flow that emits current payment capabilities
      */
-    suspend fun awaitCapabilities(): PaymentCapabilities
+    fun observeCapabilities(): Flow<PaymentCapabilities>
 
     /**
-     * Forces a re-check of payment provider availability.
+     * Observes availability of a specific payment provider reactively.
      *
-     * Use this when platform conditions may have changed (e.g., user added a card,
-     * returned from settings, or network connectivity changed).
+     * Convenience method that filters [observeCapabilities] for a single provider.
+     * Triggers lazy capability checking on first subscription.
      *
-     * @return Updated payment capabilities
-     */
-    suspend fun refreshCapabilities(): PaymentCapabilities
-
-    /**
-     * Observes availability of a specific payment provider.
-     *
-     * This triggers lazy capability checking if not already started.
-     * The flow emits updates whenever the provider's availability changes.
+     * Use this for reactive UI that only needs boolean ready/not-ready state
+     * for a specific payment provider.
      *
      * @param provider The payment provider to observe
      * @return Flow that emits true when provider is ready, false otherwise

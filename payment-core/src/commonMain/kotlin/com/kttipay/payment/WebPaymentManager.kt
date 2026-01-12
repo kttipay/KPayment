@@ -12,15 +12,14 @@ import com.kttipay.payment.api.config.WebPaymentConfig
  *
  * Example usage:
  * ```kotlin
- * // Before: PaymentManager<WebPaymentConfig>
  * val manager: WebPaymentManager = createWebPaymentManager(config)
  *
- * // Composable usage
- * @Composable
- * fun MyPaymentScreen() {
- *     val manager = LocalWebPaymentManager.current
- *     val capabilities by manager.capabilitiesFlow.collectAsState()
- * }
+ * // Check capabilities
+ * val capabilities = manager.checkCapabilities()
+ *
+ * // Reactive UI observation
+ * val isReady by manager.observeAvailability(PaymentProvider.GooglePay)
+ *     .collectAsState(initial = false)
  * ```
  *
  * @see PaymentManager

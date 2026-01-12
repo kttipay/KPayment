@@ -116,8 +116,9 @@ private class AndroidPaymentLauncher(
             is ValidationResult.Valid -> {
                 val requestJson = GooglePayEnvironment.paymentDataRequest(validationResult.amount)
                 val request = PaymentDataRequest.fromJson(requestJson.toString())
-                val task = paymentsClient.loadPaymentData(request)
-                launcher.launch(task)
+                paymentsClient.loadPaymentData(request).addOnCompleteListener {
+                    launcher.launch(it)
+                }
             }
         }
     }

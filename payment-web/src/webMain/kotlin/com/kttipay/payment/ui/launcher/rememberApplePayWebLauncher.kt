@@ -2,40 +2,20 @@ package com.kttipay.payment.ui.launcher
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import com.kttipay.payment.internal.applepay.ApplePayWebResult
+import com.kttipay.payment.api.PaymentLauncher
+import com.kttipay.payment.api.PaymentResult
 import com.kttipay.payment.internal.applepay.launcher.ApplePayWebLauncher
-import com.kttipay.payment.internal.applepay.launcher.IApplePayWebLauncher
 import com.kttipay.payment.ui.LocalWebPaymentManager
 
 /**
- * Returns an ApplePayWebLauncher for web platforms.
+ * Returns a PaymentLauncher for Apple Pay on web platforms.
  *
- * Requires LocalWebPaymentConfig to be provided via CompositionLocalProvider.
- * Use PaymentManagerProvider to automatically provide both manager and config.
- *
- * Usage:
- * ```kotlin
- * val applePayLauncher = rememberApplePayWebLauncher(
- *     onResult = { result ->
- *         when (result) {
- *             is ApplePayWebResult.Success -> println("Token: ${result.token}")
- *             ApplePayWebResult.Failure -> println("Failed")
- *             ApplePayWebResult.Cancelled -> println("Cancelled")
- *         }
- *     }
- * )
- *
- * // Launch payment
- * Button(onClick = { applePayLauncher?.launch("100.00") }) {
- *     Text("Pay with Apple Pay")
- * }
- * ```
- *
- * @param onResult Callback for payment result
- * @return ApplePayWebLauncher instance or null if not configured
+ * @param onResult Callback invoked with payment result
+ * @return PaymentLauncher for Apple Pay
+ * @throws IllegalArgumentException if Apple Pay Web is not configured
  */
 @Composable
-fun rememberApplePayWebLauncher(onResult: (ApplePayWebResult) -> Unit): IApplePayWebLauncher {
+fun rememberApplePayWebLauncher(onResult: (PaymentResult) -> Unit): PaymentLauncher {
     val manager = LocalWebPaymentManager.current
     val applePayWebConfig = manager.config.applePayWeb
     require(applePayWebConfig != null) {

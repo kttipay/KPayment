@@ -14,16 +14,12 @@ package com.kttipay.payment.api
  *     is PaymentResult.Success -> {
  *         val token = result.token
  *     }
- *     is PaymentResult.Cancelled -> {
- *     }
+ *     is PaymentResult.Cancelled -> {}
  *     is PaymentResult.Error -> {
  *         when (result.reason) {
- *             PaymentErrorReason.NetworkError -> {
- *             }
- *             PaymentErrorReason.NotAvailable -> {
- *             }
- *             else -> {
- *             }
+ *             PaymentErrorReason.NetworkError -> {}
+ *             PaymentErrorReason.NotAvailable -> {}
+ *             else -> {}
  *         }
  *     }
  * }

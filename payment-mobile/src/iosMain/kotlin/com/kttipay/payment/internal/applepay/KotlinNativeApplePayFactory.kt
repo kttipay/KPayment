@@ -34,7 +34,6 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
     private var currentCompletion: ((ApplePayResult) -> Unit)? = null
     private var currentController: PKPaymentAuthorizationController? = null
     private var currentDelegate: ApplePayDelegate? = null
-    private var isProcessing: Boolean = false
 
     override fun applePayStatus(): ApplePayStatus {
         val canPay = PKPaymentAuthorizationController.canMakePayments()
@@ -57,15 +56,15 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
         request: ApplePayRequest,
         onResult: (ApplePayResult) -> Unit
     ) {
-        if (isProcessing) {
+        if (currentCompletion != null) {
             onResult(
                 ApplePayResult.Failure(
-                    errorCode = ApplePayErrorCode.PRESENT_FAILED
+                    errorCode = ApplePayErrorCode.PRESENT_FAILED,
+                    additionalMessage = "A payment is already in progress"
                 )
             )
             return
         }
-        isProcessing = true
 
         val pkRequest = PKPaymentRequest().apply {
             merchantIdentifier = request.merchantId
@@ -134,7 +133,6 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
         currentCompletion = null
         currentController = null
         currentDelegate = null
-        isProcessing = false
     }
 
     /**

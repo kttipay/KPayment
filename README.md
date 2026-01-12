@@ -18,6 +18,7 @@ A Kotlin Multiplatform library for seamless payment processing across Android, i
   - [Google Pay Configuration](#google-pay-configuration)
   - [Apple Pay Configuration](#apple-pay-configuration)
 - [Usage Examples](#usage-examples)
+- [Testing](#testing)
 - [Samples](#samples)
 - [License](#license)
 
@@ -27,10 +28,12 @@ A Kotlin Multiplatform library for seamless payment processing across Android, i
 - **Google Pay Integration** - Android and Web support
 - **Apple Pay Integration** - iOS and Safari (Web) support
 - **Compose Support** - Payment button + launcher helpers
-- **Capability Detection** - Reactive availability checks via `StateFlow` and `Flow`
-- **Suspend API** - `awaitCapabilities()` for async initialization
+- **Capability Detection** - Reactive availability checks via `Flow`
+- **Suspend API** - `checkCapabilities()` delegates to platform SDKs
 - **Type-Safe API** - Shared config and model types across platforms
 - **Serializable Tokens** - kotlinx.serialization support for payment tokens
+- **Thread-Safe** - Proper synchronization and concurrency handling across all platforms
+- **Production-Ready** - Comprehensive error details and robust state management
 
 ## Platform Support
 
@@ -247,11 +250,27 @@ fun PaymentScreen() {
 
     PaymentManagerProvider(manager) {
         val googlePay = rememberGooglePayWebLauncher { result ->
-            // handle GooglePayWebResult.Success, .Error, .Cancelled
+            when (result) {
+                is PaymentResult.Success -> println("Token: ${result.token}")
+                is PaymentResult.Error -> println("Error: ${result.message}")
+                is PaymentResult.Cancelled -> println("Cancelled")
+            }
+        }
+
+        val applePay = rememberApplePayWebLauncher { result ->
+            when (result) {
+                is PaymentResult.Success -> println("Token: ${result.token}")
+                is PaymentResult.Error -> println("Error: ${result.message}")
+                is PaymentResult.Cancelled -> println("Cancelled")
+            }
         }
 
         Button(onClick = { googlePay.launch("10.00") }) {
             Text("Pay with Google Pay")
+        }
+
+        Button(onClick = { applePay.launch("10.00") }) {
+            Text("Pay with Apple Pay")
         }
     }
 }
@@ -373,26 +392,31 @@ val applePayWeb = ApplePayWebConfig(
 ### Check Payment Capability
 
 ```kotlin
-// Reactive: Observe availability changes
-manager.observeAvailability(PaymentProvider.GooglePay).collect { available ->
-    // true when ready, false otherwise
+// Reactive: Observe availability changes (most common)
+val isReady by manager.observeAvailability(PaymentProvider.GooglePay)
+    .collectAsState(initial = false)
+
+Button(
+    enabled = isReady,
+    onClick = { launcher.launch("10.00") }
+) {
+    Text("Pay with Google Pay")
 }
 
-// Suspend: Wait for initial capability check
-val capabilities = manager.awaitCapabilities()
+// Explicit check when needed
+val capabilities = manager.checkCapabilities()
 if (capabilities.canPayWith(PaymentProvider.GooglePay)) {
-    // Ready to launch payment
+    launcher.launch("10.00")
 }
 
-// Detailed capability status
-manager.capabilitiesFlow.collect { caps ->
-    when (caps.googlePay) {
-        CapabilityStatus.Ready -> { /* show button */ }
-        CapabilityStatus.NotConfigured -> { /* missing config */ }
-        CapabilityStatus.NotSupported -> { /* platform not supported */ }
-        CapabilityStatus.Checking -> { /* loading */ }
-        is CapabilityStatus.Error -> { /* handle error */ }
-    }
+// Handle detailed capability status
+val capabilities = manager.checkCapabilities()
+when (capabilities.googlePay) {
+    CapabilityStatus.Ready -> { /* show button */ }
+    CapabilityStatus.NotConfigured -> { /* missing config */ }
+    CapabilityStatus.NotSupported -> { /* platform not supported */ }
+    CapabilityStatus.Checking -> { /* loading */ }
+    is CapabilityStatus.Error -> { /* handle error: ${error.reason} */ }
 }
 ```
 
@@ -489,7 +513,7 @@ The payment method is not available on this device or platform.
 
 ```kotlin
 is PaymentErrorReason.NotAvailable -> {
-    val capabilities = manager.awaitCapabilities()
+    val capabilities = manager.checkCapabilities()
     if (!capabilities.canPayWith(PaymentProvider.GooglePay)) {
         showAlternativePaymentMethod()
     }
@@ -589,7 +613,7 @@ PaymentButton(
 
 1. **Always Check Capabilities First**: Before attempting payment, check if the payment method is available:
    ```kotlin
-   val capabilities = manager.awaitCapabilities()
+   val capabilities = manager.checkCapabilities()
    if (capabilities.canPayWith(PaymentProvider.GooglePay)) {
        launchPayment()
    } else {
@@ -645,38 +669,57 @@ PaymentButton(
    }
    ```
 
-### Refresh Capabilities
-
-Re-check payment availability when user conditions change:
-
-```kotlin
-val newCapabilities = manager.refreshCapabilities()
-```
-
-### All PaymentManager Methods
+### PaymentManager API
 
 | Method | Type | Description |
 |--------|------|-------------|
 | `config` | Property | The payment configuration |
-| `capabilitiesFlow` | `StateFlow` | Reactive stream of payment capabilities |
-| `awaitCapabilities()` | `suspend` | Wait for initial check, returns capabilities |
-| `refreshCapabilities()` | `suspend` | Force re-check, returns updated capabilities |
-| `observeAvailability(provider)` | `Flow<Boolean>` | Observe specific provider availability |
+| `checkCapabilities()` | `suspend` | Check current payment capabilities from platform SDKs |
+| `observeCapabilities()` | `Flow<PaymentCapabilities>` | Reactively observe full payment capabilities |
+| `observeAvailability(provider)` | `Flow<Boolean>` | Reactively observe specific provider availability |
 
 ```kotlin
-// Reactive UI binding
-val isReady = manager.observeAvailability(PaymentProvider.GooglePay)
-    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), false)
+// Reactive UI for full capabilities
+val capabilities by manager.observeCapabilities()
+    .collectAsState(initial = PaymentCapabilities.initial)
 
-// Wait for actual capabilities
-val capabilities = manager.awaitCapabilities()
+when (capabilities.googlePay) {
+    CapabilityStatus.Ready -> ShowPaymentButton()
+    CapabilityStatus.Checking -> ShowLoading()
+    else -> ShowNotAvailable()
+}
 
-// Force refresh (e.g., user added a card)
-val updated = manager.refreshCapabilities()
+// Reactive UI for single provider (convenience)
+val isReady by manager.observeAvailability(PaymentProvider.GooglePay)
+    .collectAsState(initial = false)
 
-// Quick snapshot (may be stale if check hasn't completed)
-val current = manager.capabilitiesFlow.value
+Button(enabled = isReady, onClick = { launcher.launch("10.00") }) {
+    Text("Pay")
+}
+
+// Explicit capability check
+val capabilities = manager.checkCapabilities()
+if (capabilities.canPayWith(PaymentProvider.GooglePay)) {
+    launcher.launch("10.00")
+}
 ```
+
+## Testing
+
+The library includes comprehensive unit tests:
+
+```bash
+./gradlew payment-core:jvmTest        # Core logic tests
+./gradlew payment-web:jsTest          # Web platform tests
+./gradlew payment-mobile:iosSimulatorArm64Test  # iOS tests
+./gradlew payment-mobile:testAndroid  # Android tests
+```
+
+Test coverage includes:
+- Result conversion and error mapping (Priority 1)
+- Launcher state management and concurrency (Priority 2)
+- Configuration validation
+- Amount validation
 
 ## Samples
 

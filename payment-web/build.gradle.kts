@@ -40,6 +40,12 @@ kotlin {
         webMain.dependencies {
             implementation(libs.kotlinx.browser)
         }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.coroutines.test)
+        }
     }
 }
 

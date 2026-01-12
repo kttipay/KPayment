@@ -8,8 +8,6 @@ import com.kttipay.payment.api.config.WebPaymentConfig
 import com.kttipay.payment.capability.CapabilityStatus
 import com.kttipay.payment.capability.PaymentCapabilities
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 
 @Composable
@@ -23,15 +21,12 @@ actual fun rememberWebPaymentManager(config: WebPaymentConfig): WebPaymentManage
 
             override val config: WebPaymentConfig = config
 
-            override val capabilitiesFlow: StateFlow<PaymentCapabilities> =
-                MutableStateFlow(notSupportedCapabilities)
-
-            override suspend fun awaitCapabilities(): PaymentCapabilities {
+            override suspend fun checkCapabilities(): PaymentCapabilities {
                 return notSupportedCapabilities
             }
 
-            override suspend fun refreshCapabilities(): PaymentCapabilities {
-                return notSupportedCapabilities
+            override fun observeCapabilities(): Flow<PaymentCapabilities> {
+                return flowOf(notSupportedCapabilities)
             }
 
             override fun observeAvailability(provider: PaymentProvider): Flow<Boolean> {

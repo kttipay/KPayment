@@ -77,9 +77,10 @@ sealed interface CapabilityStatus {
  *
  * Example usage:
  * ```
- * val capabilities = manager.currentCapabilities()
+ * val capabilities = manager.checkCapabilities()
  *
  * if (capabilities.canPayWith(PaymentProvider.GooglePay)) {
+ *     launcher.launch("10.00")
  * }
  *
  * val googlePayStatus = capabilities.statusFor(PaymentProvider.GooglePay)
@@ -89,6 +90,24 @@ data class PaymentCapabilities(
     val googlePay: CapabilityStatus = CapabilityStatus.NotConfigured,
     val applePay: CapabilityStatus = CapabilityStatus.NotConfigured
 ) {
+    companion object {
+        /**
+         * Initial capabilities state before any checking has occurred.
+         *
+         * Both providers are in [CapabilityStatus.Checking] state, indicating
+         * that capability checking has not yet completed.
+         *
+         * Use this as the initial value for reactive flows:
+         * ```
+         * val capabilities by manager.observeCapabilities()
+         *     .collectAsState(initial = PaymentCapabilities.initial)
+         * ```
+         */
+        val initial: PaymentCapabilities = PaymentCapabilities(
+            googlePay = CapabilityStatus.Checking,
+            applePay = CapabilityStatus.Checking
+        )
+    }
     /**
      * Returns the capability status for the specified payment provider.
      *

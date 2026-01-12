@@ -13,15 +13,14 @@ import com.kttipay.payment.api.config.MobilePaymentConfig
  *
  * Example usage:
  * ```kotlin
- * // Before: PaymentManager<MobilePaymentConfig>
  * val manager: MobilePaymentManager = createMobilePaymentManager(config, context)
  *
- * // Composable usage
- * @Composable
- * fun MyPaymentScreen() {
- *     val manager = LocalMobilePaymentManager.current
- *     val capabilities by manager.capabilitiesFlow.collectAsState()
- * }
+ * // Check capabilities
+ * val capabilities = manager.checkCapabilities()
+ *
+ * // Reactive UI observation
+ * val isReady by manager.observeAvailability(PaymentProvider.GooglePay)
+ *     .collectAsState(initial = false)
  * ```
  *
  * @see PaymentManager

@@ -10,8 +10,7 @@ import kotlin.js.unsafeCast
 internal interface GooglePayPaymentClient {
     fun requestPayment(
         amount: String,
-        onSuccess: (GooglePayToken) -> Unit,
-        onError: (Throwable) -> Unit
+        onResult: (GooglePayWebResult) -> Unit
     )
 }
 
@@ -24,8 +23,7 @@ internal class GooglePayPaymentClientImpl(
 
     override fun requestPayment(
         amount: String,
-        onSuccess: (GooglePayToken) -> Unit,
-        onError: (Throwable) -> Unit
+        onResult: (GooglePayWebResult) -> Unit
     ) {
         KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment amount=$amount")
         val paymentRequest = loadPaymentDataRequestWithDefaults(amount, config = config)
@@ -35,18 +33,42 @@ internal class GooglePayPaymentClientImpl(
             .loadPaymentData(paymentRequest)
             .then(
                 onFulfilled = { data: JsAny ->
-                    KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment onFulfilled raw=$data")
-                    val paymentData = data.unsafeCast<PaymentData>()
-                    val token = paymentData.paymentMethodData.tokenizationData.token
-                    KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment token=$token")
-                    onSuccess(GooglePayToken(token))
+                    runCatching {
+                        KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment onFulfilled raw=$data")
+                        val paymentData = data.unsafeCast<PaymentData>()
+                        val tokenData = paymentData.paymentMethodData?.tokenizationData
+                        val token = tokenData?.token
+
+                        if (token.isNullOrEmpty()) {
+                            throw IllegalStateException("Token missing or empty in payment data")
+                        }
+
+                        KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment token=$token")
+                        onResult(GooglePayWebResult.Success(token))
+                    }.onFailure { error ->
+                        KPaymentLogger.e("GooglePayPaymentClientImpl.requestPayment token extraction failed", error)
+                        onResult(
+                            GooglePayWebResult.Error(
+                                errorCode = GooglePayWebErrorCode.TOKEN_EXTRACTION_FAILED,
+                                additionalMessage = error.message
+                            )
+                        )
+                    }
                     null
                 },
                 onRejected = { error: JsPromiseError ->
                     KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment onRejected raw=$error")
                     val parsed = parsePaymentError(error)
                     KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment parsedError=${parsed::class.simpleName} message=${parsed.message}")
-                    onError(parsed)
+
+                    val result = when (parsed) {
+                        is PaymentException.CancelledException -> GooglePayWebResult.Cancelled
+                        is PaymentException.FailedException -> GooglePayWebResult.Error(
+                            errorCode = GooglePayWebErrorCode.LOAD_PAYMENT_DATA_FAILED,
+                            additionalMessage = parsed.message
+                        )
+                    }
+                    onResult(result)
                     null
                 }
             )

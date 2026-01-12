@@ -9,14 +9,10 @@ import com.kttipay.payment.strategy.CapabilityCheckStrategy
 import com.kttipay.payment.strategy.ConfigAccessor
 import com.kttipay.payment.strategy.PlatformSetupStrategy
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -25,8 +21,8 @@ import kotlinx.coroutines.launch
  * This class uses Strategy pattern with DI to accept platform-specific implementations
  * of capability checking, platform setup, and configuration access.
  *
- * Payment capabilities are checked lazily when [observeAvailability] is first called
- * or when [awaitCapabilities] is invoked.
+ * Capabilities are checked lazily on first use and delegated to platform SDKs
+ * which handle their own caching and state management.
  *
  * @param config The platform payment configuration
  * @param capabilityCheckStrategy Strategy for checking payment provider availability
@@ -46,67 +42,50 @@ class PaymentManagerImpl<T : PlatformPaymentConfig>(
 
     private val log = KPaymentLogger.tag(logTag)
 
-    private val _capabilitiesFlow = MutableStateFlow(
-        PaymentCapabilities(
-            googlePay = CapabilityStatus.NotConfigured,
-            applePay = CapabilityStatus.NotConfigured
-        )
-    )
-
-    override val capabilitiesFlow: StateFlow<PaymentCapabilities> = _capabilitiesFlow.asStateFlow()
-
-    private val lazyCapabilityCheck: Job by lazy {
-        scope.launch {
-            runCatching { refreshCapabilitiesInternal() }
-                .onFailure { error ->
-                    log.e("Capability check failed", error as? Exception)
-                    updateCapabilitiesOnFailure(error)
-                }
-        }
-    }
+    private val _capabilitiesFlow = MutableStateFlow(PaymentCapabilities.initial)
 
     init {
         log.d("Initializing Payment Manager - Environment: ${config.environment.name}")
         platformSetupStrategy.setupPlatformPayments(config)
     }
 
-    override suspend fun awaitCapabilities(): PaymentCapabilities {
-        lazyCapabilityCheck.join()
-        return _capabilitiesFlow.value
-    }
+    override suspend fun checkCapabilities(): PaymentCapabilities {
+        log.d("Checking payment capabilities")
+        return runCatching {
+            val googleStatus = capabilityCheckStrategy.checkGooglePayAvailability(config)
+            val appleStatus = capabilityCheckStrategy.checkApplePayAvailability(config)
 
-    override suspend fun refreshCapabilities(): PaymentCapabilities {
-        log.d("Refreshing payment capabilities")
-        return refreshCapabilitiesInternal()
-    }
-
-    override fun observeAvailability(provider: PaymentProvider): Flow<Boolean> {
-        lazyCapabilityCheck.start()
-        return capabilitiesFlow
-            .map { it.canPayWith(provider) }
-            .distinctUntilChanged()
-    }
-
-    private suspend fun refreshCapabilitiesInternal(): PaymentCapabilities {
-        val googleStatus = capabilityCheckStrategy.checkGooglePayAvailability(config)
-        val appleStatus = capabilityCheckStrategy.checkApplePayAvailability(config)
-
-        return PaymentCapabilities(
-            googlePay = googleStatus,
-            applePay = appleStatus
-        ).also { newCapabilities ->
-            _capabilitiesFlow.value = newCapabilities
-            log.d("Capabilities — GooglePay: $googleStatus, ApplePay: $appleStatus")
-        }
-    }
-
-    private fun updateCapabilitiesOnFailure(error: Throwable) {
-        _capabilitiesFlow.update {
+            PaymentCapabilities(
+                googlePay = googleStatus,
+                applePay = appleStatus
+            ).also { capabilities ->
+                _capabilitiesFlow.value = capabilities
+                log.d("Capabilities — GooglePay: $googleStatus, ApplePay: $appleStatus")
+            }
+        }.getOrElse { error ->
+            log.e("Capability check failed", error as? Exception)
             PaymentCapabilities(
                 googlePay = resolveErrorStatus(configAccessor.getGooglePayConfig(config), error),
                 applePay = resolveErrorStatus(configAccessor.getApplePayConfig(config), error)
-            )
+            ).also { _capabilitiesFlow.value = it }
         }
+    }
+
+    override fun observeCapabilities(): Flow<PaymentCapabilities> {
+        scope.launch {
+            if (_capabilitiesFlow.value.googlePay is CapabilityStatus.Checking ||
+                _capabilitiesFlow.value.applePay is CapabilityStatus.Checking
+            ) {
+                checkCapabilities()
+            }
+        }
+        return _capabilitiesFlow
+    }
+
+    override fun observeAvailability(provider: PaymentProvider): Flow<Boolean> {
+        return observeCapabilities()
+            .map { it.canPayWith(provider) }
+            .distinctUntilChanged()
     }
 
     private fun resolveErrorStatus(configuredProvider: Any?, error: Throwable): CapabilityStatus =

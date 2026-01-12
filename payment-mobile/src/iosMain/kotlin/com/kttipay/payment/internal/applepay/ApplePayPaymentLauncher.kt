@@ -57,7 +57,7 @@ internal class ApplePayPaymentLauncher(
     }
 }
 
-private fun ApplePayResult.toPaymentResult(): PaymentResult {
+internal fun ApplePayResult.toPaymentResult(): PaymentResult {
     return when (this) {
         is ApplePayResult.Success -> PaymentResult.Success(
             provider = PaymentProvider.ApplePay,
@@ -76,7 +76,7 @@ private fun ApplePayResult.toPaymentResult(): PaymentResult {
     }
 }
 
-private fun ApplePayErrorCode.toPaymentErrorReason(): PaymentErrorReason {
+internal fun ApplePayErrorCode.toPaymentErrorReason(): PaymentErrorReason {
     return when (this) {
         ApplePayErrorCode.PRESENT_FAILED -> PaymentErrorReason.NotAvailable
         ApplePayErrorCode.TOKEN_EXTRACTION_FAILED -> PaymentErrorReason.InternalError
