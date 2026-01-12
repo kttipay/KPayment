@@ -17,6 +17,14 @@ kotlin {
         compileSdk = libs.versions.compileSdk.get().toInt()
         minSdk = libs.versions.minSdk.get().toInt()
 
+        withDeviceTest {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+            execution = "ANDROIDX_TEST_ORCHESTRATOR"
+        }
+        withHostTest {
+            isIncludeAndroidResources = true
+        }
+
         optimization {
             consumerKeepRules.publish = true
             consumerKeepRules.files.add(project.file("proguard-rules.pro"))
@@ -48,6 +56,12 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.play.services.wallet)
             implementation(libs.compose.pay.button)
+        }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.coroutines.test)
         }
 
         iosMain.dependencies {}
