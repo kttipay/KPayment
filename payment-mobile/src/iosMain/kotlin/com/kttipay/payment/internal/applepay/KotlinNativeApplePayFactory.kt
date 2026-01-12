@@ -34,7 +34,6 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
     private var currentCompletion: ((ApplePayResult) -> Unit)? = null
     private var currentController: PKPaymentAuthorizationController? = null
     private var currentDelegate: ApplePayDelegate? = null
-    private var isProcessing: Boolean = false
 
     override fun applePayStatus(): ApplePayStatus {
         val canPay = PKPaymentAuthorizationController.canMakePayments()
@@ -57,16 +56,6 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
         request: ApplePayRequest,
         onResult: (ApplePayResult) -> Unit
     ) {
-        if (isProcessing) {
-            onResult(
-                ApplePayResult.Failure(
-                    errorCode = ApplePayErrorCode.PRESENT_FAILED
-                )
-            )
-            return
-        }
-        isProcessing = true
-
         val pkRequest = PKPaymentRequest().apply {
             merchantIdentifier = request.merchantId
             countryCode = request.countryCode
@@ -134,7 +123,6 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
         currentCompletion = null
         currentController = null
         currentDelegate = null
-        isProcessing = false
     }
 
     /**
