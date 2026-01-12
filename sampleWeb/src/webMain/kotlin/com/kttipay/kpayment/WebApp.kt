@@ -30,7 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,22 +43,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kttipay.payment.api.validation.combineErrors
-import com.kttipay.payment.api.validation.getOrNull
 import com.kttipay.payment.api.PaymentEnvironment
 import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.PaymentResult
 import com.kttipay.payment.api.config.WebPaymentConfig
-import com.kttipay.payment.api.logging.KPaymentLogger
-import com.kttipay.payment.capability.CapabilityStatus
+import com.kttipay.payment.api.validation.combineErrors
+import com.kttipay.payment.api.validation.getOrNull
 import com.kttipay.payment.ui.LocalWebPaymentManager
 import com.kttipay.payment.ui.PaymentManagerProvider
 import com.kttipay.payment.ui.launcher.rememberGooglePayWebLauncher
 import com.kttipay.payment.ui.rememberWebPaymentManager
-import androidx.compose.runtime.Immutable
 import kotlinx.coroutines.flow.map
 import org.kimplify.cedar.logging.Cedar
-import org.kimplify.cedar.logging.trees.PlatformLogTree
 
 /**
  * Holds the result of web payment configuration initialization.
@@ -101,6 +97,7 @@ private fun createWebAppConfigState(): WebAppConfigState {
     val error = when {
         config == null && validationErrors != null ->
             "$validationErrors\n\nPlease configure at least one payment provider."
+
         else -> validationErrors
     }
 
@@ -119,12 +116,6 @@ private fun createWebAppConfigState(): WebAppConfigState {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WebApp() {
-    LaunchedEffect(Unit) {
-        Cedar.plant(PlatformLogTree())
-        Cedar.i("Initializing KPayment Web Sample...")
-        KPaymentLogger.enabled = true
-    }
-
     val configState = remember { createWebAppConfigState() }
     var configError by remember { mutableStateOf(configState.error) }
     val paymentManager = configState.config?.let { rememberWebPaymentManager(it) }
@@ -219,10 +210,10 @@ private fun WebAppTopBar() {
 private fun WebAppMainContent(hasConfigError: Boolean) {
     val paymentManager = LocalWebPaymentManager.current
 
-    val isGooglePayAvailable by paymentManager.capabilitiesFlow.map { it.googlePay }
-        .collectAsStateWithLifecycle(CapabilityStatus.NotConfigured)
-    val isApplePayAvailable by paymentManager.capabilitiesFlow.map { it.applePay }
-        .collectAsStateWithLifecycle(CapabilityStatus.NotConfigured)
+    val isGooglePayAvailable by paymentManager.observeAvailability(PaymentProvider.GooglePay).map { it }
+        .collectAsStateWithLifecycle(false)
+    val isApplePayAvailable by paymentManager.observeAvailability(PaymentProvider.ApplePay).map { it }
+        .collectAsStateWithLifecycle(false)
 
     val googleButton = if (hasConfigError) rememberGooglePayWebLauncher(
         onResult = { result ->
@@ -246,96 +237,96 @@ private fun WebAppMainContent(hasConfigError: Boolean) {
         modifier = Modifier.fillMaxSize(),
         topBar = { WebAppTopBar() }
     ) { paddingValues ->
-            Box(
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.TopCenter
+                    .widthIn(max = 700.dp)
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .widthIn(max = 700.dp)
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    PaymentProviderCard(
-                        providerName = "Google Pay",
-                        status = isGooglePayAvailable,
-                        icon = "💳",
-                        provider = PaymentProvider.GooglePay,
-                        onTest = {
-                            googleButton?.launch("1.00")
-                        }
-                    )
-
-                    PaymentProviderCard(
-                        providerName = "Apple Pay",
-                        status = isApplePayAvailable,
-                        icon = "🍎",
-                        provider = PaymentProvider.ApplePay,
-                        onTest = {
-                            Cedar.i("Testing Apple Pay payment...")
-                            // Launch Apple Pay payment flow here when implemented
-                        }
-                    )
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "Configuration",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = "Environment: Development",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = "Currency: ${PaymentConfig.CURRENCY_CODE}",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = "Country: ${PaymentConfig.COUNTRY_CODE}",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
+                PaymentProviderCard(
+                    providerName = "Google Pay",
+                    status = isGooglePayAvailable,
+                    icon = "💳",
+                    provider = PaymentProvider.GooglePay,
+                    onTest = {
+                        googleButton?.launch("1.00")
                     }
+                )
 
-                    // Instructions
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer
-                        )
+                PaymentProviderCard(
+                    providerName = "Apple Pay",
+                    status = isApplePayAvailable,
+                    icon = "🍎",
+                    provider = PaymentProvider.ApplePay,
+                    onTest = {
+                        Cedar.i("Testing Apple Pay payment...")
+                        // Launch Apple Pay payment flow here when implemented
+                    }
+                )
+
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "ℹ️ Setup Instructions",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = """
+                        Text(
+                            text = "Configuration",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "Environment: Development",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = "Currency: ${PaymentConfig.CURRENCY_CODE}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = "Country: ${PaymentConfig.COUNTRY_CODE}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+
+                // Instructions
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "ℹ️ Setup Instructions",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = """
                                 1. Configure your merchant IDs in PaymentConfig.kt
                                 2. Set up Apple Pay domain verification
                                 3. Configure merchant validation endpoint
                                 4. Test payments in a secure context (HTTPS)
                             """.trimIndent(),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             }
         }
+    }
 }
 
 /**
@@ -414,7 +405,7 @@ private fun GooglePayButton(
 @Composable
 private fun PaymentProviderCard(
     providerName: String,
-    status: CapabilityStatus,
+    status: Boolean,
     icon: String,
     provider: PaymentProvider,
     onTest: () -> Unit
@@ -448,26 +439,20 @@ private fun PaymentProviderCard(
                         )
                         Text(
                             text = when (status) {
-                                is CapabilityStatus.Ready -> "✅ Available"
-                                is CapabilityStatus.NotSupported -> "❌ Not Available"
-                                is CapabilityStatus.Checking -> "⏳ Checking..."
-                                is CapabilityStatus.NotConfigured -> "⚠ Not Configured"
-                                is CapabilityStatus.Error -> "⚠ Error: ${status.reason}"
+                                true -> "✅ Available"
+                                false -> "❌ Not Available"
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = when (status) {
-                                is CapabilityStatus.Ready -> MaterialTheme.colorScheme.primary
-                                is CapabilityStatus.NotSupported -> MaterialTheme.colorScheme.error
-                                is CapabilityStatus.Checking -> MaterialTheme.colorScheme.onSurfaceVariant
-                                is CapabilityStatus.NotConfigured -> MaterialTheme.colorScheme.tertiary
-                                is CapabilityStatus.Error -> MaterialTheme.colorScheme.error
+                                true -> MaterialTheme.colorScheme.primary
+                                false -> MaterialTheme.colorScheme.error
                             }
                         )
                     }
                 }
             }
 
-            if (status is CapabilityStatus.Ready) {
+            if (status) {
                 when (provider) {
                     PaymentProvider.GooglePay -> {
                         GooglePayButton(
