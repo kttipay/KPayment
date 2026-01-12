@@ -65,7 +65,7 @@ internal fun ApplePayWebResult.toPaymentResult(): PaymentResult {
 /**
  * Maps ApplePayWebErrorCode to PaymentErrorReason.
  */
-private fun ApplePayWebErrorCode.toPaymentErrorReason(): PaymentErrorReason {
+internal fun ApplePayWebErrorCode.toPaymentErrorReason(): PaymentErrorReason {
     return when (this) {
         ApplePayWebErrorCode.SESSION_BEGIN_FAILED -> PaymentErrorReason.NotAvailable
         ApplePayWebErrorCode.MERCHANT_VALIDATION_FAILED -> PaymentErrorReason.NetworkError
