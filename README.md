@@ -18,6 +18,7 @@ A Kotlin Multiplatform library for seamless payment processing across Android, i
   - [Google Pay Configuration](#google-pay-configuration)
   - [Apple Pay Configuration](#apple-pay-configuration)
 - [Usage Examples](#usage-examples)
+- [Testing](#testing)
 - [Samples](#samples)
 - [License](#license)
 
@@ -702,6 +703,23 @@ if (capabilities.canPayWith(PaymentProvider.GooglePay)) {
     launcher.launch("10.00")
 }
 ```
+
+## Testing
+
+The library includes comprehensive unit tests:
+
+```bash
+./gradlew payment-core:jvmTest        # Core logic tests
+./gradlew payment-web:jsTest          # Web platform tests
+./gradlew payment-mobile:iosSimulatorArm64Test  # iOS tests
+./gradlew payment-mobile:testAndroid  # Android tests
+```
+
+Test coverage includes:
+- Result conversion and error mapping (Priority 1)
+- Launcher state management and concurrency (Priority 2)
+- Configuration validation
+- Amount validation
 
 ## Samples
 
