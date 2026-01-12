@@ -1,12 +1,21 @@
 package com.kttipay.payment.internal.applepay.launcher
 
+import com.kttipay.payment.api.PaymentErrorReason
+import com.kttipay.payment.api.PaymentLauncher
+import com.kttipay.payment.api.PaymentProvider
+import com.kttipay.payment.api.PaymentResult
 import com.kttipay.payment.api.config.ApplePayWebConfig
 import com.kttipay.payment.internal.applepay.ApplePaySessionManager
+import com.kttipay.payment.internal.applepay.ApplePayWebErrorCode
 import com.kttipay.payment.internal.applepay.ApplePayWebResult
 import com.kttipay.payment.internal.applepay.createApplePaySession
 import com.kttipay.payment.internal.applepay.parseJsonToJs
+import com.kttipay.payment.internal.applepay.toPaymentResult
 import com.kttipay.payment.internal.config.ApplePayApiConstants
 import com.kttipay.payment.internal.logging.KPaymentLogger
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
@@ -20,12 +29,28 @@ import kotlin.js.JsAny
 @OptIn(ExperimentalWasmJsInterop::class)
 internal class ApplePayWebLauncher(
     private val config: ApplePayWebConfig,
-    private val onResult: (ApplePayWebResult) -> Unit
-) : IApplePayWebLauncher {
+    private val onResult: (PaymentResult) -> Unit
+) : PaymentLauncher {
+
+    override val provider: PaymentProvider = PaymentProvider.ApplePay
+
+    private val _isProcessing = MutableStateFlow(false)
+    override val isProcessing: StateFlow<Boolean> = _isProcessing.asStateFlow()
 
     private val logger = KPaymentLogger.tag("ApplePayWebLauncher")
 
     override fun launch(amount: String) {
+        if (!_isProcessing.compareAndSet(expect = false, update = true)) {
+            onResult(
+                PaymentResult.Error(
+                    provider = provider,
+                    reason = PaymentErrorReason.AlreadyInProgress,
+                    message = "A payment is already in progress"
+                )
+            )
+            return
+        }
+
         val paymentRequestJson = buildPaymentRequest(amount)
         val paymentRequestJs = parseJsonToJs(paymentRequestJson)
 
@@ -34,13 +59,16 @@ internal class ApplePayWebLauncher(
             paymentRequest = paymentRequestJs,
             config = config,
             onPaymentAuthorized = { token ->
-                onResult(ApplePayWebResult.Success(token))
+                _isProcessing.value = false
+                onResult(ApplePayWebResult.Success(token).toPaymentResult())
             },
-            onError = {
-                onResult(ApplePayWebResult.Failure)
+            onError = { errorCode, errorMessage ->
+                _isProcessing.value = false
+                onResult(ApplePayWebResult.Failure(errorCode, errorMessage).toPaymentResult())
             },
             onCancel = {
-                onResult(ApplePayWebResult.Cancelled)
+                _isProcessing.value = false
+                onResult(ApplePayWebResult.Cancelled.toPaymentResult())
             }
         )
     }
@@ -72,7 +100,7 @@ internal class ApplePayWebLauncher(
         paymentRequest: JsAny,
         config: ApplePayWebConfig,
         onPaymentAuthorized: (String) -> Unit,
-        onError: () -> Unit,
+        onError: (ApplePayWebErrorCode, String?) -> Unit,
         onCancel: () -> Unit
     ) {
         val sessionManager = ApplePaySessionManager(config)
@@ -92,7 +120,7 @@ internal class ApplePayWebLauncher(
         }.onFailure { error ->
             logger.e("Session begin failed", error)
             session.abort()
-            onError()
+            onError(ApplePayWebErrorCode.SESSION_BEGIN_FAILED, error.message)
         }
     }
 }

@@ -56,6 +56,16 @@ class KotlinNativeApplePayFactory : ApplePayFactory {
         request: ApplePayRequest,
         onResult: (ApplePayResult) -> Unit
     ) {
+        if (currentCompletion != null) {
+            onResult(
+                ApplePayResult.Failure(
+                    errorCode = ApplePayErrorCode.PRESENT_FAILED,
+                    additionalMessage = "A payment is already in progress"
+                )
+            )
+            return
+        }
+
         val pkRequest = PKPaymentRequest().apply {
             merchantIdentifier = request.merchantId
             countryCode = request.countryCode
