@@ -16,10 +16,9 @@ This module does not call any platform payment APIs. Use `kpayment-mobile` or
 | Method | Type | Description |
 |--------|------|-------------|
 | `config` | Property | The payment configuration |
-| `capabilitiesFlow` | `StateFlow` | Reactive stream of payment capabilities |
-| `awaitCapabilities()` | `suspend` | Wait for initial check, returns capabilities |
-| `refreshCapabilities()` | `suspend` | Force re-check, returns updated capabilities |
-| `observeAvailability(provider)` | `Flow<Boolean>` | Observe specific provider availability |
+| `checkCapabilities()` | `suspend` | Check current payment capabilities from platform SDKs |
+| `observeCapabilities()` | `Flow<PaymentCapabilities>` | Reactively observe full payment capabilities |
+| `observeAvailability(provider)` | `Flow<Boolean>` | Reactively observe specific provider availability |
 
 ## Install
 

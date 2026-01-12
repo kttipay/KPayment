@@ -56,6 +56,7 @@ import com.kttipay.payment.ui.PaymentManagerProvider
 import com.kttipay.payment.ui.launcher.rememberGooglePayWebLauncher
 import com.kttipay.payment.ui.rememberWebPaymentManager
 import androidx.compose.runtime.Immutable
+import com.kttipay.payment.capability.PaymentCapabilities
 import kotlinx.coroutines.flow.map
 import org.kimplify.cedar.logging.Cedar
 import org.kimplify.cedar.logging.trees.PlatformLogTree
@@ -219,10 +220,8 @@ private fun WebAppTopBar() {
 private fun WebAppMainContent(hasConfigError: Boolean) {
     val paymentManager = LocalWebPaymentManager.current
 
-    val isGooglePayAvailable by paymentManager.capabilitiesFlow.map { it.googlePay }
-        .collectAsStateWithLifecycle(CapabilityStatus.NotConfigured)
-    val isApplePayAvailable by paymentManager.capabilitiesFlow.map { it.applePay }
-        .collectAsStateWithLifecycle(CapabilityStatus.NotConfigured)
+    val capabilities by paymentManager.observeCapabilities()
+        .collectAsStateWithLifecycle(PaymentCapabilities.initial)
 
     val googleButton = if (hasConfigError) rememberGooglePayWebLauncher(
         onResult = { result ->
@@ -262,7 +261,7 @@ private fun WebAppMainContent(hasConfigError: Boolean) {
                 ) {
                     PaymentProviderCard(
                         providerName = "Google Pay",
-                        status = isGooglePayAvailable,
+                        status = capabilities.googlePay,
                         icon = "💳",
                         provider = PaymentProvider.GooglePay,
                         onTest = {
@@ -272,12 +271,11 @@ private fun WebAppMainContent(hasConfigError: Boolean) {
 
                     PaymentProviderCard(
                         providerName = "Apple Pay",
-                        status = isApplePayAvailable,
+                        status = capabilities.applePay,
                         icon = "🍎",
                         provider = PaymentProvider.ApplePay,
                         onTest = {
                             Cedar.i("Testing Apple Pay payment...")
-                            // Launch Apple Pay payment flow here when implemented
                         }
                     )
 
