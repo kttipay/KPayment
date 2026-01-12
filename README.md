@@ -1,41 +1,99 @@
-# KPayment
+<div align="center">
 
-A Kotlin Multiplatform library for seamless payment processing across Android, iOS, and Web platforms. KPayment provides a unified API for integrating Google Pay and Apple Pay into your applications.
+# 💳 KPayment
+
+### Unified Payment Integration for Kotlin Multiplatform
+
+*One API. Three Platforms. Google Pay & Apple Pay.*
+
+[![Maven Central](https://img.shields.io/maven-central/v/com.kttipay/kpayment-core)](https://central.sonatype.com/artifact/com.kttipay/kpayment-core)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-blue.svg)](https://kotlinlang.org)
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-green.svg)](https://github.com/kttipay/KPayment)
+
+[Quickstart](#-quickstart) • [Installation](#-installation) • [Samples](#-samples) • [Documentation](#table-of-contents)
+
+</div>
+
+---
+
+## Overview
+
+A **Kotlin Multiplatform library** for seamless payment processing across Android, iOS, and Web platforms. KPayment provides a unified, type-safe API for integrating Google Pay and Apple Pay into your applications with reactive capability detection, comprehensive error handling, and production-ready state management.
+
+Whether you're building a mobile app, web application, or cross-platform solution, KPayment offers a single, consistent API that works everywhere.
 
 ## Table of Contents
 
-- [Features](#features)
-- [Platform Support](#platform-support)
-- [Architecture](#architecture)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Quick Start](#quick-start)
+- [🚀 Quickstart](#-quickstart)
+- [📱 Platform Support](#-platform-support)
+- [✨ Why KPayment?](#-why-kpayment)
+- [💻 Show Me The Code](#-show-me-the-code)
+- [📦 Installation](#-installation)
+  - [Add Maven Central Repository](#add-maven-central-repository)
+  - [Add Dependencies](#add-dependencies)
+  - [Platform-Specific Setup](#platform-specific-setup)
+- [🏃 Quick Start](#-quick-start)
   - [Android](#android)
   - [iOS](#ios)
   - [Web](#web)
-- [Module Details](#module-details)
-- [Configuration](#configuration)
+- [⚙️ Configuration](#-configuration)
   - [Google Pay Configuration](#google-pay-configuration)
   - [Apple Pay Configuration](#apple-pay-configuration)
-- [Usage Examples](#usage-examples)
-- [Testing](#testing)
-- [Samples](#samples)
-- [License](#license)
+- [🎯 Usage Examples](#-usage-examples)
+  - [Check Payment Capability](#check-payment-capability)
+  - [Handle Payment Results](#handle-payment-results)
+  - [Track Payment State](#track-payment-state)
+  - [PaymentManager API](#paymentmanager-api)
+- [🚨 Error Handling](#-error-handling)
+  - [Error Types](#error-types)
+  - [Error Handling Best Practices](#error-handling-best-practices)
+- [📚 Module Details](#-module-details)
+  - [payment-core](#payment-core)
+  - [payment-mobile](#payment-mobile)
+  - [payment-web](#payment-web)
+- [🪵 Logging](#-logging)
+- [🧪 Testing](#-testing)
+- [🎨 Samples](#-samples)
+- [⭐ Star History](#-star-history)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 
-## Features
+## 🚀 Quickstart
 
-- **Cross-Platform Payment Processing** - Single codebase for Android, iOS, and Web
-- **Google Pay Integration** - Android and Web support
-- **Apple Pay Integration** - iOS and Safari (Web) support
-- **Compose Support** - Payment button + launcher helpers
-- **Capability Detection** - Reactive availability checks via `Flow`
-- **Suspend API** - `checkCapabilities()` delegates to platform SDKs
-- **Type-Safe API** - Shared config and model types across platforms
-- **Serializable Tokens** - kotlinx.serialization support for payment tokens
-- **Thread-Safe** - Proper synchronization and concurrency handling across all platforms
-- **Production-Ready** - Comprehensive error details and robust state management
+Get started with KPayment in 5 minutes:
 
-## Platform Support
+1. **Add the dependency** to your project from [Maven Central](https://central.sonatype.com/artifact/com.kttipay/kpayment-core)
+2. **Configure your payment providers** (Google Pay, Apple Pay, or both)
+3. **Add a payment button** using our Compose Multiplatform components
+4. **Launch payments** and handle results with our type-safe API
+
+```kotlin
+// Create a payment manager
+val manager = rememberMobilePaymentManager(config)
+
+// Check availability
+val isReady by manager.observeAvailability(currentNativePaymentProvider())
+    .collectAsState(initial = false)
+
+// Launch payment
+val launcher = rememberNativePaymentLauncher { result ->
+    when (result) {
+        is PaymentResult.Success -> handleSuccess(result.token)
+        is PaymentResult.Error -> handleError(result)
+        is PaymentResult.Cancelled -> handleCancellation()
+    }
+}
+
+PaymentButton(enabled = isReady, onClick = { launcher.launch("10.00") })
+```
+
+**Next Steps:**
+- [Installation Guide](#-installation) - Add KPayment to your project
+- [Quick Start](#-quick-start) - Platform-specific examples
+- [Sample Apps](#-samples) - See complete working examples
+
+## 📱 Platform Support
 
 | Platform | Google Pay | Apple Pay | Compose UI |
 |----------|------------|-----------|------------|
@@ -46,39 +104,178 @@ A Kotlin Multiplatform library for seamless payment processing across Android, i
 
 *Apple Pay on Web requires Safari and a merchant validation endpoint.
 
-## Architecture
+### Requirements
 
-KPayment is organized into three main modules:
-
-```
-KPayment/
-├── payment-core/      Shared interfaces, models, and types
-├── payment-mobile/    Android + iOS implementations
-└── payment-web/       Web (JS/WASM) implementations
-```
-
-## Requirements
-
-### Android
+**Android:**
 - Minimum SDK: 26
 - Target SDK: 36
 - Compile SDK: 36
 - Google Play Services Wallet: 19.5.0+
 
-### iOS
+**iOS:**
 - Deployment target is set by your host app
 - Apple Pay requires a physical device and a valid merchant ID
 
-### Web
+**Web:**
 - Modern browsers with ES6 support
 - Apple Pay requires Safari and domain validation
 
-### Build Environment
+**Build Environment:**
 - Kotlin: 2.3.x
 - Java: 21
 - Gradle: 8.13+
 
-## Installation
+## ✨ Why KPayment?
+
+- **🌍 Cross-Platform** - Single codebase for Android, iOS, and Web with unified API
+- **🔒 Type-Safe** - Shared configuration and model types prevent runtime errors
+- **⚡ Reactive** - Real-time capability detection via Kotlin `Flow` and `StateFlow`
+- **🛡️ Production-Ready** - Comprehensive error handling with 11 distinct error types
+- **🧵 Thread-Safe** - Proper synchronization and state management for concurrent payment launches
+- **🎨 Compose Native** - First-class Compose Multiplatform support with payment buttons and launchers
+- **📦 Serializable** - kotlinx.serialization support for payment tokens
+- **🐛 Debuggable** - Optional logging system for development (disabled by default)
+- **🧪 Testable** - Comprehensive test coverage with unit tests for all platforms
+
+## 💻 Show Me The Code
+
+### Basic Payment Flow
+
+<details>
+<summary><strong>Android / iOS (Compose)</strong></summary>
+
+```kotlin
+val config = MobilePaymentConfig(
+    environment = PaymentEnvironment.Development,
+    googlePay = GooglePayConfig(
+        merchantId = "YOUR_MERCHANT_ID",
+        merchantName = "Your Store",
+        gateway = "stripe",
+        gatewayMerchantId = "YOUR_GATEWAY_ID"
+    ),
+    applePayMobile = ApplePayMobileConfig(
+        merchantId = "merchant.com.yourcompany.app",
+        base = ApplePayBaseConfig(merchantName = "Your Store")
+    )
+)
+
+@Composable
+fun PaymentScreen() {
+    val manager = rememberMobilePaymentManager(config)
+    val isReady by manager.observeAvailability(currentNativePaymentProvider())
+        .collectAsState(initial = false)
+
+    PaymentManagerProvider(manager) {
+        val launcher = rememberNativePaymentLauncher { result ->
+            when (result) {
+                is PaymentResult.Success -> println("Token: ${result.token}")
+                is PaymentResult.Error -> println("Error: ${result.message}")
+                is PaymentResult.Cancelled -> println("Cancelled")
+            }
+        }
+
+        PaymentButton(
+            theme = NativePaymentTheme.Dark,
+            type = NativePaymentType.Pay,
+            enabled = isReady,
+            radius = 12.dp,
+            onClick = { launcher.launch("10.00") }
+        )
+    }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Web (JS/WASM)</strong></summary>
+
+```kotlin
+val config = WebPaymentConfig(
+    environment = PaymentEnvironment.Development,
+    googlePay = GooglePayConfig(
+        merchantId = "YOUR_MERCHANT_ID",
+        merchantName = "Your Store",
+        gateway = "stripe",
+        gatewayMerchantId = "YOUR_GATEWAY_ID"
+    ),
+    applePayWeb = ApplePayWebConfig(
+        base = ApplePayBaseConfig(merchantName = "Your Store"),
+        merchantValidationEndpoint = "https://example.com/apple-pay/validate",
+        baseUrl = "https://example.com",
+        domain = "example.com"
+    )
+)
+
+@Composable
+fun PaymentScreen() {
+    val manager = rememberWebPaymentManager(config)
+
+    PaymentManagerProvider(manager) {
+        val googlePay = rememberGooglePayWebLauncher { result ->
+            // Handle result
+        }
+
+        val applePay = rememberApplePayWebLauncher { result ->
+            // Handle result
+        }
+
+        Button(onClick = { googlePay.launch("10.00") }) {
+            Text("Pay with Google Pay")
+        }
+
+        Button(onClick = { applePay.launch("10.00") }) {
+            Text("Pay with Apple Pay")
+        }
+    }
+}
+```
+
+</details>
+
+### Capability Detection
+
+```kotlin
+// Reactive: Observe availability changes (recommended)
+val isReady by manager.observeAvailability(PaymentProvider.GooglePay)
+    .collectAsState(initial = false)
+
+Button(enabled = isReady, onClick = { launcher.launch("10.00") }) {
+    Text("Pay with Google Pay")
+}
+
+// Explicit check when needed
+val capabilities = manager.checkCapabilities()
+if (capabilities.canPayWith(PaymentProvider.GooglePay)) {
+    launcher.launch("10.00")
+}
+```
+
+### Error Handling
+
+```kotlin
+when (val result = paymentResult) {
+    is PaymentResult.Success -> {
+        // Send token to your backend
+        processPayment(result.token)
+    }
+    is PaymentResult.Error -> {
+        when (result.reason) {
+            PaymentErrorReason.NetworkError -> showNetworkError()
+            PaymentErrorReason.NotAvailable -> showAlternativePayment()
+            PaymentErrorReason.Timeout -> retryPayment()
+            else -> showGenericError(result.message)
+        }
+    }
+    is PaymentResult.Cancelled -> {
+        // User cancelled - no action needed
+    }
+}
+```
+
+See [full examples in Quick Start](#-quick-start) and [comprehensive guides below](#table-of-contents).
+
+## 📦 Installation
 
 ### Add Maven Central Repository
 
@@ -94,7 +291,55 @@ dependencyResolutionManagement {
 
 ### Add Dependencies
 
-Add the KPayment dependencies to your `build.gradle.kts`:
+<details>
+<summary><strong>Version Catalog (Recommended)</strong></summary>
+
+Add to your `libs.versions.toml`:
+
+```toml
+[versions]
+kpayment = "0.1.0"
+
+[libraries]
+kpayment-core = { module = "com.kttipay:kpayment-core", version.ref = "kpayment" }
+kpayment-mobile = { module = "com.kttipay:kpayment-mobile", version.ref = "kpayment" }
+kpayment-web = { module = "com.kttipay:kpayment-web", version.ref = "kpayment" }
+```
+
+Then in your `build.gradle.kts`:
+
+```kotlin
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.kpayment.core)
+        }
+
+        androidMain.dependencies {
+            implementation(libs.kpayment.mobile)
+        }
+
+        iosMain.dependencies {
+            implementation(libs.kpayment.mobile)
+        }
+
+        jsMain.dependencies {
+            implementation(libs.kpayment.web)
+        }
+
+        wasmJsMain.dependencies {
+            implementation(libs.kpayment.web)
+        }
+    }
+}
+```
+
+</details>
+
+<details>
+<summary><strong>Gradle DSL</strong></summary>
+
+Add the KPayment dependencies directly to your `build.gradle.kts`:
 
 ```kotlin
 kotlin {
@@ -122,13 +367,15 @@ kotlin {
 }
 ```
 
-## Platform-Specific Setup
+</details>
 
-### Android
+### Platform-Specific Setup
+
+#### Android
 
 No additional configuration required. Google Play Services Wallet is included as a dependency.
 
-### iOS
+#### iOS
 
 1. **Add Apple Pay Capability:**
    - In Xcode, select your target
@@ -140,7 +387,7 @@ No additional configuration required. Google Play Services Wallet is included as
    - Create a merchant ID in your [Apple Developer account](https://developer.apple.com/account/resources/identifiers/list/merchant)
    - Format: `merchant.com.yourcompany.yourapp`
 
-### Web
+#### Web
 
 **For Apple Pay on Web:**
 - Register your domain with Apple
@@ -149,7 +396,7 @@ No additional configuration required. Google Play Services Wallet is included as
 
 See [Apple Pay on the Web documentation](https://developer.apple.com/documentation/apple_pay_on_the_web)
 
-## Quick Start
+## 🏃 Quick Start
 
 Amounts are decimal strings (for example, `"10.00"`).
 
@@ -276,56 +523,7 @@ fun PaymentScreen() {
 }
 ```
 
-## Module Details
-
-### payment-core
-
-Shared abstractions used by all platforms:
-
-- `PaymentManager` - unified API for capability checks and configuration
-- Config models (`GooglePayConfig`, `ApplePayBaseConfig`, `MobilePaymentConfig`, `WebPaymentConfig`)
-- Result types (`PaymentResult`) and tokens (`GooglePayToken`, `ApplePayToken`)
-- Reactive capability observation via `StateFlow` and `Flow`
-
-See `payment-core/README.md` for a focused overview.
-
-### payment-mobile
-
-Android + iOS implementation with Compose helpers:
-
-- `createMobilePaymentManager(...)`
-- `rememberMobilePaymentManager(...)`
-- `PaymentButton` and `rememberNativePaymentLauncher(...)`
-
-See `payment-mobile/README.md` for setup and platform-specific details.
-
-### payment-web
-
-Web implementation for JS/Wasm:
-
-- `createWebPaymentManager(...)`
-- `rememberWebPaymentManager(...)`
-- `rememberGooglePayWebLauncher(...)` and `rememberApplePayWebLauncher(...)`
-
-See `payment-web/README.md` for setup and platform-specific details.
-
-## Logging
-
-KPayment includes an optional logging system for debugging:
-
-```kotlin
-KPaymentLogger.enabled = true
-
-KPaymentLogger.callback = object : KPaymentLogCallback {
-    override fun onLog(event: LogEvent) {
-        println("[${event.tag}] ${event.message}")
-    }
-}
-```
-
-By default, logging is **disabled** and will not interfere with your app's logging.
-
-## Configuration
+## ⚙️ Configuration
 
 ### Google Pay Configuration
 
@@ -387,7 +585,7 @@ val applePayWeb = ApplePayWebConfig(
 )
 ```
 
-## Usage Examples
+## 🎯 Usage Examples
 
 ### Check Payment Capability
 
@@ -447,7 +645,56 @@ when (val result = paymentResult) {
 }
 ```
 
-## Error Handling
+### Track Payment State
+
+The launcher exposes `isProcessing: StateFlow<Boolean>` to track whether a payment is in progress:
+
+```kotlin
+val launcher = rememberNativePaymentLauncher { result -> /* handle */ }
+val isProcessing by launcher.isProcessing.collectAsState()
+
+PaymentButton(
+    enabled = isReady && !isProcessing,
+    onClick = { launcher.launch("10.00") }
+)
+```
+
+### PaymentManager API
+
+| Method | Type | Description |
+|--------|------|-------------|
+| `config` | Property | The payment configuration |
+| `checkCapabilities()` | `suspend` | Check current payment capabilities from platform SDKs |
+| `observeCapabilities()` | `Flow<PaymentCapabilities>` | Reactively observe full payment capabilities |
+| `observeAvailability(provider)` | `Flow<Boolean>` | Reactively observe specific provider availability |
+
+```kotlin
+// Reactive UI for full capabilities
+val capabilities by manager.observeCapabilities()
+    .collectAsState(initial = PaymentCapabilities.initial)
+
+when (capabilities.googlePay) {
+    CapabilityStatus.Ready -> ShowPaymentButton()
+    CapabilityStatus.Checking -> ShowLoading()
+    else -> ShowNotAvailable()
+}
+
+// Reactive UI for single provider (convenience)
+val isReady by manager.observeAvailability(PaymentProvider.GooglePay)
+    .collectAsState(initial = false)
+
+Button(enabled = isReady, onClick = { launcher.launch("10.00") }) {
+    Text("Pay")
+}
+
+// Explicit capability check
+val capabilities = manager.checkCapabilities()
+if (capabilities.canPayWith(PaymentProvider.GooglePay)) {
+    launcher.launch("10.00")
+}
+```
+
+## 🚨 Error Handling
 
 KPayment provides comprehensive error handling through the [PaymentResult.Error] sealed class. Understanding error types and implementing proper error handling is crucial for a robust payment integration.
 
@@ -595,20 +842,6 @@ is PaymentErrorReason.Unknown -> {
 }
 ```
 
-### Track Payment State
-
-The launcher exposes `isProcessing: StateFlow<Boolean>` to track whether a payment is in progress:
-
-```kotlin
-val launcher = rememberNativePaymentLauncher { result -> /* handle */ }
-val isProcessing by launcher.isProcessing.collectAsState()
-
-PaymentButton(
-    enabled = isReady && !isProcessing,
-    onClick = { launcher.launch("10.00") }
-)
-```
-
 ### Error Handling Best Practices
 
 1. **Always Check Capabilities First**: Before attempting payment, check if the payment method is available:
@@ -669,42 +902,65 @@ PaymentButton(
    }
    ```
 
-### PaymentManager API
+## 📚 Module Details
 
-| Method | Type | Description |
-|--------|------|-------------|
-| `config` | Property | The payment configuration |
-| `checkCapabilities()` | `suspend` | Check current payment capabilities from platform SDKs |
-| `observeCapabilities()` | `Flow<PaymentCapabilities>` | Reactively observe full payment capabilities |
-| `observeAvailability(provider)` | `Flow<Boolean>` | Reactively observe specific provider availability |
+KPayment is organized into three main modules:
+
+```
+KPayment/
+├── payment-core/      Shared interfaces, models, and types
+├── payment-mobile/    Android + iOS implementations
+└── payment-web/       Web (JS/WASM) implementations
+```
+
+### payment-core
+
+Shared abstractions used by all platforms:
+
+- `PaymentManager` - unified API for capability checks and configuration
+- Config models (`GooglePayConfig`, `ApplePayBaseConfig`, `MobilePaymentConfig`, `WebPaymentConfig`)
+- Result types (`PaymentResult`) and tokens (`GooglePayToken`, `ApplePayToken`)
+- Reactive capability observation via `StateFlow` and `Flow`
+
+See `payment-core/README.md` for a focused overview.
+
+### payment-mobile
+
+Android + iOS implementation with Compose helpers:
+
+- `createMobilePaymentManager(...)`
+- `rememberMobilePaymentManager(...)`
+- `PaymentButton` and `rememberNativePaymentLauncher(...)`
+
+See `payment-mobile/README.md` for setup and platform-specific details.
+
+### payment-web
+
+Web implementation for JS/Wasm:
+
+- `createWebPaymentManager(...)`
+- `rememberWebPaymentManager(...)`
+- `rememberGooglePayWebLauncher(...)` and `rememberApplePayWebLauncher(...)`
+
+See `payment-web/README.md` for setup and platform-specific details.
+
+## 🪵 Logging
+
+KPayment includes an optional logging system for debugging:
 
 ```kotlin
-// Reactive UI for full capabilities
-val capabilities by manager.observeCapabilities()
-    .collectAsState(initial = PaymentCapabilities.initial)
+KPaymentLogger.enabled = true
 
-when (capabilities.googlePay) {
-    CapabilityStatus.Ready -> ShowPaymentButton()
-    CapabilityStatus.Checking -> ShowLoading()
-    else -> ShowNotAvailable()
-}
-
-// Reactive UI for single provider (convenience)
-val isReady by manager.observeAvailability(PaymentProvider.GooglePay)
-    .collectAsState(initial = false)
-
-Button(enabled = isReady, onClick = { launcher.launch("10.00") }) {
-    Text("Pay")
-}
-
-// Explicit capability check
-val capabilities = manager.checkCapabilities()
-if (capabilities.canPayWith(PaymentProvider.GooglePay)) {
-    launcher.launch("10.00")
+KPaymentLogger.callback = object : KPaymentLogCallback {
+    override fun onLog(event: LogEvent) {
+        println("[${event.tag}] ${event.message}")
+    }
 }
 ```
 
-## Testing
+By default, logging is **disabled** and will not interfere with your app's logging.
+
+## 🧪 Testing
 
 The library includes comprehensive unit tests:
 
@@ -721,16 +977,108 @@ Test coverage includes:
 - Configuration validation
 - Amount validation
 
-## Samples
+## 🎨 Samples
 
-- `sampleMobile` - Android + iOS KMP sample
-- `sampleWeb` - Web sample (JS/Wasm)
-- `iosApp` - iOS host app for the KMP sample
+KPayment includes complete sample applications demonstrating integration on all platforms:
 
-Sample configs:
+- **[sampleMobile](./sampleMobile)** - Android + iOS KMP sample with:
+  - Platform-specific payment button selection
+  - Capability status display
+  - Result handling with detailed logging
+  - Setup instructions per platform
+
+- **[sampleWeb](./sampleWeb)** - Web sample (JS/WASM) with:
+  - Google Pay and Apple Pay web integration
+  - Separate launchers for each provider
+  - Error and success handling
+
+Sample configurations:
 - `sampleMobile/src/commonMain/kotlin/com/kttipay/kpayment/config/PaymentConfig.kt`
 - `sampleWeb/src/webMain/kotlin/com/kttipay/kpayment/PaymentConfig.kt`
 
-## License
+**Running Samples:**
 
-Apache 2.0. See `LICENSE`.
+```bash
+# Android
+./gradlew sampleMobile:installDebug
+
+# iOS
+cd iosApp && pod install
+open iosApp.xcworkspace
+
+# Web
+./gradlew sampleWeb:jsBrowserDevelopmentRun
+```
+
+## ⭐ Star History
+
+<div align="center">
+
+[![Star History Chart](https://api.star-history.com/svg?repos=kttipay/KPayment&type=Date)](https://star-history.com/#kttipay/KPayment&Date)
+
+</div>
+
+## 🤝 Contributing
+
+We welcome contributions to KPayment! Here's how you can help:
+
+### Reporting Issues
+
+Found a bug or have a feature request? Please open an issue on [GitHub Issues](https://github.com/kttipay/KPayment/issues) with:
+- Clear description of the issue or feature
+- Platform and version information
+- Steps to reproduce (for bugs)
+- Expected vs actual behavior
+
+### Pull Requests
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes with tests
+4. Run tests: `./gradlew check`
+5. Commit your changes following conventional commits
+6. Push to your fork and submit a pull request
+
+### Development Setup
+
+```bash
+git clone https://github.com/kttipay/KPayment.git
+cd KPayment
+./gradlew build
+```
+
+**Requirements:**
+- JDK 21
+- Android SDK (for Android targets)
+- Xcode (for iOS targets)
+- Node.js (for web targets)
+
+## 📄 License
+
+```
+Copyright 2025 KTTipay
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```
+
+See [LICENSE](LICENSE) file for the full license text.
+
+---
+
+<div align="center">
+
+**Built with ❤️ using Kotlin Multiplatform**
+
+[⭐ Star us on GitHub](https://github.com/kttipay/KPayment) • [📖 Documentation](https://github.com/kttipay/KPayment) • [🐛 Report Bug](https://github.com/kttipay/KPayment/issues)
+
+</div>
