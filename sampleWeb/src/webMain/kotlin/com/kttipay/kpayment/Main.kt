@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.window.ComposeViewport
+import com.kttipay.payment.api.logging.KPaymentLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
@@ -22,6 +23,8 @@ import kpayment.sampleweb.generated.resources.Res
 import kpayment.sampleweb.generated.resources.noto_color_emoji
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.preloadFont
+import org.kimplify.cedar.logging.Cedar
+import org.kimplify.cedar.logging.trees.PlatformLogTree
 
 /**
  * Entry point for the web application.
@@ -34,6 +37,12 @@ fun main() {
         val notoColorEmoji by preloadFont(Res.font.noto_color_emoji)
         var fontsLoaded by remember { mutableStateOf(false) }
         val resolver = LocalFontFamilyResolver.current
+
+        LaunchedEffect(Unit) {
+            Cedar.plant(PlatformLogTree())
+            Cedar.i("Initializing KPayment Web Sample...")
+            KPaymentLogger.enabled = true
+        }
 
         LaunchedEffect(notoColorEmoji) {
             val all = listOfNotNull(notoColorEmoji)

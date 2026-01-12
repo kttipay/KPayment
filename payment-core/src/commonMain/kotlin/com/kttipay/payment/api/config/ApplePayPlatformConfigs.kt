@@ -67,7 +67,6 @@ data class ApplePayWebConfig(
 ) : ApplePayConfig by base {
     init {
         require(merchantValidationEndpoint.isNotBlank()) { "merchantValidationEndpoint cannot be blank" }
-        require(merchantValidationEndpoint.startsWith("https://")) { "merchantValidationEndpoint must use HTTPS" }
         require(baseUrl.isNotBlank()) { "baseUrl cannot be blank" }
         require(baseUrl.startsWith("https://")) { "baseUrl must use HTTPS" }
         require(domain.isNotBlank()) { "domain cannot be blank" }

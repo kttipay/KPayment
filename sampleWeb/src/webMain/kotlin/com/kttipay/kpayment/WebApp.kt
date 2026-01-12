@@ -102,6 +102,7 @@ private fun createWebAppConfigState(): WebAppConfigState {
     val error = when {
         config == null && validationErrors != null ->
             "$validationErrors\n\nPlease configure at least one payment provider."
+
         else -> validationErrors
     }
 
@@ -279,61 +280,61 @@ private fun WebAppMainContent(hasConfigError: Boolean) {
                         }
                     )
 
-                    Card(
-                        modifier = Modifier.fillMaxWidth()
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "Configuration",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = "Environment: Development",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = "Currency: ${PaymentConfig.CURRENCY_CODE}",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = "Country: ${PaymentConfig.COUNTRY_CODE}",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-
-                    // Instructions
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                        Text(
+                            text = "Configuration",
+                            style = MaterialTheme.typography.titleMedium
                         )
+                        Text(
+                            text = "Environment: Development",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = "Currency: ${PaymentConfig.CURRENCY_CODE}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = "Country: ${PaymentConfig.COUNTRY_CODE}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+
+                // Instructions
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "ℹ️ Setup Instructions",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = """
+                        Text(
+                            text = "ℹ️ Setup Instructions",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = """
                                 1. Configure your merchant IDs in PaymentConfig.kt
                                 2. Set up Apple Pay domain verification
                                 3. Configure merchant validation endpoint
                                 4. Test payments in a secure context (HTTPS)
                             """.trimIndent(),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                 }
             }
         }
+    }
 }
 
 /**
