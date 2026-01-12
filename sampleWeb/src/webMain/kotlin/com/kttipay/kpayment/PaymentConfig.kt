@@ -32,12 +32,6 @@ import com.kttipay.payment.api.validation.map
 object PaymentConfig {
 
     /**
-     * Google Pay merchant identifier.
-     * Replace with your actual Google Merchant ID.
-     */
-    const val GOOGLE_PAY_MERCHANT_ID = "YOUR_MERCHANT_ID_HERE"
-
-    /**
      * Google Pay merchant name displayed during payment.
      * Replace with your actual business name.
      */
