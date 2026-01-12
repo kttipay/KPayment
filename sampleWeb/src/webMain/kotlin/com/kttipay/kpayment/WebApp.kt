@@ -46,10 +46,10 @@ import com.kttipay.kpayment.config.combineErrors
 import com.kttipay.kpayment.config.getOrNull
 import com.kttipay.payment.api.PaymentEnvironment
 import com.kttipay.payment.api.PaymentProvider
+import com.kttipay.payment.api.PaymentResult
 import com.kttipay.payment.api.config.WebPaymentConfig
 import com.kttipay.payment.api.logging.KPaymentLogger
 import com.kttipay.payment.capability.CapabilityStatus
-import com.kttipay.payment.internal.googlepay.GooglePayWebResult
 import com.kttipay.payment.ui.LocalWebPaymentManager
 import com.kttipay.payment.ui.PaymentManagerProvider
 import com.kttipay.payment.ui.launcher.rememberGooglePayWebLauncher
@@ -116,15 +116,15 @@ private fun WebAppContent(
     val googleButton = if (configError?.isBlank() == true) rememberGooglePayWebLauncher(
         onResult = { result ->
             when (result) {
-                is GooglePayWebResult.Success -> {
+                is PaymentResult.Success -> {
                     Cedar.i("Google Pay payment successful: ${result.token}")
                 }
 
-                is GooglePayWebResult.Error -> {
-                    Cedar.e("Google Pay payment error: ${result.reason}")
+                is PaymentResult.Error -> {
+                    Cedar.e("Google Pay payment error: ${result.message}")
                 }
 
-                GooglePayWebResult.Cancelled -> {
+                is PaymentResult.Cancelled -> {
                     Cedar.i("Google Pay payment cancelled by user")
                 }
             }

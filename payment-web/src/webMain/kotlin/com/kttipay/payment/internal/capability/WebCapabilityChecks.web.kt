@@ -1,6 +1,6 @@
 package com.kttipay.payment.internal.capability
 
-import com.kttipay.payment.ApplePayAvailability
+import com.kttipay.payment.internal.applepay.ApplePayAvailability
 import com.kttipay.payment.api.config.ApplePayWebConfig
 import com.kttipay.payment.api.config.GooglePayWebConfig
 import com.kttipay.payment.capability.CapabilityStatus

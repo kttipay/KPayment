@@ -1,4 +1,4 @@
-package com.kttipay.payment
+package com.kttipay.payment.internal.applepay
 
 import kotlin.js.JsName
 

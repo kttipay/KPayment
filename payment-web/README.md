@@ -37,11 +37,27 @@ fun CheckoutWeb() {
 
     PaymentManagerProvider(manager) {
         val googlePay = rememberGooglePayWebLauncher { result ->
-            // handle GooglePayWebResult.Success, .Error, .Cancelled
+            when (result) {
+                is PaymentResult.Success -> println("Token: ${result.token}")
+                is PaymentResult.Error -> println("Error: ${result.message}")
+                is PaymentResult.Cancelled -> println("Cancelled")
+            }
+        }
+
+        val applePay = rememberApplePayWebLauncher { result ->
+            when (result) {
+                is PaymentResult.Success -> println("Token: ${result.token}")
+                is PaymentResult.Error -> println("Error: ${result.message}")
+                is PaymentResult.Cancelled -> println("Cancelled")
+            }
         }
 
         Button(onClick = { googlePay.launch("10.00") }) {
             Text("Pay with Google Pay")
+        }
+
+        Button(onClick = { applePay.launch("10.00") }) {
+            Text("Pay with Apple Pay")
         }
     }
 }

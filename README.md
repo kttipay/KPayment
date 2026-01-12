@@ -31,6 +31,8 @@ A Kotlin Multiplatform library for seamless payment processing across Android, i
 - **Suspend API** - `awaitCapabilities()` for async initialization
 - **Type-Safe API** - Shared config and model types across platforms
 - **Serializable Tokens** - kotlinx.serialization support for payment tokens
+- **Thread-Safe** - Proper synchronization and concurrency handling across all platforms
+- **Production-Ready** - Comprehensive error details and robust state management
 
 ## Platform Support
 
@@ -247,11 +249,27 @@ fun PaymentScreen() {
 
     PaymentManagerProvider(manager) {
         val googlePay = rememberGooglePayWebLauncher { result ->
-            // handle GooglePayWebResult.Success, .Error, .Cancelled
+            when (result) {
+                is PaymentResult.Success -> println("Token: ${result.token}")
+                is PaymentResult.Error -> println("Error: ${result.message}")
+                is PaymentResult.Cancelled -> println("Cancelled")
+            }
+        }
+
+        val applePay = rememberApplePayWebLauncher { result ->
+            when (result) {
+                is PaymentResult.Success -> println("Token: ${result.token}")
+                is PaymentResult.Error -> println("Error: ${result.message}")
+                is PaymentResult.Cancelled -> println("Cancelled")
+            }
         }
 
         Button(onClick = { googlePay.launch("10.00") }) {
             Text("Pay with Google Pay")
+        }
+
+        Button(onClick = { applePay.launch("10.00") }) {
+            Text("Pay with Apple Pay")
         }
     }
 }
