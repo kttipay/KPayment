@@ -39,11 +39,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kttipay.kpayment.config.combineErrors
-import com.kttipay.kpayment.config.getOrNull
+import com.kttipay.payment.api.validation.combineErrors
+import com.kttipay.payment.api.validation.getOrNull
 import com.kttipay.payment.api.PaymentEnvironment
 import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.config.WebPaymentConfig
@@ -54,9 +55,57 @@ import com.kttipay.payment.ui.LocalWebPaymentManager
 import com.kttipay.payment.ui.PaymentManagerProvider
 import com.kttipay.payment.ui.launcher.rememberGooglePayWebLauncher
 import com.kttipay.payment.ui.rememberWebPaymentManager
+import androidx.compose.runtime.Immutable
 import kotlinx.coroutines.flow.map
 import org.kimplify.cedar.logging.Cedar
 import org.kimplify.cedar.logging.trees.PlatformLogTree
+
+/**
+ * Holds the result of web payment configuration initialization.
+ *
+ * @property config The payment configuration, or null if no providers are valid
+ * @property error Error message describing configuration issues, or null if valid
+ */
+@Immutable
+data class WebAppConfigState(
+    val config: WebPaymentConfig?,
+    val error: String?
+)
+
+/**
+ * Creates the web app configuration state by validating payment providers.
+ * Extracted from composable to keep remember block clean and testable.
+ */
+private fun createWebAppConfigState(): WebAppConfigState {
+    val googlePayResult = PaymentConfig.buildGooglePayConfig()
+    val applePayResult = PaymentConfig.buildApplePayWebConfig()
+
+    val googlePay = googlePayResult.getOrNull()
+    val applePay = applePayResult.getOrNull()
+
+    val validationErrors = listOf(googlePayResult, applePayResult)
+        .combineErrors()
+        .takeIf { it.isNotEmpty() }
+        ?.joinToString("\n\n")
+
+    val config = if (googlePay != null || applePay != null) {
+        WebPaymentConfig(
+            environment = PaymentEnvironment.Development,
+            googlePay = googlePay,
+            applePayWeb = applePay
+        )
+    } else {
+        null
+    }
+
+    val error = when {
+        config == null && validationErrors != null ->
+            "$validationErrors\n\nPlease configure at least one payment provider."
+        else -> validationErrors
+    }
+
+    return WebAppConfigState(config = config, error = error)
+}
 
 /**
  * Main web application demonstrating KPayment library for web platforms.
@@ -76,36 +125,98 @@ fun WebApp() {
         KPaymentLogger.enabled = true
     }
 
-    var configError by remember { mutableStateOf<String?>("") }
-    val config = remember {
-        val googlePayResult = PaymentConfig.buildGooglePayConfig()
-        val applePayResult = PaymentConfig.buildApplePayWebConfig()
+    val configState = remember { createWebAppConfigState() }
+    var configError by remember { mutableStateOf(configState.error) }
+    val paymentManager = configState.config?.let { rememberWebPaymentManager(it) }
 
-        configError = listOf(googlePayResult, applePayResult)
-            .combineErrors()
-            .takeIf { it.isNotEmpty() }
-            ?.joinToString("\n\n")
-
-        WebPaymentConfig(
-            environment = PaymentEnvironment.Development,
-            googlePay = googlePayResult.getOrNull(),
-            applePayWeb = applePayResult.getOrNull()
+    MaterialTheme {
+        ConfigErrorDialog(
+            error = configError,
+            onDismiss = { configError = null }
         )
+
+        if (paymentManager != null) {
+            PaymentManagerProvider(manager = paymentManager) {
+                WebAppMainContent(hasConfigError = configError?.isBlank() == true)
+            }
+        } else {
+            NotConfiguredContent()
+        }
     }
+}
 
-    val paymentManager = rememberWebPaymentManager(config)
-
-    PaymentManagerProvider(manager = paymentManager) {
-        WebAppContent(configError = configError, onDismissError = { configError = null })
+@Composable
+private fun ConfigErrorDialog(
+    error: String?,
+    onDismiss: () -> Unit
+) {
+    error?.let {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Configuration Error") },
+            text = {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun WebAppContent(
-    configError: String?,
-    onDismissError: () -> Unit
-) {
+private fun NotConfiguredContent() {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = { WebAppTopBar() }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Payment Not Configured",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Please configure at least one payment provider (Google Pay or Apple Pay) in PaymentConfig.kt",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun WebAppTopBar() {
+    TopAppBar(
+        title = { Text("KPayment Web Sample") },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun WebAppMainContent(hasConfigError: Boolean) {
     val paymentManager = LocalWebPaymentManager.current
 
     val isGooglePayAvailable by paymentManager.capabilitiesFlow.map { it.googlePay }
@@ -113,7 +224,7 @@ private fun WebAppContent(
     val isApplePayAvailable by paymentManager.capabilitiesFlow.map { it.applePay }
         .collectAsStateWithLifecycle(CapabilityStatus.NotConfigured)
 
-    val googleButton = if (configError?.isBlank() == true) rememberGooglePayWebLauncher(
+    val googleButton = if (hasConfigError) rememberGooglePayWebLauncher(
         onResult = { result ->
             when (result) {
                 is GooglePayWebResult.Success -> {
@@ -131,37 +242,10 @@ private fun WebAppContent(
         }
     ) else null
 
-    MaterialTheme {
-        configError?.let { error ->
-            AlertDialog(
-                onDismissRequest = onDismissError,
-                title = { Text("Configuration Error") },
-                text = {
-                    Text(
-                        text = error,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                confirmButton = {
-                    TextButton(onClick = onDismissError) {
-                        Text("OK")
-                    }
-                }
-            )
-        }
-
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                TopAppBar(
-                    title = { Text("KPayment Web Sample") },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                )
-            }
-        ) { paddingValues ->
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = { WebAppTopBar() }
+    ) { paddingValues ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -252,7 +336,6 @@ private fun WebAppContent(
                 }
             }
         }
-    }
 }
 
 /**

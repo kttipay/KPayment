@@ -1,22 +1,21 @@
-package com.kttipay.kpayment.config
+package com.kttipay.payment.api.validation
 
 /**
- * Result type for payment configuration creation.
- * Follows the same pattern as ValidationResult in AmountValidator.
+ * Result type for payment configuration validation.
  *
  * This sealed interface provides a type-safe alternative to returning Pair<Config?, String?>,
  * ensuring compile-time guarantees about success and failure states.
  */
 sealed interface ConfigResult<out T> {
     /**
-     * Configuration was successfully created and validated.
+     * Configuration was successfully validated.
      *
-     * @property config The successfully created configuration object
+     * @property config The successfully validated configuration object
      */
     data class Success<T>(val config: T) : ConfigResult<T>
 
     /**
-     * Configuration creation failed due to validation errors.
+     * Configuration validation failed due to errors.
      *
      * @property providerName Name of the payment provider (e.g., "Google Pay", "Apple Pay")
      * @property errors List of validation error messages
