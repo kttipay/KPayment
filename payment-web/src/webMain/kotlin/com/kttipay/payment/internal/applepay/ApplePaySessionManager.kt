@@ -4,6 +4,9 @@ import com.kttipay.payment.api.config.ApplePayWebConfig
 import com.kttipay.payment.internal.logging.KPaymentLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlin.JsFun
 import kotlin.js.ExperimentalWasmJsInterop
@@ -49,11 +52,13 @@ internal class ApplePaySessionManager(
     private val httpClient: ApplePayHttpClient = FetchApplePayHttpClient()
 ) {
     private val validationOrchestrator = ApplePayMerchantValidationOrchestrator(config, httpClient)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var validationJob: Job? = null
 
     fun setupSessionHandlers(
         session: ApplePaySessionInstance,
         onPaymentAuthorized: (String) -> Unit,
-        onError: () -> Unit,
+        onError: (ApplePayWebErrorCode, String?) -> Unit,
         onCancel: () -> Unit
     ) {
         session.onValidateMerchant = { event ->
@@ -74,7 +79,7 @@ internal class ApplePaySessionManager(
         session: ApplePaySessionInstance,
         domain: String,
         event: JsAny,
-        onError: () -> Unit
+        onError: (ApplePayWebErrorCode, String?) -> Unit
     ) {
         runCatching {
             val rawValidationUrl = getValidationURL(event)
@@ -83,7 +88,8 @@ internal class ApplePaySessionManager(
             val decodedValidationUrl = decodeURIComponent(rawValidationUrl)
             KPaymentLogger.tag(TAG).d("Decoded merchant validation URL: $decodedValidationUrl")
 
-            CoroutineScope(Dispatchers.Default).launch {
+            validationJob?.cancel()
+            validationJob = scope.launch {
                 runCatching {
                     val sessionData = validationOrchestrator.validate(decodedValidationUrl, domain)
                     KPaymentLogger.tag(TAG).d("Merchant validation succeeded: $sessionData")
@@ -91,21 +97,27 @@ internal class ApplePaySessionManager(
                 }.onFailure { error ->
                     KPaymentLogger.tag(TAG).e("Merchant validation failed", error)
                     session.abort()
-                    onError()
+                    onError(ApplePayWebErrorCode.MERCHANT_VALIDATION_FAILED, error.message)
                 }
             }
         }.onFailure { ex ->
             KPaymentLogger.tag(TAG).d("Merchant validation failed: $ex")
             session.abort()
-            onError()
+            onError(ApplePayWebErrorCode.MERCHANT_VALIDATION_FAILED, ex.message)
         }
+    }
+
+    fun cleanup() {
+        validationJob?.cancel()
+        validationJob = null
+        scope.cancel()
     }
 
     private fun handlePaymentAuthorized(
         session: ApplePaySessionInstance,
         event: JsAny,
         onPaymentAuthorized: (String) -> Unit,
-        onError: () -> Unit
+        onError: (ApplePayWebErrorCode, String?) -> Unit
     ) {
         runCatching {
             val tokenJs = getPaymentToken(event)
@@ -116,7 +128,7 @@ internal class ApplePaySessionManager(
         }.onFailure { error ->
             KPaymentLogger.tag(TAG).e("Payment token retrieval failed", error)
             session.completePayment(ApplePaySession.STATUS_FAILURE)
-            onError()
+            onError(ApplePayWebErrorCode.TOKEN_EXTRACTION_FAILED, error.message)
         }
     }
 }

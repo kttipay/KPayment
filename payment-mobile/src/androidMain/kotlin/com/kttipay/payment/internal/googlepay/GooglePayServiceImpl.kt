@@ -17,24 +17,34 @@ import org.json.JSONObject
  * It maintains internal state and must be configured before use.
  */
 internal class GooglePayServiceImpl : GooglePayService {
+    private val stateLock = Any()
     private var state: State? = null
 
     override fun configure(config: GooglePayConfig, environment: PaymentEnvironment) {
-        state = State(config, environment)
+        synchronized(stateLock) {
+            state = State(config, environment)
+        }
     }
 
-    override fun readyToPayRequest(): JSONObject = requireState().requestFactory.readyToPayRequest()
+    override fun readyToPayRequest(): JSONObject = synchronized(stateLock) {
+        requireState().requestFactory.readyToPayRequest()
+    }
 
-    override fun allowedPaymentMethodsJson(): String =
+    override fun allowedPaymentMethodsJson(): String = synchronized(stateLock) {
         requireState().requestFactory.allowedPaymentMethodsJson()
+    }
 
-    override fun paymentDataRequest(amount: String): JSONObject =
+    override fun paymentDataRequest(amount: String): JSONObject = synchronized(stateLock) {
         requireState().requestFactory.paymentDataRequest(amount)
+    }
 
-    override fun createPaymentsClient(context: Context): PaymentsClient =
+    override fun createPaymentsClient(context: Context): PaymentsClient = synchronized(stateLock) {
         requireState().createClient(context)
+    }
 
-    override fun isConfigured(): Boolean = state != null
+    override fun isConfigured(): Boolean = synchronized(stateLock) {
+        state != null
+    }
 
     private fun requireState(): State = state
         ?: error("GooglePayService must be configured before use. Call configure() first.")

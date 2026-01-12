@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Unified implementation of PaymentManager.
@@ -55,15 +57,8 @@ class PaymentManagerImpl<T : PlatformPaymentConfig>(
 
     override val capabilitiesFlow: StateFlow<PaymentCapabilities> = _capabilitiesFlow.asStateFlow()
 
-    private val lazyCapabilityCheck: Job by lazy {
-        scope.launch {
-            runCatching { refreshCapabilitiesInternal() }
-                .onFailure { error ->
-                    log.e("Capability check failed", error as? Exception)
-                    updateCapabilitiesOnFailure(error)
-                }
-        }
-    }
+    private val capabilityCheckMutex = Mutex()
+    private var capabilityCheckJob: Job? = null
 
     init {
         log.d("Initializing Payment Manager - Environment: ${config.environment.name}")
@@ -71,7 +66,8 @@ class PaymentManagerImpl<T : PlatformPaymentConfig>(
     }
 
     override suspend fun awaitCapabilities(): PaymentCapabilities {
-        lazyCapabilityCheck.join()
+        ensureCapabilityCheckStarted()
+        capabilityCheckJob?.join()
         return _capabilitiesFlow.value
     }
 
@@ -81,10 +77,24 @@ class PaymentManagerImpl<T : PlatformPaymentConfig>(
     }
 
     override fun observeAvailability(provider: PaymentProvider): Flow<Boolean> {
-        lazyCapabilityCheck.start()
+        scope.launch { ensureCapabilityCheckStarted() }
         return capabilitiesFlow
             .map { it.canPayWith(provider) }
             .distinctUntilChanged()
+    }
+
+    private suspend fun ensureCapabilityCheckStarted() {
+        capabilityCheckMutex.withLock {
+            if (capabilityCheckJob == null) {
+                capabilityCheckJob = scope.launch {
+                    runCatching { refreshCapabilitiesInternal() }
+                        .onFailure { error ->
+                            log.e("Capability check failed", error as? Exception)
+                            updateCapabilitiesOnFailure(error)
+                        }
+                }
+            }
+        }
     }
 
     private suspend fun refreshCapabilitiesInternal(): PaymentCapabilities {
