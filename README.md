@@ -1016,7 +1016,7 @@ open iosApp.xcworkspace
 
 <div align="center">
 
-[![Star History Chart](https://api.star-history.com/svg?repos=kttipay/KPayment&type=Date)](https://star-history.com/#kttipay/KPayment&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=kttipay/KPayment&type=date&legend=top-left)](https://www.star-history.com/#kttipay/KPayment&type=date&legend=top-left)
 
 </div>
 
