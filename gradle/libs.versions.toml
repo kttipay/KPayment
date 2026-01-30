@@ -1,6 +1,6 @@
 [versions]
-appVersionCode = "1"
-appVersionName = "0.1.0"
+appVersionCode = "2"
+appVersionName = "0.1.1"
 
 libraryName = "KPayment"
 libraryDescription = "A Kotlin Multiplatform library for seamless payment processing across Android, iOS, and Web platforms."
@@ -14,7 +14,7 @@ targetSdk = "36"
 javaVersion = "21"
 jvmVersion = "JVM_21"
 
-androidx-activity = "1.12.2"
+androidx-activity = "1.12.3"
 androidx-appcompat = "1.7.1"
 androidx-core = "1.17.0"
 androidx-espresso = "3.7.0"
