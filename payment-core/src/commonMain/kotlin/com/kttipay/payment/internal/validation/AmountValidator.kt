@@ -19,10 +19,6 @@ object AmountValidator {
             "Amount cannot be parsed as a number"
         )
 
-        if (numericAmount <= 0.0) {
-            return ValidationResult.Error("Amount must be greater than zero")
-        }
-
         return ValidationResult.Valid(amount)
     }
 

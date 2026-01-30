@@ -5,9 +5,12 @@ import com.kttipay.payment.api.PaymentLauncher
 import com.kttipay.payment.api.PaymentProvider
 import com.kttipay.payment.api.PaymentResult
 import com.kttipay.payment.api.config.ApplePayMobileConfig
+import com.kttipay.payment.internal.validation.AmountValidator
+import com.kttipay.payment.internal.validation.ValidationResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 internal class ApplePayPaymentLauncher(
     private val config: ApplePayMobileConfig,
@@ -33,27 +36,42 @@ internal class ApplePayPaymentLauncher(
             return
         }
 
-        val baseConfig = config.base
-        factory.startPayment(
-            ApplePayRequest(
-                merchantId = config.merchantId,
-                countryCode = baseConfig.countryCode,
-                currencyCode = baseConfig.currencyCode,
-                supportedNetworks = baseConfig.supportedNetworks,
-                merchantCapabilities = baseConfig.merchantCapabilities,
-                summaryItems = listOf(
-                    SummaryItem(
-                        label = baseConfig.merchantName,
-                        amount = amount,
-                        isFinal = true
+        when (val validationResult = AmountValidator.validate(amount)) {
+            is ValidationResult.Error -> {
+                _isProcessing.update { false }
+                onResult(
+                    PaymentResult.Error(
+                        provider = provider,
+                        reason = PaymentErrorReason.DeveloperError,
+                        message = validationResult.message
                     )
                 )
-            ),
-            onResult = { result ->
-                _isProcessing.value = false
-                onResult(result.toPaymentResult())
             }
-        )
+
+            is ValidationResult.Valid -> {
+                val baseConfig = config.base
+                factory.startPayment(
+                    ApplePayRequest(
+                        merchantId = config.merchantId,
+                        countryCode = baseConfig.countryCode,
+                        currencyCode = baseConfig.currencyCode,
+                        supportedNetworks = baseConfig.supportedNetworks,
+                        merchantCapabilities = baseConfig.merchantCapabilities,
+                        summaryItems = listOf(
+                            SummaryItem(
+                                label = baseConfig.merchantName,
+                                amount = validationResult.amount,
+                                isFinal = true
+                            )
+                        )
+                    ),
+                    onResult = { result ->
+                        _isProcessing.update { false }
+                        onResult(result.toPaymentResult())
+                    }
+                )
+            }
+        }
     }
 }
 

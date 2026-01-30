@@ -84,11 +84,6 @@ private fun createWebAppConfigState(): WebAppConfigState {
     val googlePay = googlePayResult.getOrNull()
     val applePay = applePayResult.getOrNull()
 
-    val validationErrors = listOf(googlePayResult, applePayResult)
-        .combineErrors()
-        .takeIf { it.isNotEmpty() }
-        ?.joinToString("\n\n")
-
     val config = if (googlePay != null || applePay != null) {
         WebPaymentConfig(
             environment = PaymentEnvironment.Development,
@@ -99,11 +94,13 @@ private fun createWebAppConfigState(): WebAppConfigState {
         null
     }
 
-    val error = when {
-        config == null && validationErrors != null ->
-            "$validationErrors\n\nPlease configure at least one payment provider."
-
-        else -> validationErrors
+    val error = if (config == null) {
+        val validationErrors = listOf(googlePayResult, applePayResult)
+            .combineErrors()
+            .joinToString("\n\n")
+        "$validationErrors\n\nPlease configure at least one payment provider."
+    } else {
+        null
     }
 
     return WebAppConfigState(config = config, error = error)
@@ -139,7 +136,7 @@ fun WebApp() {
 
         if (paymentManager != null) {
             PaymentManagerProvider(manager = paymentManager) {
-                WebAppMainContent(hasConfigError = configError?.isBlank() == true)
+                WebAppMainContent()
             }
         } else {
             NotConfiguredContent()
@@ -218,13 +215,15 @@ private fun WebAppTopBar() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun WebAppMainContent(hasConfigError: Boolean) {
+private fun WebAppMainContent() {
     val paymentManager = LocalWebPaymentManager.current
 
     val capabilities by paymentManager.observeCapabilities()
         .collectAsStateWithLifecycle(PaymentCapabilities.initial)
 
-    val googleButton = if (hasConfigError) rememberGooglePayWebLauncher(
+    val hasGooglePay = paymentManager.config.googlePay != null
+
+    val googleButton = if (hasGooglePay) rememberGooglePayWebLauncher(
         onResult = { result ->
             when (result) {
                 is PaymentResult.Success -> {

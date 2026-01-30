@@ -66,10 +66,15 @@ PaymentButton(
 )
 ```
 
+## Compose Preview
+
+`PaymentButton` works in `@Preview` out of the box. When `LocalInspectionMode` is active, a styled stub is rendered instead of the native Google Pay / Apple Pay button, so your screen previews won't crash.
+
 ## Notes
 
 - Apple Pay requires a physical iOS device and a valid merchant ID.
 - Google Pay requires Google Play services and an eligible device.
+- Zero-amount payments (`"0.00"`) are supported for card verification flows.
 - Concurrent launch attempts return `PaymentErrorReason.AlreadyInProgress`.
 
 ## License

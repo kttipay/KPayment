@@ -64,11 +64,6 @@ private fun createAppConfigState(): AppConfigState {
     val googlePay = googlePayResult.getOrNull()
     val applePay = applePayResult.getOrNull()
 
-    val validationErrors = listOf(googlePayResult, applePayResult)
-        .combineErrors()
-        .takeIf { it.isNotEmpty() }
-        ?.joinToString("\n\n")
-
     val config = if (googlePay != null || applePay != null) {
         MobilePaymentConfig(
             googlePay = googlePay,
@@ -79,10 +74,13 @@ private fun createAppConfigState(): AppConfigState {
         null
     }
 
-    val error = when {
-        config == null && validationErrors != null ->
-            "$validationErrors\n\nPlease configure at least one payment provider."
-        else -> validationErrors
+    val error = if (config == null) {
+        val validationErrors = listOf(googlePayResult, applePayResult)
+            .combineErrors()
+            .joinToString("\n\n")
+        "$validationErrors\n\nPlease configure at least one payment provider."
+    } else {
+        null
     }
 
     return AppConfigState(config = config, error = error)

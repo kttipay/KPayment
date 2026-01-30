@@ -10,7 +10,7 @@
 [![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.11.0-blue.svg)](https://www.jetbrains.com/lp/compose-multiplatform/)
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-green.svg)](https://github.com/kttipay/KPayment)
 
-[Quickstart](#-quickstart) • [Installation](#-installation) • [Samples](#-samples) • [Documentation](#table-of-contents)
+[Quickstart](#-quickstart) • [Installation](#-installation) • [Samples](#-samples) • [Documentation](#table-of-contents) • [![DeepWiki](https://img.shields.io/badge/DeepWiki-kttipay%2FKPayment-blue.svg?logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyIDJMMyA3djEwbDkgNSA5LTVIN0wxMiAyeiIgZmlsbD0id2hpdGUiLz48L3N2Zz4=)](https://deepwiki.com/kttipay/KPayment)
 
 </div>
 
@@ -18,9 +18,7 @@
 
 ## Overview
 
-A **Kotlin Multiplatform library** with **Compose Multiplatform UI** for seamless payment processing across Android, iOS, and Web platforms. KPayment provides a unified, type-safe API for integrating Google Pay and Apple Pay into your applications with reactive capability detection, comprehensive error handling, and production-ready state management.
-
-Built on Kotlin Multiplatform for shared business logic and platform implementations, with first-class Compose Multiplatform support for UI components that work everywhere. Whether you're building a mobile app, web application, or cross-platform solution, KPayment offers a single, consistent API that works everywhere.
+A **Kotlin Multiplatform** payment library with **Compose Multiplatform** UI components for Google Pay and Apple Pay across Android, iOS, and Web. One API, shared types, reactive availability detection, and platform-native payment buttons.
 
 <details>
 <summary><strong>📑 Table of Contents</strong></summary>
@@ -129,15 +127,11 @@ PaymentButton(enabled = isReady, onClick = { launcher.launch("10.00") })
 
 ## ✨ Why KPayment?
 
-- **🌍 Cross-Platform** - Single codebase for Android, iOS, and Web with unified API
-- **🔒 Type-Safe** - Shared configuration and model types prevent runtime errors
-- **⚡ Reactive** - Real-time capability detection via Kotlin `Flow` and `StateFlow`
-- **🛡️ Production-Ready** - Comprehensive error handling with 11 distinct error types
-- **🧵 Thread-Safe** - Proper synchronization and state management for concurrent payment launches
-- **🎨 Compose Native** - First-class Compose Multiplatform support with payment buttons and launchers
-- **📦 Serializable** - kotlinx.serialization support for payment tokens
-- **🐛 Debuggable** - Optional logging system for development (disabled by default)
-- **🧪 Testable** - Comprehensive test coverage with unit tests for all platforms
+- **Cross-Platform** - Single codebase for Android, iOS, and Web
+- **Type-Safe** - Shared configuration and model types across all targets
+- **Reactive** - Capability detection via Kotlin `Flow` and `StateFlow`
+- **Thread-Safe** - Atomic state management prevents duplicate payment launches
+- **Compose Native** - First-class Compose Multiplatform payment buttons and launchers
 
 ## 💻 Show Me The Code
 
@@ -698,211 +692,37 @@ if (capabilities.canPayWith(PaymentProvider.GooglePay)) {
 
 ## 🚨 Error Handling
 
-KPayment provides comprehensive error handling through the [PaymentResult.Error] sealed class. Understanding error types and implementing proper error handling is crucial for a robust payment integration.
-
-### Error Types
-
-#### Timeout
-Occurs when a payment request times out. This is typically a temporary issue.
-
-**Recommended Action**: Retry the payment request after a short delay.
+All payment results come through the `PaymentResult` sealed class:
 
 ```kotlin
-is PaymentErrorReason.Timeout -> {
-    // Retry after delay
-    delay(2000)
-    retryPayment()
+when (result) {
+    is PaymentResult.Success -> sendTokenToBackend(result.token)
+    is PaymentResult.Error -> handleError(result.reason, result.message)
+    is PaymentResult.Cancelled -> { /* user cancelled, no action needed */ }
 }
 ```
 
-#### NetworkError
-Occurs when there's a network connectivity issue during payment processing.
+### Error Reasons
 
-**Recommended Action**: Check network connectivity and retry.
+| Reason | When | Suggested Action |
+|--------|------|------------------|
+| `Timeout` | Request timed out | Retry after a delay |
+| `NetworkError` | No connectivity | Check network, retry |
+| `DeveloperError` | Bad config or invalid amount | Fix configuration |
+| `InternalError` | Platform SDK failure | Retry with backoff |
+| `NotAvailable` | Payment method unavailable | Show alternative |
+| `AlreadyInProgress` | Duplicate launch | Disable button via `launcher.isProcessing` |
+| `SignInRequired` | User not signed in | Prompt sign-in |
+| `ApiNotConnected` | SDK not initialized | Re-initialize manager |
+| `ConnectionSuspendedDuringCall` | App backgrounded mid-call | Retry on resume |
+| `Interrupted` | Operation interrupted | Show retry dialog |
+| `Unknown` | Unclassified error | Log and show generic message |
 
-```kotlin
-is PaymentErrorReason.NetworkError -> {
-    if (isNetworkAvailable()) {
-        retryPayment()
-    } else {
-        showNetworkError()
-    }
-}
-```
+### Tips
 
-#### DeveloperError
-Indicates a configuration or implementation error. This usually means something is misconfigured.
-
-**Recommended Action**: Review your payment configuration and ensure all required parameters are set correctly.
-
-```kotlin
-is PaymentErrorReason.DeveloperError -> {
-    Log.e("Payment", "Configuration error: ${result.message}")
-    // Review payment configuration
-    checkPaymentConfiguration()
-}
-```
-
-#### InternalError
-An internal error occurred in the payment system. This is typically temporary.
-
-**Recommended Action**: Retry after a delay, or contact support if persistent.
-
-```kotlin
-is PaymentErrorReason.InternalError -> {
-    // Retry with exponential backoff
-    retryWithBackoff()
-}
-```
-
-#### NotAvailable
-The payment method is not available on this device or platform.
-
-**Recommended Action**: Check payment capabilities before attempting payment, or show an alternative payment method.
-
-```kotlin
-is PaymentErrorReason.NotAvailable -> {
-    val capabilities = manager.checkCapabilities()
-    if (!capabilities.canPayWith(PaymentProvider.GooglePay)) {
-        showAlternativePaymentMethod()
-    }
-}
-```
-
-#### AlreadyInProgress
-A payment is already being processed.
-
-**Recommended Action**: Observe `launcher.isProcessing` to disable the button during payment, or ignore this error.
-
-```kotlin
-is PaymentErrorReason.AlreadyInProgress -> {
-    // Payment already in progress, ignore or show message
-}
-```
-
-#### SignInRequired
-User sign-in is required to complete the payment.
-
-**Recommended Action**: Prompt the user to sign in and retry.
-
-```kotlin
-is PaymentErrorReason.SignInRequired -> {
-    promptUserSignIn {
-        retryPayment()
-    }
-}
-```
-
-#### ApiNotConnected
-The payment API is not connected or initialized.
-
-**Recommended Action**: Ensure the payment manager is properly initialized before use.
-
-```kotlin
-is PaymentErrorReason.ApiNotConnected -> {
-    // Reinitialize payment manager
-    initializePaymentManager()
-}
-```
-
-#### ConnectionSuspendedDuringCall
-The connection was suspended during the payment call (e.g., app backgrounded).
-
-**Recommended Action**: Retry the payment when the app returns to foreground.
-
-```kotlin
-is PaymentErrorReason.ConnectionSuspendedDuringCall -> {
-    // Retry when app resumes
-    lifecycleScope.launchWhenResumed {
-        retryPayment()
-    }
-}
-```
-
-#### Interrupted
-The payment operation was interrupted.
-
-**Recommended Action**: Retry if appropriate, or inform the user.
-
-```kotlin
-is PaymentErrorReason.Interrupted -> {
-    // Check if user wants to retry
-    showRetryDialog()
-}
-```
-
-#### Unknown
-An unknown error occurred. Check the error message for details.
-
-**Recommended Action**: Log the error and check the error message for additional context.
-
-```kotlin
-is PaymentErrorReason.Unknown -> {
-    Log.e("Payment", "Unknown error: ${result.message}")
-    // Check error message for details
-    handleUnknownError(result.message)
-}
-```
-
-### Error Handling Best Practices
-
-1. **Always Check Capabilities First**: Before attempting payment, check if the payment method is available:
-   ```kotlin
-   val capabilities = manager.checkCapabilities()
-   if (capabilities.canPayWith(PaymentProvider.GooglePay)) {
-       launchPayment()
-   } else {
-       showPaymentNotAvailable()
-   }
-   ```
-
-2. **Implement Retry Logic**: For transient errors (Timeout, NetworkError, InternalError), implement retry logic with exponential backoff:
-   ```kotlin
-   suspend fun retryPayment(maxRetries: Int = 3) {
-       repeat(maxRetries) { attempt ->
-           try {
-               val result = launchPayment()
-               if (result is PaymentResult.Success) return
-           } catch (e: Exception) {
-               if (attempt == maxRetries - 1) throw e
-               delay(1000L * (attempt + 1))
-           }
-       }
-   }
-   ```
-
-3. **Handle User Cancellation Gracefully**: User cancellation is not an error - handle it appropriately:
-   ```kotlin
-   is PaymentResult.Cancelled -> {
-       // User cancelled - this is normal, no action needed
-       // Optionally show a message or return to previous screen
-   }
-   ```
-
-4. **Log Errors for Debugging**: Always log errors with context for debugging:
-   ```kotlin
-   is PaymentResult.Error -> {
-       Log.e("Payment", "Payment failed: ${result.reason}, message: ${result.message}")
-       // Handle error
-   }
-   ```
-
-5. **Provide User Feedback**: Inform users about errors in a user-friendly way:
-   ```kotlin
-   is PaymentResult.Error -> {
-       when (result.reason) {
-           PaymentErrorReason.NetworkError -> {
-               showError("Network error. Please check your connection and try again.")
-           }
-           PaymentErrorReason.NotAvailable -> {
-               showError("Payment method not available. Please use an alternative.")
-           }
-           else -> {
-               showError("Payment failed. Please try again.")
-           }
-       }
-   }
-   ```
+- Check `observeAvailability()` before showing the payment button.
+- Use `launcher.isProcessing` to disable the button while a payment is in flight.
+- `Cancelled` is not an error — don't show error UI for it.
 
 ## 📚 Module Details
 
@@ -1081,6 +901,6 @@ See [LICENSE](LICENSE) file for the full license text.
 
 **Built with ❤️ using Kotlin Multiplatform**
 
-[⭐ Star us on GitHub](https://github.com/kttipay/KPayment) • [📖 Documentation](https://github.com/kttipay/KPayment) • [🐛 Report Bug](https://github.com/kttipay/KPayment/issues)
+[⭐ Star us on GitHub](https://github.com/kttipay/KPayment) • [📖 DeepWiki](https://deepwiki.com/kttipay/KPayment) • [🐛 Report Bug](https://github.com/kttipay/KPayment/issues)
 
 </div>

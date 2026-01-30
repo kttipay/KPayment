@@ -134,41 +134,21 @@ val merchantId = when (environment) {
 
 ## Input Validation
 
-### Validate Payment Amounts
+### Amount Validation
 
-Always validate payment amounts before initiating payment:
+`AmountValidator` runs automatically before every payment launch on both Android and iOS. It enforces:
 
-```kotlin
-fun processPayment(amount: String) {
-    val validationResult = AmountValidator.validate(amount)
-    when (validationResult) {
-        is ValidationResult.Valid -> {
-            launchPayment(amount)
-        }
-        is ValidationResult.Error -> {
-            showError(validationResult.message)
-        }
-    }
-}
-```
+- Non-empty string
+- Decimal format with at most 2 decimal places (e.g., `"10.00"`, `"0"`, `"5.5"`)
+- No negative values
 
-### Validate Configuration
+Zero-amount payments (`"0.00"`) are allowed for card verification and token enrollment flows.
 
-The library validates configuration at initialization, but you should also validate user inputs:
+Invalid amounts return `PaymentResult.Error` with `PaymentErrorReason.DeveloperError`.
 
-```kotlin
-fun createConfig(merchantId: String, merchantName: String): GooglePayConfig {
-    require(merchantId.isNotBlank()) { "Merchant ID cannot be blank" }
-    require(merchantName.isNotBlank()) { "Merchant name cannot be blank" }
-    
-    return GooglePayConfig(
-        merchantId = merchantId,
-        merchantName = merchantName,
-        gateway = "stripe",
-        gatewayMerchantId = gatewayMerchantId
-    )
-}
-```
+### Configuration Validation
+
+The library validates configuration at initialization. Ensure merchant IDs and names are non-blank before passing them in.
 
 ## Apple Pay Web Security
 
