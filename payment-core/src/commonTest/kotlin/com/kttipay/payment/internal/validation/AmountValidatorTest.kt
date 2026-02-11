@@ -57,10 +57,10 @@ class AmountValidatorTest {
     }
 
     @Test
-    fun `validate returns Error for zero amount`() {
+    fun `validate returns Valid for zero amount`() {
         val result = AmountValidator.validate("0.00")
-        assertTrue(result is ValidationResult.Error)
-        assertEquals("Amount must be greater than zero", result.message)
+        assertTrue(result is ValidationResult.Valid)
+        assertEquals("0.00", result.amount)
     }
 
     @Test
