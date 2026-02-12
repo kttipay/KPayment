@@ -45,10 +45,11 @@ kotlin {
         commonMain.dependencies {
             api(projects.paymentCore)
 
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.ui)
+            implementation(libs.jetbrains.runtime)
+            implementation(libs.jetbrains.foundation)
+            implementation(libs.material3)
+            implementation(libs.jetbrains.ui)
+            implementation(libs.jetbrains.ui.tooling.preview)
         }
 
         androidMain.dependencies {
@@ -56,6 +57,9 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.play.services.wallet)
             implementation(libs.compose.pay.button)
+
+            implementation(libs.ui.tooling)
+            implementation(libs.ui.tooling.preview)
         }
 
         commonTest.dependencies {
@@ -66,6 +70,14 @@ kotlin {
 
         iosMain.dependencies {}
     }
+}
+
+dependencies {
+    androidRuntimeClasspath(libs.jetbrains.ui.tooling)
+}
+
+ktlint {
+    version.set("1.8.0")
 }
 
 // Publishing your Kotlin Multiplatform library to Maven Central
@@ -107,6 +119,3 @@ mavenPublishing {
     }
 }
 
-ktlint {
-    version.set("1.8.0")
-}
