@@ -1,21 +1,9 @@
 package com.kttipay.payment.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.kttipay.payment.api.PaymentErrorReason
 import com.kttipay.payment.api.PaymentLauncher
 import com.kttipay.payment.api.PaymentProvider
@@ -50,57 +38,6 @@ actual fun PaymentButton(
             type = type.toAppleType(),
             cornerRadius = radius,
             enabled = enabled,
-        )
-    }
-}
-
-@Composable
-private fun ApplePayButtonPreviewStub(
-    theme: NativePaymentTheme,
-    type: NativePaymentType,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier,
-    radius: Dp
-) {
-    val backgroundColor = when (theme) {
-        NativePaymentTheme.Dark -> Color.Black
-        NativePaymentTheme.Light -> Color.White
-        NativePaymentTheme.LightOutline -> Color.White
-        NativePaymentTheme.Automatic -> Color.Black
-    }
-    val contentColor = when (theme) {
-        NativePaymentTheme.Dark, NativePaymentTheme.Automatic -> Color.White
-        NativePaymentTheme.Light, NativePaymentTheme.LightOutline -> Color.Black
-    }
-    val label = when (type) {
-        NativePaymentType.AddMoney -> "Add Money with Apple Pay"
-        NativePaymentType.Buy -> "Buy with  Pay"
-        NativePaymentType.Continue -> "Continue with Apple Pay"
-        NativePaymentType.Pay -> "Pay with Apple Pay"
-        NativePaymentType.TopUp -> "Top Up with Apple Pay"
-        NativePaymentType.Plain -> "Apple Pay"
-        NativePaymentType.Book,
-        NativePaymentType.Checkout,
-        NativePaymentType.Donate,
-        NativePaymentType.Order,
-        NativePaymentType.Subscribe -> "Pay with Apple Pay"
-    }
-
-    val shape = RoundedCornerShape(radius)
-    Box(
-        modifier = modifier
-            .clip(shape)
-            .background(backgroundColor.copy(alpha = if (enabled) 1f else 0.5f))
-            .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 24.dp, vertical = 12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = label,
-            color = contentColor.copy(alpha = if (enabled) 1f else 0.5f),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium
         )
     }
 }

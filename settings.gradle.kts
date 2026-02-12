@@ -15,6 +15,10 @@ pluginManagement {
     }
 }
 
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
 dependencyResolutionManagement {
     repositories {
         google {
@@ -29,7 +33,8 @@ dependencyResolutionManagement {
 }
 
 include(
-    ":sampleMobile",
+    ":sampleMobile:shared",
+    ":sampleMobile:app",
     ":sampleWeb",
     ":payment-core",
     ":payment-mobile",

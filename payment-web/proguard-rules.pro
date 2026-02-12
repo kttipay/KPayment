@@ -1,0 +1,2 @@
+-keep class com.kttipay.payment.web.** { *; }
+-dontwarn com.kttipay.payment.web.**

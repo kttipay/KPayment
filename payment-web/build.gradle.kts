@@ -1,4 +1,3 @@
-import com.android.build.api.dsl.androidLibrary
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
@@ -18,6 +17,11 @@ kotlin {
         namespace = "com.kttipay.payment.web"
         compileSdk = libs.versions.compileSdk.get().toInt()
         minSdk = libs.versions.minSdk.get().toInt()
+
+        optimization {
+            consumerKeepRules.publish = true
+            consumerKeepRules.files.add(project.file("proguard-rules.pro"))
+        }
     }
 
     js { browser() }
@@ -29,9 +33,9 @@ kotlin {
         commonMain.dependencies {
             api(projects.paymentCore)
 
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.ui)
+            implementation(libs.jetbrains.runtime)
+            implementation(libs.jetbrains.foundation)
+            implementation(libs.jetbrains.ui)
 
             implementation(libs.kotlinx.serialization)
             implementation(libs.kotlinx.coroutines.core)

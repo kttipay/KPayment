@@ -11,3 +11,6 @@
     *;
 }
 
+# Compose — keep @Composable metadata
+-keep class androidx.compose.** { *; }
+-dontwarn androidx.compose.**
