@@ -18,6 +18,11 @@ kotlin {
         namespace = "com.kttipay.payment.web"
         compileSdk = libs.versions.compileSdk.get().toInt()
         minSdk = libs.versions.minSdk.get().toInt()
+
+        optimization {
+            consumerKeepRules.publish = true
+            consumerKeepRules.files.add(project.file("proguard-rules.pro"))
+        }
     }
 
     js { browser() }
@@ -53,7 +58,7 @@ kotlin {
 // https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
 mavenPublishing {
     publishToMavenCentral()
-    signAllPublications()
+//    signAllPublications()
     coordinates("com.kttipay", "kpayment-web", libs.versions.appVersionName.get())
 
     pom {

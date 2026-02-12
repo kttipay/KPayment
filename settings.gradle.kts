@@ -33,7 +33,8 @@ dependencyResolutionManagement {
 }
 
 include(
-    ":sampleMobile",
+    ":sampleMobile:shared",
+    ":sampleMobile:app",
     ":sampleWeb",
     ":payment-core",
     ":payment-mobile",
