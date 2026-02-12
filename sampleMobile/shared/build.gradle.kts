@@ -1,4 +1,3 @@
-import com.android.build.api.dsl.androidLibrary
 
 plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
@@ -25,13 +24,13 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.ui)
-            implementation(compose.materialIconsExtended)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+            implementation(libs.jetbrains.runtime)
+            implementation(libs.jetbrains.foundation)
+            implementation(libs.material3)
+            implementation(libs.jetbrains.ui)
+            implementation(libs.material.icons.extended)
+            implementation(libs.jetbrains.resources)
+            implementation(libs.jetbrains.ui.tooling.preview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.cedar)

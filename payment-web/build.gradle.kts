@@ -1,4 +1,3 @@
-import com.android.build.api.dsl.androidLibrary
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
@@ -34,9 +33,9 @@ kotlin {
         commonMain.dependencies {
             api(projects.paymentCore)
 
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.ui)
+            implementation(libs.jetbrains.runtime)
+            implementation(libs.jetbrains.foundation)
+            implementation(libs.jetbrains.ui)
 
             implementation(libs.kotlinx.serialization)
             implementation(libs.kotlinx.coroutines.core)
@@ -58,7 +57,7 @@ kotlin {
 // https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
 mavenPublishing {
     publishToMavenCentral()
-//    signAllPublications()
+    signAllPublications()
     coordinates("com.kttipay", "kpayment-web", libs.versions.appVersionName.get())
 
     pom {

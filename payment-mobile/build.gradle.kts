@@ -1,4 +1,3 @@
-import com.android.build.api.dsl.androidLibrary
 
 plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
@@ -84,7 +83,7 @@ ktlint {
 // https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
 mavenPublishing {
     publishToMavenCentral()
-//    signAllPublications()
+    signAllPublications()
     coordinates("com.kttipay", "kpayment-mobile", libs.versions.appVersionName.get())
 
     pom {
