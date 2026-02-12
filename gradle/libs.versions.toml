@@ -66,6 +66,7 @@ androidx-lifecycle-viewmodelCompose = { module = "org.jetbrains.androidx.lifecyc
 androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 
 jetbrains-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
+jetbrains-components-ui-tooling-preview = { module = "org.jetbrains.compose.components:components-ui-tooling-preview", version.ref = "composeMultiplatform" }
 jetbrains-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeMultiplatform" }
 jetbrains-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
 jetbrains-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMultiplatform" }
