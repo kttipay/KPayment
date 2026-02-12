@@ -46,6 +46,9 @@ actual fun PaymentButton(
 actual fun rememberNativePaymentLauncher(
     onResult: (PaymentResult) -> Unit
 ): PaymentLauncher {
+    if (LocalInspectionMode.current) {
+        return NotConfiguredLauncher(onResult)
+    }
     val manager = LocalMobilePaymentManager.current
     return if (manager.config.googlePay != null) {
         rememberGooglePayLauncher(onResult)
