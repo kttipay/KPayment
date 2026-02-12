@@ -42,6 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `AmountValidator` integration in Apple Pay launcher (iOS), matching Android behavior
 
 ### Changed
+- Migrated build system to Gradle 9 with updated Kotlin Multiplatform configuration
+- Refactored `sampleMobile` module into `app` and `shared` submodules for Gradle 9 compatibility
 - `AmountValidator` now allows zero-amount payments (`"0.00"`) for card verification and token enrollment flows
 - Web sample app no longer blocks payment when only one provider is configured
 
@@ -49,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PaymentButton` no longer crashes in `@Preview` due to platform-native Google Pay / Apple Pay button dependencies
 - Web sample `hasConfigError` logic that prevented Google Pay launcher from being created
 - Apple Pay launcher now validates amounts before forwarding to the native SDK
+
+**Full Changelog**: https://github.com/kttipay/KPayment/compare/v0.1.0...v0.1.1
 
 [0.1.1]: https://github.com/kttipay/KPayment/releases/tag/v0.1.1
 [0.1.0]: https://github.com/kttipay/KPayment/releases/tag/v0.1.0
