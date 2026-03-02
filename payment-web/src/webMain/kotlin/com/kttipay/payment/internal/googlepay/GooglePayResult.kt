@@ -20,7 +20,7 @@ sealed interface GooglePayWebResult {
         val additionalMessage: String? = null
     ) : GooglePayWebResult {
         val message: String
-            get() = additionalMessage ?: errorCode.message
+            get() = additionalMessage.takeUnless { it.isNullOrBlank() } ?: errorCode.message
     }
 }
 

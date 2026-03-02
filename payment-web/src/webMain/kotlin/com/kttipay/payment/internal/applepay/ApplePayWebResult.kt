@@ -36,7 +36,7 @@ sealed interface ApplePayWebResult {
         val additionalMessage: String? = null
     ) : ApplePayWebResult {
         val message: String
-            get() = additionalMessage ?: errorCode.message
+            get() = additionalMessage.takeUnless { it.isNullOrBlank() } ?: errorCode.message
     }
 }
 
