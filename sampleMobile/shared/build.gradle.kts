@@ -20,6 +20,9 @@ kotlin {
             baseName = "ComposeApp"
             isStatic = true
         }
+        iosTarget.binaries.all {
+            linkerOpts("-U", "_OBJC_CLASS_${'$'}_UIViewLayoutRegion")
+        }
     }
 
     sourceSets {

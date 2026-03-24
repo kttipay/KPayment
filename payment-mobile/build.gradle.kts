@@ -35,6 +35,9 @@ kotlin {
         iosSimulatorArm64(),
     ).forEach { iosTarget ->
         iosTarget.binaries.framework { isStatic = true }
+        iosTarget.binaries.all {
+            linkerOpts("-U", "_OBJC_CLASS_${'$'}_UIViewLayoutRegion")
+        }
         swiftExport {
             moduleName = "PaymentMobile"
         }
@@ -83,7 +86,7 @@ ktlint {
 // https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
 mavenPublishing {
     publishToMavenCentral()
-    signAllPublications()
+//    signAllPublications()
     coordinates("com.kttipay", "kpayment-mobile", libs.versions.appVersionName.get())
 
     pom {
