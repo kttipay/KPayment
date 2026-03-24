@@ -194,7 +194,8 @@ object PaymentConfig {
             ),
             merchantValidationEndpoint = APPLE_PAY_MERCHANT_VALIDATION_ENDPOINT,
             baseUrl = "https://${kotlinx.browser.window.location.hostname}",
-            domain = kotlinx.browser.window.location.hostname
+            domain = kotlinx.browser.window.location.hostname,
+            enableJsSdk = true
         )
     }
 
