@@ -17,6 +17,9 @@ enum class ApplePayWebErrorCode(val code: String, val message: String) {
     /** Failed to extract payment token from Apple Pay response */
     TOKEN_EXTRACTION_FAILED("token_extraction_failed", "Failed to extract payment token from Apple Pay response"),
 
+    /** Failed to load the Apple Pay JS SDK */
+    SDK_LOAD_FAILED("sdk_load_failed", "Failed to load Apple Pay JS SDK"),
+
     /** Unknown error occurred */
     UNKNOWN("unknown", "An unknown error occurred");
 
@@ -70,6 +73,7 @@ internal fun ApplePayWebErrorCode.toPaymentErrorReason(): PaymentErrorReason {
         ApplePayWebErrorCode.SESSION_BEGIN_FAILED -> PaymentErrorReason.NotAvailable
         ApplePayWebErrorCode.MERCHANT_VALIDATION_FAILED -> PaymentErrorReason.NetworkError
         ApplePayWebErrorCode.TOKEN_EXTRACTION_FAILED -> PaymentErrorReason.InternalError
+        ApplePayWebErrorCode.SDK_LOAD_FAILED -> PaymentErrorReason.NotAvailable
         ApplePayWebErrorCode.UNKNOWN -> PaymentErrorReason.Unknown
     }
 }

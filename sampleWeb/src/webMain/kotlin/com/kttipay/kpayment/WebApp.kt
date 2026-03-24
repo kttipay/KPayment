@@ -51,13 +51,17 @@ import com.kttipay.payment.api.PaymentResult
 import com.kttipay.payment.api.config.WebPaymentConfig
 import com.kttipay.payment.api.logging.KPaymentLogger
 import com.kttipay.payment.capability.CapabilityStatus
+import com.kttipay.payment.ui.ApplePayWebButton
+import com.kttipay.payment.ui.ApplePayWebButtonConfig
+import com.kttipay.payment.ui.ApplePayWebButtonTheme
+import com.kttipay.payment.ui.ApplePayWebButtonType
 import com.kttipay.payment.ui.LocalWebPaymentManager
 import com.kttipay.payment.ui.PaymentManagerProvider
+import com.kttipay.payment.ui.launcher.rememberApplePayWebLauncher
 import com.kttipay.payment.ui.launcher.rememberGooglePayWebLauncher
 import com.kttipay.payment.ui.rememberWebPaymentManager
 import androidx.compose.runtime.Immutable
 import com.kttipay.payment.capability.PaymentCapabilities
-import kotlinx.coroutines.flow.map
 import org.kimplify.cedar.logging.Cedar
 import org.kimplify.cedar.logging.trees.PlatformLogTree
 
@@ -222,6 +226,7 @@ private fun WebAppMainContent() {
         .collectAsStateWithLifecycle(PaymentCapabilities.initial)
 
     val hasGooglePay = paymentManager.config.googlePay != null
+    val hasApplePay = paymentManager.config.applePayWeb != null
 
     val googleButton = if (hasGooglePay) rememberGooglePayWebLauncher(
         onResult = { result ->
@@ -236,6 +241,24 @@ private fun WebAppMainContent() {
 
                 is PaymentResult.Cancelled -> {
                     Cedar.i("Google Pay payment cancelled by user")
+                }
+            }
+        }
+    ) else null
+
+    val appleButton = if (hasApplePay) rememberApplePayWebLauncher(
+        onResult = { result ->
+            when (result) {
+                is PaymentResult.Success -> {
+                    Cedar.i("Apple Pay payment successful: ${result.token}")
+                }
+
+                is PaymentResult.Error -> {
+                    Cedar.e("Apple Pay payment error: ${result.message}")
+                }
+
+                is PaymentResult.Cancelled -> {
+                    Cedar.i("Apple Pay payment cancelled by user")
                 }
             }
         }
@@ -269,14 +292,9 @@ private fun WebAppMainContent() {
                         }
                     )
 
-                    PaymentProviderCard(
-                        providerName = "Apple Pay",
+                    ApplePayDemoCard(
                         status = capabilities.applePay,
-                        icon = "🍎",
-                        provider = PaymentProvider.ApplePay,
-                        onTest = {
-                            Cedar.i("Testing Apple Pay payment...")
-                        }
+                        onLaunch = { appleButton?.launch("1.00") }
                     )
 
                 Card(
@@ -336,75 +354,69 @@ private fun WebAppMainContent() {
     }
 }
 
-/**
- * Styled Apple Pay button following Apple's brand guidelines
- */
 @Composable
-private fun ApplePayButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true
+private fun ApplePayDemoCard(
+    status: CapabilityStatus,
+    onLaunch: () -> Unit
 ) {
-    Button(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = modifier.height(48.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Black,
-            contentColor = Color.White,
-            disabledContainerColor = Color.Gray,
-            disabledContentColor = Color.LightGray
-        ),
-        shape = RoundedCornerShape(8.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
-    ) {
-        Text(
-            text = " Pay",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
-
-/**
- * Styled Google Pay button following Google's brand guidelines
- */
-@Composable
-private fun GooglePayButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true
-) {
-    Button(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = modifier.height(48.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Black,
-            contentColor = Color.White,
-            disabledContainerColor = Color.Gray,
-            disabledContentColor = Color.LightGray
-        ),
-        shape = RoundedCornerShape(8.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Image(
-                imageVector = GoogleIcon,
-                modifier = Modifier
-                    .background(Color.White, RoundedCornerShape(2.dp))
-                    .padding(horizontal = 4.dp, vertical = 2.dp),
-                contentDescription = ""
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Pay",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "🍎", style = MaterialTheme.typography.headlineMedium)
+                Column {
+                    Text(text = "Apple Pay", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = when (status) {
+                            is CapabilityStatus.Ready -> "✅ Available"
+                            is CapabilityStatus.NotSupported -> "❌ Not Available"
+                            is CapabilityStatus.Checking -> "⏳ Checking..."
+                            is CapabilityStatus.NotConfigured -> "⚠ Not Configured"
+                            is CapabilityStatus.Error -> "⚠ Error: ${status.reason}"
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = when (status) {
+                            is CapabilityStatus.Ready -> MaterialTheme.colorScheme.primary
+                            is CapabilityStatus.NotSupported -> MaterialTheme.colorScheme.error
+                            is CapabilityStatus.Checking -> MaterialTheme.colorScheme.onSurfaceVariant
+                            is CapabilityStatus.NotConfigured -> MaterialTheme.colorScheme.tertiary
+                            is CapabilityStatus.Error -> MaterialTheme.colorScheme.error
+                        }
+                    )
+                }
+            }
+
+            if (status is CapabilityStatus.Ready) {
+                Text(
+                    text = "JS SDK Button",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                ApplePayWebButton(
+                    onClick = onLaunch,
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    config = ApplePayWebButtonConfig(
+                        theme = ApplePayWebButtonTheme.Black,
+                        type = ApplePayWebButtonType.Pay,
+                        cornerRadius = 8.dp,
+                    )
+                )
+
+                Text(
+                    text = "Compose Button",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                NativeApplePayButton(
+                    onClick = onLaunch,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
@@ -468,17 +480,14 @@ private fun PaymentProviderCard(
             if (status is CapabilityStatus.Ready) {
                 when (provider) {
                     PaymentProvider.GooglePay -> {
-                        GooglePayButton(
+                        NativeGooglePayButton(
                             onClick = onTest,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
 
                     PaymentProvider.ApplePay -> {
-                        ApplePayButton(
-                            onClick = onTest,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        // Apple Pay is handled by ApplePayDemoCard above
                     }
                 }
             }

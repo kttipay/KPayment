@@ -25,6 +25,16 @@
             font-size: 18px;
             color: #666;
         }
+        /* Apple Pay SDK button styling via CSS custom properties.
+           These control the shadow DOM's internal button dimensions. */
+        apple-pay-button {
+            --apple-pay-button-width: 100%;
+            --apple-pay-button-height: 48px;
+            --apple-pay-button-border-radius: 8px;
+            --apple-pay-button-padding: 0px 0px;
+            --apple-pay-button-box-sizing: border-box;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -33,10 +43,10 @@
         Loading KPayment Sample...
     </div>
     <script>
-        // Hide loading indicator once the app starts
         window.addEventListener('load', function() {
             setTimeout(function() {
-                document.getElementById('loading').style.display = 'none';
+                var el = document.getElementById('loading');
+                if (el) el.style.display = 'none';
             }, 1000);
         });
     </script>

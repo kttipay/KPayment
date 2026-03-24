@@ -4,7 +4,7 @@ import com.kttipay.payment.api.config.ApplePayWebConfig
 import com.kttipay.payment.api.config.GooglePayWebConfig
 import com.kttipay.payment.capability.CapabilityStatus
 
-internal actual fun checkApplePayAvailability(config: ApplePayWebConfig): CapabilityStatus {
+internal actual suspend fun checkApplePayAvailability(config: ApplePayWebConfig): CapabilityStatus {
     return CapabilityStatus.NotSupported
 }
 
