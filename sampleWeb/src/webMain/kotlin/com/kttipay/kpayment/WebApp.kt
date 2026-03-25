@@ -323,7 +323,6 @@ private fun WebAppMainContent() {
                     }
                 }
 
-                // Instructions
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
@@ -487,7 +486,6 @@ private fun PaymentProviderCard(
                     }
 
                     PaymentProvider.ApplePay -> {
-                        // Apple Pay is handled by ApplePayDemoCard above
                     }
                 }
             }

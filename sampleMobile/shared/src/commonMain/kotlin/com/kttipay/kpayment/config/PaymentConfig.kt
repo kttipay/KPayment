@@ -61,8 +61,6 @@ object PaymentConfig {
      */
     const val GOOGLE_PAY_ENVIRONMENT = "TEST"
 
-    // MARK: - Apple Pay Configuration
-
     /**
      * Apple Pay merchant name displayed during payment.
      * Replace with your actual business name.
@@ -91,8 +89,6 @@ object PaymentConfig {
      * Domain where the Apple Pay JS integration is hosted.
      */
     const val APPLE_PAY_DOMAIN = "localhost"
-
-    // MARK: - Common Payment Configuration
 
     /**
      * Test payment amount in the currency's smallest unit.

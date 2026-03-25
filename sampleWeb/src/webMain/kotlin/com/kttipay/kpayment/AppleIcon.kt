@@ -22,14 +22,12 @@ val AppleIcon: ImageVector
             viewportHeight = 16f
         ).apply {
             path(fill = SolidColor(Color.White)) {
-                // Leaf
                 moveTo(11.182f, 0.008f)
                 curveTo(11.148f, -0.03f, 9.923f, 0.023f, 8.857f, 1.18f)
                 curveToRelative(-1.066f, 1.156f, -0.902f, 2.482f, -0.878f, 2.516f)
                 reflectiveCurveToRelative(1.52f, 0.087f, 2.475f, -1.258f)
                 reflectiveCurveToRelative(0.762f, -2.391f, 0.728f, -2.43f)
                 close()
-                // Body
                 moveTo(14.496f, 11.741f)
                 curveToRelative(-0.048f, -0.096f, -2.325f, -1.234f, -2.113f, -3.422f)
                 reflectiveCurveToRelative(1.675f, -2.789f, 1.698f, -2.854f)

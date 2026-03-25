@@ -16,7 +16,6 @@ internal class WebConfigAccessor(
     config: PlatformPaymentConfig
 ) : ConfigAccessor {
 
-    // Cache GooglePayWebConfig transformation
     private val googlePayConfigCache: GooglePayWebConfig? = run {
         require(config is WebPaymentConfig) {
             "WebConfigAccessor requires WebPaymentConfig"

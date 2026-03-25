@@ -88,7 +88,6 @@ private fun NativePaymentType.toAppleType(): ApplePayButtonType = when (this) {
     NativePaymentType.TopUp -> ApplePayButtonType.TopUp
     NativePaymentType.Plain -> ApplePayButtonType.Plain
 
-    // Map unsupported Google specific types to closest Apple equivalent
     NativePaymentType.Book,
     NativePaymentType.Checkout,
     NativePaymentType.Donate,

@@ -53,11 +53,9 @@ kotlin {
     }
 }
 
-// Publishing your Kotlin Multiplatform library to Maven Central
-// https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
 mavenPublishing {
     publishToMavenCentral()
-//    signAllPublications()
+    signAllPublications()
     coordinates("com.kttipay", "kpayment-web", libs.versions.appVersionName.get())
 
     pom {
