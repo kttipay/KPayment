@@ -22,5 +22,8 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
+      - name: Run iOS tests
+        run: ./gradlew iosSimulatorArm64Test --no-configuration-cache
+
       - name: Build library
         run: ./gradlew build --no-configuration-cache
