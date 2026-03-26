@@ -9,7 +9,7 @@ plugins {
 kotlin {
     jvmToolchain(libs.versions.javaVersion.get().toInt())
 
-    androidLibrary {
+    android {
         namespace = "com.kttipay.kpayment.shared"
         compileSdk = libs.versions.compileSdk.get().toInt()
         minSdk = libs.versions.minSdk.get().toInt()
