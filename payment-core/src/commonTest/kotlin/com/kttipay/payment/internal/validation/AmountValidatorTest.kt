@@ -105,5 +105,36 @@ class AmountValidatorTest {
         assertTrue(result is ValidationResult.Error)
         assertTrue(result.message.contains("Invalid amount format"))
     }
+
+    @Test
+    fun `validate returns Error for comma decimal separator`() {
+        val result = AmountValidator.validate("10,50")
+        assertTrue(result is ValidationResult.Error)
+        assertTrue(result.message.contains("Locale-formatted"))
+    }
+
+    @Test
+    fun `validate returns Error for period thousands with comma decimal`() {
+        val result = AmountValidator.validate("1.234,56")
+        assertTrue(result is ValidationResult.Error)
+        assertTrue(result.message.contains("Locale-formatted"))
+    }
+
+    @Test
+    fun `validate returns Error for comma thousands with period decimal`() {
+        val result = AmountValidator.validate("1,234.56")
+        assertTrue(result is ValidationResult.Error)
+        assertTrue(result.message.contains("Locale-formatted"))
+    }
+
+    @Test
+    fun `validateOrThrow throws for comma decimal separator`() {
+        try {
+            AmountValidator.validateOrThrow("10,50")
+            assertFalse(true, "Should have thrown IllegalArgumentException")
+        } catch (e: IllegalArgumentException) {
+            assertTrue(e.message?.contains("Locale-formatted") == true)
+        }
+    }
 }
 

@@ -11,13 +11,13 @@ object AmountValidator {
 
         if (!AMOUNT_REGEX.matches(amount)) {
             return ValidationResult.Error(
-                "Invalid amount format. Expected decimal number with max 2 decimal places (e.g., '10.00')"
+                "Invalid amount format. Use '.' as decimal separator with max 2 decimal places " +
+                    "(e.g., '10.50'). Locale-formatted values like '10,50' are not accepted. " +
+                    "Avoid using locale-sensitive formatting such as String.format() or NumberFormat."
             )
         }
 
-        val numericAmount = amount.toDoubleOrNull() ?: return ValidationResult.Error(
-            "Amount cannot be parsed as a number"
-        )
+        amount.toDoubleOrNull() ?: return ValidationResult.Error("Amount cannot be parsed as a number")
 
         return ValidationResult.Valid(amount)
     }
