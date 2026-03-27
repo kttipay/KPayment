@@ -9,6 +9,5 @@ import com.kttipay.payment.api.config.PlatformPaymentConfig
  */
 internal class WebPlatformSetupStrategy : PlatformSetupStrategy {
     override fun setupPlatformPayments(config: PlatformPaymentConfig) {
-        // No setup needed for web
     }
 }

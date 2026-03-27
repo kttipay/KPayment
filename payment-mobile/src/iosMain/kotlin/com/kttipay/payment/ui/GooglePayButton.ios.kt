@@ -13,5 +13,4 @@ actual fun GooglePayButton(
     cornerRadius: Dp,
     enabled: Boolean
 ) {
-    // No-op for ios
 }

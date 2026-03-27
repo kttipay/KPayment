@@ -9,7 +9,7 @@ plugins {
 kotlin {
     jvmToolchain(libs.versions.javaVersion.get().toInt())
 
-    androidLibrary {
+    android {
         namespace = "com.kttipay.kpayment.shared"
         compileSdk = libs.versions.compileSdk.get().toInt()
         minSdk = libs.versions.minSdk.get().toInt()
@@ -19,6 +19,9 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+        }
+        iosTarget.binaries.all {
+            linkerOpts("-U", "_OBJC_CLASS_${'$'}_UIViewLayoutRegion")
         }
     }
 

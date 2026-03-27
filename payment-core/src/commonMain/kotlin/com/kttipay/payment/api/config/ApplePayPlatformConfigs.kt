@@ -30,12 +30,15 @@ data class ApplePayMobileConfig(
 }
 
 /**
- * Web-specific Apple Pay configuration for Safari.
+ * Web-specific Apple Pay configuration.
  *
  * This configuration augments [ApplePayBaseConfig] with web-specific settings required
  * for Apple Pay on the Web, including the merchant validation endpoint.
  *
- * Note: Apple Pay on Web only works in Safari and requires domain validation.
+ * When the Apple Pay JS SDK (v1.2.0+) is loaded, Apple Pay is also available on
+ * non-Safari browsers (Chrome, Firefox, Edge) via a QR code flow — users scan the
+ * code with their iPhone to complete payment. Without the SDK, Apple Pay is
+ * limited to Safari and requires domain validation.
  *
  * @param base The base Apple Pay configuration shared across platforms.
  * @param merchantValidationEndpoint The URL endpoint on your backend that handles
@@ -63,7 +66,18 @@ data class ApplePayWebConfig(
     val base: ApplePayBaseConfig,
     val merchantValidationEndpoint: String,
     val baseUrl: String,
-    val domain: String
+    val domain: String,
+    /**
+     * Whether to dynamically load the Apple Pay JS SDK if it's not already present.
+     *
+     * When `true` (default), the SDK is loaded automatically during capability checks,
+     * enabling Apple Pay on non-Safari browsers via QR code flow.
+     *
+     * When `false`, the SDK is NOT loaded dynamically. Apple Pay will only be available
+     * if the SDK was loaded via a `<script>` tag in the HTML `<head>`, or natively in Safari.
+     * Use this to control exactly when/if the SDK is loaded.
+     */
+    val enableJsSdk: Boolean = true
 ) : ApplePayConfig by base {
     init {
         require(merchantValidationEndpoint.isNotBlank()) { "merchantValidationEndpoint cannot be blank" }

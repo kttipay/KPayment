@@ -60,8 +60,6 @@ object PaymentConfig {
      */
     const val GOOGLE_PAY_ENVIRONMENT = "TEST"
 
-    // MARK: - Apple Pay Configuration
-
     /**
      * Apple Pay merchant identifier.
      * Create this in your Apple Developer account.
@@ -84,8 +82,6 @@ object PaymentConfig {
      * Domain where the Apple Pay JS integration is hosted.
      */
     const val APPLE_PAY_DOMAIN = "localhost"
-
-    // MARK: - Common Payment Configuration
 
     /**
      * Test payment amount in the currency's smallest unit.
@@ -194,7 +190,8 @@ object PaymentConfig {
             ),
             merchantValidationEndpoint = APPLE_PAY_MERCHANT_VALIDATION_ENDPOINT,
             baseUrl = "https://${kotlinx.browser.window.location.hostname}",
-            domain = kotlinx.browser.window.location.hostname
+            domain = kotlinx.browser.window.location.hostname,
+            enableJsSdk = true
         )
     }
 

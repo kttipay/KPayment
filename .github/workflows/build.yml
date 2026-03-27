@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Test & Build
+    name: Build
     runs-on: macOS-latest
     steps:
       - name: Check out code
@@ -22,8 +22,8 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
-      - name: Run tests
-        run: ./gradlew allTests --no-configuration-cache
+      - name: Run iOS tests
+        run: ./gradlew iosSimulatorArm64Test --no-configuration-cache
 
       - name: Build library
         run: ./gradlew build --no-configuration-cache

@@ -10,7 +10,18 @@ dependencies {
 }
 ```
 
-## Quick start (Compose)
+## Platform Setup
+
+### Android
+
+No additional setup. Google Play Services Wallet is included as a dependency.
+
+### iOS
+
+1. In Xcode, select your target → "Signing & Capabilities" → add "Apple Pay"
+2. Select your [merchant ID](https://developer.apple.com/account/resources/identifiers/list/merchant) (format: `merchant.com.yourcompany.yourapp`)
+
+## Quick Start (Compose)
 
 Amounts are decimal strings (for example, `"10.00"`).
 
@@ -35,7 +46,11 @@ fun Checkout() {
 
     PaymentManagerProvider(manager) {
         val launcher = rememberNativePaymentLauncher { result ->
-            // handle PaymentResult.Success, PaymentResult.Error, PaymentResult.Cancelled
+            when (result) {
+                is PaymentResult.Success -> println("Token: ${result.token}")
+                is PaymentResult.Error -> println("Error: ${result.message}")
+                is PaymentResult.Cancelled -> println("Cancelled")
+            }
         }
 
         PaymentButton(
@@ -49,7 +64,7 @@ fun Checkout() {
 }
 ```
 
-## Non-Compose usage
+## Non-Compose Usage
 
 - Android: `createMobilePaymentManager(config, context)`
 - iOS: `createMobilePaymentManager(config)`
@@ -68,7 +83,7 @@ PaymentButton(
 
 ## Compose Preview
 
-`PaymentButton` works in `@Preview` out of the box. When `LocalInspectionMode` is active, a styled stub is rendered instead of the native Google Pay / Apple Pay button, so your screen previews won't crash.
+`PaymentButton` works in `@Preview` out of the box. When `LocalInspectionMode` is active, a styled stub is rendered instead of the native button.
 
 ## Notes
 

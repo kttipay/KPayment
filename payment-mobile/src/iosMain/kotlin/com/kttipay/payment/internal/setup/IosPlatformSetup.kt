@@ -11,6 +11,5 @@ import com.kttipay.payment.api.config.MobilePaymentConfig
 internal class IosPlatformSetup : PlatformSetup {
 
     override fun setupPlatformPayments(config: MobilePaymentConfig) {
-        // No setup needed - factory is lazily created in ApplePayPaymentLauncher
     }
 }

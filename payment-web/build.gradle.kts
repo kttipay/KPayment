@@ -13,7 +13,7 @@ plugins {
 kotlin {
     jvmToolchain(libs.versions.javaVersion.get().toInt())
 
-    androidLibrary {
+    android {
         namespace = "com.kttipay.payment.web"
         compileSdk = libs.versions.compileSdk.get().toInt()
         minSdk = libs.versions.minSdk.get().toInt()
@@ -53,8 +53,6 @@ kotlin {
     }
 }
 
-// Publishing your Kotlin Multiplatform library to Maven Central
-// https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()

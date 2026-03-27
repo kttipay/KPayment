@@ -11,7 +11,7 @@ plugins {
 kotlin {
     jvmToolchain(libs.versions.javaVersion.get().toInt())
 
-    androidLibrary {
+    android {
         namespace = "com.kttipay.payment.mobile"
         compileSdk = libs.versions.compileSdk.get().toInt()
         minSdk = libs.versions.minSdk.get().toInt()
@@ -35,6 +35,9 @@ kotlin {
         iosSimulatorArm64(),
     ).forEach { iosTarget ->
         iosTarget.binaries.framework { isStatic = true }
+        iosTarget.binaries.all {
+            linkerOpts("-U", "_OBJC_CLASS_${'$'}_UIViewLayoutRegion")
+        }
         swiftExport {
             moduleName = "PaymentMobile"
         }
@@ -79,8 +82,6 @@ ktlint {
     version.set("1.8.0")
 }
 
-// Publishing your Kotlin Multiplatform library to Maven Central
-// https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html
 mavenPublishing {
     publishToMavenCentral()
     signAllPublications()

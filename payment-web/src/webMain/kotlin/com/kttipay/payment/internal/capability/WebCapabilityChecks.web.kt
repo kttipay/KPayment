@@ -1,28 +1,71 @@
 package com.kttipay.payment.internal.capability
 
-import com.kttipay.payment.internal.applepay.ApplePayAvailability
 import com.kttipay.payment.api.config.ApplePayWebConfig
 import com.kttipay.payment.api.config.GooglePayWebConfig
 import com.kttipay.payment.capability.CapabilityStatus
 import com.kttipay.payment.internal.googlepay.GooglePayWebClient
 import com.kttipay.payment.internal.googlepay.GooglePayWebClientImpl
+import com.kttipay.payment.internal.logging.KPaymentLogger
 import com.kttipay.payment.internal.utils.ScriptLoader
+import kotlin.JsFun
+import kotlin.js.ExperimentalWasmJsInterop
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
-internal actual fun checkApplePayAvailability(
+private const val TAG = "WebCapabilityChecks"
+
+/**
+ * Safely checks ApplePaySession.canMakePayments() with full JS-level error handling.
+ *
+ * Returns:
+ * - 1 if ApplePaySession exists and canMakePayments() returns true
+ * - 0 if ApplePaySession is undefined or canMakePayments() returns false
+ * - -1 if canMakePayments() threw an error (e.g., SecurityError on non-HTTPS)
+ */
+@OptIn(ExperimentalWasmJsInterop::class)
+@JsFun(
+    """
+    function() {
+        try {
+            if (typeof ApplePaySession === 'undefined') {
+                console.log('[KPayment] ApplePaySession is undefined');
+                return 0;
+            }
+            var result = ApplePaySession.canMakePayments();
+            console.log('[KPayment] ApplePaySession.canMakePayments() =', result);
+            return result ? 1 : 0;
+        } catch(e) {
+            console.warn('[KPayment] ApplePaySession.canMakePayments() threw:', e);
+            return -1;
+        }
+    }
+    """
+)
+private external fun safeCanMakePaymentsCode(): Int
+
+internal actual suspend fun checkApplePayAvailability(
     config: ApplePayWebConfig
 ): CapabilityStatus {
-    return runCatching { ApplePayAvailability.canMakePayments() }
-        .map { available ->
-            if (available) {
-                CapabilityStatus.Ready
-            } else {
-                CapabilityStatus.Error("Apple Pay unavailable for ${config.base.merchantName}")
+    if (config.enableJsSdk) {
+        val sdkResult = ScriptLoader.loadApplePaySdkScript()
+        KPaymentLogger.tag(TAG).d("Apple Pay SDK load result: ${sdkResult.isSuccess}")
+        sdkResult.onFailure { error ->
+            KPaymentLogger.tag(TAG).w("Apple Pay SDK load failed, falling back to native API", error)
+        }
+    }
+
+    return runCatching { safeCanMakePaymentsCode() }
+        .map { code ->
+            KPaymentLogger.tag(TAG).d("Apple Pay canMakePayments code: $code")
+            when (code) {
+                1 -> CapabilityStatus.Ready
+                0 -> CapabilityStatus.Error("Apple Pay unavailable for ${config.base.merchantName}")
+                else -> CapabilityStatus.Error("Apple Pay canMakePayments() threw an error (non-HTTPS?)")
             }
         }
         .getOrElse { error ->
-            CapabilityStatus.Error("Apple Pay availability check failed", error)
+            KPaymentLogger.tag(TAG).e("Apple Pay availability check failed", error)
+            CapabilityStatus.Error("Apple Pay availability check failed: ${error.message}", error)
         }
 }
 
