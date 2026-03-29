@@ -6,8 +6,8 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.kttipay/kpayment-core)](https://central.sonatype.com/artifact/com.kttipay/kpayment-core)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-blue.svg)](https://kotlinlang.org)
-[![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.11.0-blue.svg)](https://www.jetbrains.com/lp/compose-multiplatform/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-blue.svg)](https://kotlinlang.org)
+[![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.11.0--alpha04-blue.svg)](https://www.jetbrains.com/lp/compose-multiplatform/)
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-green.svg)](https://github.com/kttipay/KPayment)
 
 [Quickstart](#-quickstart) • [Installation](#-installation) • [Samples](#-samples) • [Documentation](#-module-details) • [![DeepWiki](https://img.shields.io/badge/DeepWiki-kttipay%2FKPayment-blue.svg?logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyIDJMMyA3djEwbDkgNSA5LTVIN0wxMiAyeiIgZmlsbD0id2hpdGUiLz48L3N2Zz4=)](https://deepwiki.com/kttipay/KPayment)
