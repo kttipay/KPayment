@@ -47,6 +47,16 @@ fun CheckoutWeb() {
 
 - `createWebPaymentManager(config)`
 
+## Google Pay Script
+
+Google Pay requires the [Google Pay JS SDK](https://developers.google.com/pay/api/web/guides/tutorial) (`pay.js`) to be loaded before `launch()` is called. Add this to your HTML `<head>`:
+
+```html
+<script src="https://pay.google.com/gp/p/js/pay.js"></script>
+```
+
+Without the script tag, `launch()` will fail with `Uncaught ReferenceError: google is not defined`. The SDK is otherwise lazy-loaded on the first capability check, so running an availability check before rendering the button also works.
+
 ## Apple Pay Cross-Browser (QR Code Flow)
 
 By default (`enableJsSdk = true`), the library loads the [Apple Pay JS SDK](https://developer.apple.com/documentation/apple_pay_on_the_web) to enable Apple Pay on **all browsers** via QR code (iOS 18+). Without the SDK, Apple Pay is Safari-only.
@@ -124,6 +134,7 @@ Button(
 
 ## Notes
 
+- Google Pay requires `pay.js` to be loaded before `launch()`. Either include the `<script>` tag in `<head>` or run a capability check first.
 - Apple Pay requires HTTPS. Use ngrok or a staging domain for local testing.
 - Apple Pay requires a merchant validation endpoint and domain verification with Apple.
 - The Apple Pay JS SDK script must be loaded synchronously in `<head>` (not async/deferred).
