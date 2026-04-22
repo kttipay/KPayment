@@ -1,6 +1,6 @@
 [versions]
 appVersionCode = "3"
-appVersionName = "0.2.0"
+appVersionName = "0.3.0"
 
 libraryName = "KPayment"
 libraryDescription = "A Kotlin Multiplatform library for seamless payment processing across Android, iOS, and Web platforms."
