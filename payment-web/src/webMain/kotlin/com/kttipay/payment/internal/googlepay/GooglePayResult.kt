@@ -7,7 +7,7 @@ import com.kttipay.payment.api.PaymentResult
 enum class GooglePayWebErrorCode(val message: String) {
     LOAD_PAYMENT_DATA_FAILED("Failed to load payment data"),
     TOKEN_EXTRACTION_FAILED("Failed to extract payment token from Google Pay response"),
-    UNKNOWN("An unknown error occurred");
+    UNKNOWN("An unknown error occurred")
 }
 
 sealed interface GooglePayWebResult {

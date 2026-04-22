@@ -42,7 +42,7 @@ class PaymentManagerImpl<T : PlatformPaymentConfig>(
 
     private val log = KPaymentLogger.tag(logTag)
 
-    private val _capabilitiesFlow = MutableStateFlow(PaymentCapabilities.initial)
+    private val capabilitiesFlow = MutableStateFlow(PaymentCapabilities.initial)
 
     init {
         log.d("Initializing Payment Manager - Environment: ${config.environment.name}")
@@ -59,7 +59,7 @@ class PaymentManagerImpl<T : PlatformPaymentConfig>(
                 googlePay = googleStatus,
                 applePay = appleStatus
             ).also { capabilities ->
-                _capabilitiesFlow.value = capabilities
+                capabilitiesFlow.value = capabilities
                 log.d("Capabilities — GooglePay: $googleStatus, ApplePay: $appleStatus")
             }
         }.getOrElse { error ->
@@ -67,19 +67,19 @@ class PaymentManagerImpl<T : PlatformPaymentConfig>(
             PaymentCapabilities(
                 googlePay = resolveErrorStatus(configAccessor.getGooglePayConfig(config), error),
                 applePay = resolveErrorStatus(configAccessor.getApplePayConfig(config), error)
-            ).also { _capabilitiesFlow.value = it }
+            ).also { capabilitiesFlow.value = it }
         }
     }
 
     override fun observeCapabilities(): Flow<PaymentCapabilities> {
         scope.launch {
-            if (_capabilitiesFlow.value.googlePay is CapabilityStatus.Checking ||
-                _capabilitiesFlow.value.applePay is CapabilityStatus.Checking
+            if (capabilitiesFlow.value.googlePay is CapabilityStatus.Checking ||
+                capabilitiesFlow.value.applePay is CapabilityStatus.Checking
             ) {
                 checkCapabilities()
             }
         }
-        return _capabilitiesFlow
+        return capabilitiesFlow
     }
 
     override fun observeAvailability(provider: PaymentProvider): Flow<Boolean> {

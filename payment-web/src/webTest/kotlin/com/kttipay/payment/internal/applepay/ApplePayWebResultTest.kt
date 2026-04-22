@@ -111,8 +111,14 @@ class ApplePayWebResultTest {
     @Test
     fun `ApplePayWebErrorCode fromCode returns correct error code`() {
         assertEquals(ApplePayWebErrorCode.SESSION_BEGIN_FAILED, ApplePayWebErrorCode.fromCode("session_begin_failed"))
-        assertEquals(ApplePayWebErrorCode.MERCHANT_VALIDATION_FAILED, ApplePayWebErrorCode.fromCode("merchant_validation_failed"))
-        assertEquals(ApplePayWebErrorCode.TOKEN_EXTRACTION_FAILED, ApplePayWebErrorCode.fromCode("token_extraction_failed"))
+        assertEquals(
+            ApplePayWebErrorCode.MERCHANT_VALIDATION_FAILED,
+            ApplePayWebErrorCode.fromCode("merchant_validation_failed"),
+        )
+        assertEquals(
+            ApplePayWebErrorCode.TOKEN_EXTRACTION_FAILED,
+            ApplePayWebErrorCode.fromCode("token_extraction_failed"),
+        )
         assertEquals(ApplePayWebErrorCode.UNKNOWN, ApplePayWebErrorCode.fromCode("unknown"))
     }
 

@@ -20,7 +20,10 @@ internal external interface PaymentData : JsAny {
     val paymentMethodData: PaymentMethodData
 }
 
-@JsFun("function(googlePayEnvironment) { return new google.payments.api.PaymentsClient({ environment: googlePayEnvironment }) } ")
+@JsFun(
+    "function(googlePayEnvironment) { " +
+        "return new google.payments.api.PaymentsClient({ environment: googlePayEnvironment }) }",
+)
 external fun createPaymentsClient(googlePayEnvironment: String): PaymentsClient
 
 external interface PaymentsClient : JsAny {

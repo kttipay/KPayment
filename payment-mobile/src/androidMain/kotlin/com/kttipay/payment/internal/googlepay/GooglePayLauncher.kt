@@ -35,7 +35,8 @@ fun rememberGooglePayLauncher(
     val processingState = remember { MutableStateFlow(false) }
     val currentOnResult by rememberUpdatedState(onResult)
 
-    val launcher = rememberLauncherForActivityResult(contract = TaskResultContracts.GetPaymentDataResult()) { taskResult ->
+    val launcher =
+        rememberLauncherForActivityResult(contract = TaskResultContracts.GetPaymentDataResult()) { taskResult ->
             processingState.update { false }
             val provider = PaymentProvider.GooglePay
             when (taskResult.status.statusCode) {

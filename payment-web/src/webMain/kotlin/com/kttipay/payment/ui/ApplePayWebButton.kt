@@ -7,9 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.HtmlElementView
+import com.kttipay.payment.internal.applepay.isApplePaySdkLoaded
 import kotlinx.browser.document
 import org.w3c.dom.HTMLElement
-import com.kttipay.payment.internal.applepay.isApplePaySdkLoaded
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.unsafeCast
 

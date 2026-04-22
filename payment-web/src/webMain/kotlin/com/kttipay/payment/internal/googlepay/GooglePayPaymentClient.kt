@@ -59,7 +59,10 @@ internal class GooglePayPaymentClientImpl(
                 onRejected = { error: JsPromiseError ->
                     KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment onRejected raw=$error")
                     val parsed = parsePaymentError(error)
-                    KPaymentLogger.d("GooglePayPaymentClientImpl.requestPayment parsedError=${parsed::class.simpleName} message=${parsed.message}")
+                    KPaymentLogger.d(
+                        "GooglePayPaymentClientImpl.requestPayment parsedError=${parsed::class.simpleName} " +
+                            "message=${parsed.message}",
+                    )
 
                     val result = when (parsed) {
                         is PaymentException.CancelledException -> GooglePayWebResult.Cancelled
@@ -100,7 +103,9 @@ private fun parsePaymentError(error: JsPromiseError): PaymentException {
     val statusCode = googlePayError?.statusCode
     val statusMessage = googlePayError?.statusMessage.orEmpty()
 
-    KPaymentLogger.tag("GooglePayPaymentClient").w("parsePaymentError extracted statusCode=$statusCode statusMessage=$statusMessage")
+    KPaymentLogger.tag("GooglePayPaymentClient").w(
+        "parsePaymentError extracted statusCode=$statusCode statusMessage=$statusMessage",
+    )
 
     return when {
         statusCode.equals("CANCELED", ignoreCase = true) -> {

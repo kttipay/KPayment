@@ -272,7 +272,6 @@ private fun ApplePayButtonDarkPreview() {
             radius = previewRadius
         )
     }
-
 }
 
 @Preview
@@ -288,7 +287,6 @@ private fun ApplePayButtonLightPreview() {
             radius = previewRadius
         )
     }
-
 }
 
 @Preview

@@ -108,6 +108,7 @@ data class PaymentCapabilities(
             applePay = CapabilityStatus.Checking
         )
     }
+
     /**
      * Returns the capability status for the specified payment provider.
      *

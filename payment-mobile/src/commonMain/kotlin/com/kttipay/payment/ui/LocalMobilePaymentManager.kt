@@ -60,7 +60,8 @@ internal val MockPaymentManager = object : MobilePaymentManager {
                 gateway = "test_gateway",
                 gatewayMerchantId = "test_gateway_merchant_id",
             ),
-            environment = PaymentEnvironment.Development)
+            environment = PaymentEnvironment.Development
+        )
 
     override suspend fun checkCapabilities(): PaymentCapabilities = readyCapabilities
 

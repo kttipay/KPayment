@@ -84,6 +84,8 @@ data class ApplePayWebConfig(
         require(baseUrl.isNotBlank()) { "baseUrl cannot be blank" }
         require(baseUrl.startsWith("https://")) { "baseUrl must use HTTPS" }
         require(domain.isNotBlank()) { "domain cannot be blank" }
-        require(!domain.contains("://")) { "domain must not include protocol (e.g., 'example.com', not 'https://example.com')" }
+        require(!domain.contains("://")) {
+            "domain must not include protocol (e.g., 'example.com', not 'https://example.com')"
+        }
     }
 }
