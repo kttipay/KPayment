@@ -66,6 +66,12 @@ sealed class GatewayConfig {
                 require(k.isNotBlank()) { "parameter keys cannot be blank" }
                 require(v.isNotBlank()) { "parameter values cannot be blank (key: $k)" }
             }
+            require(
+                !additionalParameters.containsKey("gateway") &&
+                    !additionalParameters.containsKey("gatewayMerchantId")
+            ) {
+                "additionalParameters cannot contain reserved keys 'gateway' or 'gatewayMerchantId' — use the typed fields instead"
+            }
         }
     }
 }

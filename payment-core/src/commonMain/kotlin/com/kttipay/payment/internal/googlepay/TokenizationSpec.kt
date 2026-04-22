@@ -14,12 +14,6 @@ internal fun GatewayConfig.toTokenizationParameters(): Map<String, String> = whe
         stripeAccountId?.let { put("gatewayMerchantId", it) }
     }
     is GatewayConfig.Custom -> buildMap {
-        require(
-            !additionalParameters.containsKey("gateway") &&
-                !additionalParameters.containsKey("gatewayMerchantId")
-        ) {
-            "Custom.additionalParameters cannot contain reserved keys 'gateway' or 'gatewayMerchantId' — use the typed fields instead"
-        }
         put("gateway", gatewayName)
         gatewayMerchantId?.let { put("gatewayMerchantId", it) }
         putAll(additionalParameters)
@@ -30,6 +24,11 @@ internal fun GatewayConfig.toTokenizationParameters(): Map<String, String> = whe
  * Minimal, allocation-light JSON-object serializer for `Map<String, String>`. Keeps
  * `payment-core` free of a kotlinx.serialization dependency for this single use case.
  * Escapes `"`, `\`, and the JSON-required control characters.
+ *
+ * Caveat: only C0 controls (U+0000–U+001F) are escaped. C1 controls (U+0080–U+009F) and
+ * surrogate pairs are passed through verbatim. This is acceptable here because the only
+ * callers are [GatewayConfig.toTokenizationParameters], whose values are gateway names,
+ * merchant IDs, and similar ASCII tokens.
  */
 internal fun Map<String, String>.toJsonObjectString(): String {
     val sb = StringBuilder()
@@ -53,6 +52,7 @@ private fun StringBuilder.appendEscaped(s: String): StringBuilder {
             '\r' -> append("\\r")
             '\t' -> append("\\t")
             '\b' -> append("\\b")
+            '' -> append("\\f")
             else -> if (c.code < 0x20) {
                 append("\\u")
                 val hex = c.code.toString(16)

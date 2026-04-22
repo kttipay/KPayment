@@ -3,7 +3,6 @@ package com.kttipay.payment.internal.googlepay
 import com.kttipay.payment.api.config.GatewayConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class TokenizationSpecTest {
@@ -84,26 +83,6 @@ class TokenizationSpecTest {
     }
 
     @Test
-    fun `Custom with reserved gateway key in additionalParameters throws`() {
-        assertFailsWith<IllegalArgumentException> {
-            GatewayConfig.Custom(
-                gatewayName = "braintree",
-                additionalParameters = mapOf("gateway" to "x")
-            ).toTokenizationParameters()
-        }
-    }
-
-    @Test
-    fun `Custom with reserved gatewayMerchantId key in additionalParameters throws`() {
-        assertFailsWith<IllegalArgumentException> {
-            GatewayConfig.Custom(
-                gatewayName = "braintree",
-                additionalParameters = mapOf("gatewayMerchantId" to "x")
-            ).toTokenizationParameters()
-        }
-    }
-
-    @Test
     fun `toJsonObjectString emits valid JSON with no escaping needed`() {
         val json = mapOf("a" to "b", "c" to "d").toJsonObjectString()
         // Order is not guaranteed on all platforms, but both keys must be present
@@ -127,5 +106,16 @@ class TokenizationSpecTest {
     @Test
     fun `toJsonObjectString emits empty object for empty map`() {
         assertEquals("{}", emptyMap<String, String>().toJsonObjectString())
+    }
+
+    @Test
+    fun `toJsonObjectString passes non-ASCII characters through unchanged`() {
+        val json = mapOf("k" to "héllo 日本 ").toJsonObjectString()
+        assertEquals("""{"k":"héllo 日本 "}""", json)
+    }
+
+    @Test
+    fun `toJsonObjectString accepts empty string values`() {
+        assertEquals("""{"k":""}""", mapOf("k" to "").toJsonObjectString())
     }
 }

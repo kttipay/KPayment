@@ -122,4 +122,24 @@ class GatewayConfigTest {
             )
         }
     }
+
+    @Test
+    fun `Custom with reserved gateway key in additionalParameters throws`() {
+        assertFailsWith<IllegalArgumentException> {
+            GatewayConfig.Custom(
+                gatewayName = "braintree",
+                additionalParameters = mapOf("gateway" to "x")
+            )
+        }
+    }
+
+    @Test
+    fun `Custom with reserved gatewayMerchantId key in additionalParameters throws`() {
+        assertFailsWith<IllegalArgumentException> {
+            GatewayConfig.Custom(
+                gatewayName = "braintree",
+                additionalParameters = mapOf("gatewayMerchantId" to "x")
+            )
+        }
+    }
 }
