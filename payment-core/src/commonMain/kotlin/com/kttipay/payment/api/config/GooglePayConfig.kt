@@ -1,64 +1,56 @@
 package com.kttipay.payment.api.config
 
 /**
- * Configuration for Google Pay integration.
+ * Configuration for Google Pay integration (shared across Android and Web).
  *
- * This configuration is used across Android and Web platforms to set up Google Pay.
- * All required parameters must be provided, while optional parameters have sensible defaults.
- *
- * @param merchantId Your Google Pay merchant ID. This is the merchant identifier registered
- *                  with Google Pay Business Console. Must not be empty.
- * @param merchantName The name of your business as it should appear to users during payment.
- *                     Must not be empty.
- * @param gateway The payment gateway identifier (e.g., "stripe", "braintree", "adyen").
- *                Must not be empty.
- * @param gatewayMerchantId Your merchant identifier with the payment gateway.
- *                          This is used by the gateway to identify your account.
- *                          Must not be empty.
+ * @param merchantId Your Google Pay merchant ID from the Google Pay & Wallet Console.
+ * @param merchantName The name of your business as it should appear to users at checkout.
+ * @param gateway Gateway-specific tokenization configuration. See [GatewayConfig].
  * @param allowedCardNetworks Set of card networks to accept. Defaults to MASTERCARD and VISA.
- *                           Use [GooglePayCardNetwork] enum values.
- * @param allowedAuthMethods Set of authentication methods to accept.
- *                          Defaults to [GooglePayAuthMethod.DEFAULT] (PAN_ONLY and CRYPTOGRAM_3DS).
+ * @param allowedAuthMethods Set of authentication methods to accept. Defaults to PAN_ONLY + CRYPTOGRAM_3DS.
  * @param allowCreditCards Whether to allow credit card transactions. Defaults to false.
- *                        Set to true if you want to accept credit cards in addition to debit cards.
- * @param assuranceDetailsRequired Whether to require additional cardholder verification.
- *                                 Defaults to false. Set to true to request additional verification
- *                                 for enhanced security.
- * @param currencyCode ISO 4217 currency code (e.g., "USD", "EUR", "AUD")
- * @param countryCode ISO 3166-1 alpha-2 country code (e.g., "US", "GB", "AU")
+ * @param assuranceDetailsRequired Whether to request additional cardholder verification.
+ * @param currencyCode ISO 4217 currency code (e.g. "USD", "EUR", "AUD").
+ * @param countryCode ISO 3166-1 alpha-2 country code (e.g. "US", "GB", "AU").
  *
- * Example usage:
+ * Example (Stripe):
  * ```
- * val googlePayConfig = GooglePayConfig(
+ * GooglePayConfig(
  *     merchantId = "YOUR_MERCHANT_ID",
  *     merchantName = "Your Store",
- *     gateway = "stripe",
- *     gatewayMerchantId = "YOUR_GATEWAY_ID",
- *     currencyCode = "USD",
- *     countryCode = "US"
+ *     gateway = GatewayConfig.Stripe(publishableKey = "pk_live_...")
+ * )
+ * ```
+ *
+ * Example (FatZebra / Adyen / any other gateway):
+ * ```
+ * GooglePayConfig(
+ *     merchantId = "YOUR_MERCHANT_ID",
+ *     merchantName = "Your Store",
+ *     gateway = GatewayConfig.Custom(
+ *         gatewayName = "fatzebra",
+ *         gatewayMerchantId = "<your merchant id>"
+ *     )
  * )
  * ```
  */
 data class GooglePayConfig(
     val merchantId: String,
     val merchantName: String,
-    val gateway: String,
-    val gatewayMerchantId: String,
+    val gateway: GatewayConfig,
     val allowedCardNetworks: Set<GooglePayCardNetwork> = setOf(
         GooglePayCardNetwork.MASTERCARD,
-        GooglePayCardNetwork.VISA
+        GooglePayCardNetwork.VISA,
     ),
     val allowedAuthMethods: Set<GooglePayAuthMethod> = GooglePayAuthMethod.DEFAULT,
     val allowCreditCards: Boolean = false,
     val assuranceDetailsRequired: Boolean = false,
     val currencyCode: String = "AUD",
-    val countryCode: String = "AU"
+    val countryCode: String = "AU",
 ) {
     init {
         require(merchantId.isNotBlank()) { "merchantId cannot be blank" }
         require(merchantName.isNotBlank()) { "merchantName cannot be blank" }
-        require(gateway.isNotBlank()) { "gateway cannot be blank" }
-        require(gatewayMerchantId.isNotBlank()) { "gatewayMerchantId cannot be blank" }
         require(currencyCode.isNotBlank()) { "currencyCode cannot be blank" }
         require(currencyCode.length == 3) { "currencyCode must be a 3-letter ISO 4217 code" }
         require(countryCode.isNotBlank()) { "countryCode cannot be blank" }

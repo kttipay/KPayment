@@ -13,8 +13,7 @@ class ConfigValidationTest {
         val config = GooglePayConfig(
             merchantId = "merchant_123",
             merchantName = "Test Merchant",
-            gateway = "stripe",
-            gatewayMerchantId = "gateway_123"
+            gateway = GatewayConfig.Custom(gatewayName = "stripe", gatewayMerchantId = "gateway_123")
         )
 
         assertNotNull(config)
@@ -27,8 +26,7 @@ class ConfigValidationTest {
         val config = GooglePayConfig(
             merchantId = "merchant_123",
             merchantName = "Test Merchant",
-            gateway = "stripe",
-            gatewayMerchantId = "gateway_123"
+            gateway = GatewayConfig.Custom(gatewayName = "stripe", gatewayMerchantId = "gateway_123")
         )
 
         assertEquals(setOf(GooglePayCardNetwork.MASTERCARD, GooglePayCardNetwork.VISA), config.allowedCardNetworks)
@@ -37,6 +35,16 @@ class ConfigValidationTest {
         assertFalse(config.assuranceDetailsRequired)
         assertEquals("AUD", config.currencyCode)
         assertEquals("AU", config.countryCode)
+    }
+
+    @Test
+    fun `GooglePayConfig accepts typed Stripe gateway`() {
+        val config = GooglePayConfig(
+            merchantId = "merchant_123",
+            merchantName = "Test Merchant",
+            gateway = GatewayConfig.Stripe(publishableKey = "pk_live_x")
+        )
+        assertEquals(GatewayConfig.Stripe(publishableKey = "pk_live_x"), config.gateway)
     }
 
     @Test
@@ -69,8 +77,7 @@ class ConfigValidationTest {
             googlePay = GooglePayConfig(
                 merchantId = "merchant_123",
                 merchantName = "Test Merchant",
-                gateway = "stripe",
-                gatewayMerchantId = "gateway_123"
+                gateway = GatewayConfig.Custom(gatewayName = "stripe", gatewayMerchantId = "gateway_123")
             )
         )
 
@@ -99,8 +106,7 @@ class ConfigValidationTest {
             googlePay = GooglePayConfig(
                 merchantId = "merchant_123",
                 merchantName = "Test Merchant",
-                gateway = "stripe",
-                gatewayMerchantId = "gateway_123"
+                gateway = GatewayConfig.Custom(gatewayName = "stripe", gatewayMerchantId = "gateway_123")
             ),
             applePayWeb = ApplePayWebConfig(
                 base = ApplePayBaseConfig(merchantName = "Test Merchant"),

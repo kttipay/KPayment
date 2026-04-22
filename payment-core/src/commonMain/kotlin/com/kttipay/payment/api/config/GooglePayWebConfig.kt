@@ -4,8 +4,7 @@ import com.kttipay.payment.api.PaymentEnvironment
 
 data class GooglePayWebConfig(
     val googlePayEnvironment: String,
-    val googlePayGateway: String,
-    val googlePayGatewayMerchantId: String,
+    val gateway: GatewayConfig,
     val googlePayMerchantId: String,
     val googlePayMerchantName: String,
     val allowedCardNetworks: Set<GooglePayCardNetwork>,
@@ -13,7 +12,7 @@ data class GooglePayWebConfig(
     val allowCreditCards: Boolean,
     val assuranceDetailsRequired: Boolean = false,
     val currencyCode: String,
-    val countryCode: String
+    val countryCode: String,
 )
 
 fun GooglePayConfig.toGooglePayWebConfig(environment: PaymentEnvironment): GooglePayWebConfig {
@@ -22,8 +21,7 @@ fun GooglePayConfig.toGooglePayWebConfig(environment: PaymentEnvironment): Googl
             PaymentEnvironment.Production -> "PRODUCTION"
             PaymentEnvironment.Development -> "TEST"
         },
-        googlePayGateway = gateway,
-        googlePayGatewayMerchantId = gatewayMerchantId,
+        gateway = gateway,
         googlePayMerchantId = merchantId,
         googlePayMerchantName = merchantName,
         allowedCardNetworks = allowedCardNetworks,
@@ -31,6 +29,6 @@ fun GooglePayConfig.toGooglePayWebConfig(environment: PaymentEnvironment): Googl
         allowCreditCards = allowCreditCards,
         assuranceDetailsRequired = assuranceDetailsRequired,
         currencyCode = currencyCode,
-        countryCode = countryCode
+        countryCode = countryCode,
     )
 }
