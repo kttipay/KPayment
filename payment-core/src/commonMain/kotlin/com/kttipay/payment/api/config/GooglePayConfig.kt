@@ -10,6 +10,8 @@ package com.kttipay.payment.api.config
  * @param allowedAuthMethods Set of authentication methods to accept. Defaults to PAN_ONLY + CRYPTOGRAM_3DS.
  * @param allowCreditCards Whether to allow credit card transactions. Defaults to false.
  * @param assuranceDetailsRequired Whether to request additional cardholder verification.
+ *                                 Defaults to false. Set to true to request additional verification
+ *                                 for enhanced security.
  * @param currencyCode ISO 4217 currency code (e.g. "USD", "EUR", "AUD").
  * @param countryCode ISO 3166-1 alpha-2 country code (e.g. "US", "GB", "AU").
  *

@@ -98,10 +98,13 @@ kotlin {
 val googlePay = GooglePayConfig(
     merchantId = "YOUR_MERCHANT_ID",
     merchantName = "Your Store",
-    gateway = "stripe",
-    gatewayMerchantId = "YOUR_GATEWAY_ID"
+    gateway = GatewayConfig.Stripe(publishableKey = "pk_live_...")
 )
+```
 
+See [Google Pay gateway configuration](payment-web/README.md#google-pay-gateway) for FatZebra, Braintree, Adyen, and other gateways.
+
+```kotlin
 // Apple Pay (Mobile)
 val applePayMobile = ApplePayMobileConfig(
     merchantId = "merchant.com.yourcompany.app",

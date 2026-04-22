@@ -18,8 +18,7 @@ val config = WebPaymentConfig(
     googlePay = GooglePayConfig(
         merchantId = "YOUR_MERCHANT_ID",
         merchantName = "Your Store",
-        gateway = "stripe",
-        gatewayMerchantId = "YOUR_GATEWAY_ID"
+        gateway = GatewayConfig.Stripe(publishableKey = "pk_live_...")
     ),
     applePayWeb = ApplePayWebConfig(
         base = ApplePayBaseConfig(merchantName = "Your Store"),
@@ -42,6 +41,33 @@ fun CheckoutWeb() {
     }
 }
 ```
+
+## Google Pay Gateway
+
+Google Pay tokenization is gateway-specific. KPayment exposes a sealed `GatewayConfig`:
+Stripe has a first-class typed variant, everything else goes through `GatewayConfig.Custom`.
+
+```kotlin
+// Stripe
+GatewayConfig.Stripe(publishableKey = "pk_live_...")
+
+// FatZebra, Adyen, and other gateways that use the standard gatewayMerchantId field
+GatewayConfig.Custom(
+    gatewayName = "fatzebra",
+    gatewayMerchantId = "<your merchant id>"
+)
+
+// Braintree and other gateways with their own required parameters
+GatewayConfig.Custom(
+    gatewayName = "braintree",
+    additionalParameters = mapOf(
+        "braintree:apiVersion" to "v1",
+        "braintree:clientKey" to "production_xyz_..."
+    )
+)
+```
+
+Consult your gateway's Google Pay integration docs for the exact `parameters` shape.
 
 ## Non-Compose Usage
 
