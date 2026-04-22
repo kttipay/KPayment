@@ -58,12 +58,6 @@ fun ConfigScreen() {
         )
 
         ConfigItem(
-            label = "Payment Gateway",
-            value = PaymentConfig.GOOGLE_PAY_GATEWAY,
-            description = "Your payment gateway identifier (e.g., 'stripe', 'braintree')"
-        )
-
-        ConfigItem(
             label = "Environment",
             value = PaymentConfig.GOOGLE_PAY_ENVIRONMENT,
             description = "Use 'TEST' for development, 'PRODUCTION' for live payments"

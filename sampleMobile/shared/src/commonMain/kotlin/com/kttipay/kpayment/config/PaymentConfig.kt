@@ -5,6 +5,7 @@ import com.kttipay.payment.api.config.ApplePayMerchantCapability
 import com.kttipay.payment.api.config.ApplePayMobileConfig
 import com.kttipay.payment.api.config.ApplePayWebConfig
 import com.kttipay.payment.api.config.ApplePayNetwork
+import com.kttipay.payment.api.config.GatewayConfig
 import com.kttipay.payment.api.config.GooglePayAuthMethod
 import com.kttipay.payment.api.config.GooglePayCardNetwork
 import com.kttipay.payment.api.config.GooglePayConfig
@@ -48,12 +49,6 @@ object PaymentConfig {
      * Get this from your payment gateway provider (e.g., Stripe, Braintree, etc.)
      */
     const val GOOGLE_PAY_GATEWAY_MERCHANT_ID = "YOUR_GATEWAY_MERCHANT_ID_HERE"
-
-    /**
-     * Payment gateway identifier.
-     * Examples: "stripe", "braintree", "checkout", etc.
-     */
-    const val GOOGLE_PAY_GATEWAY = "stripe"
 
     /**
      * Google Pay environment.
@@ -151,8 +146,7 @@ object PaymentConfig {
     fun buildGooglePayConfig(): ConfigResult<GooglePayConfig> {
         return PaymentConfigValidator.validateGooglePayValues(
             merchantId = GOOGLE_PAY_MERCHANT_ID,
-            merchantName = GOOGLE_PAY_MERCHANT_NAME,
-            gatewayMerchantId = GOOGLE_PAY_GATEWAY_MERCHANT_ID
+            merchantName = GOOGLE_PAY_MERCHANT_NAME
         ).map { createGooglePayConfig() }
     }
 
@@ -178,8 +172,10 @@ object PaymentConfig {
         return GooglePayConfig(
             merchantId = GOOGLE_PAY_MERCHANT_ID,
             merchantName = GOOGLE_PAY_MERCHANT_NAME,
-            gatewayMerchantId = GOOGLE_PAY_GATEWAY_MERCHANT_ID,
-            gateway = GOOGLE_PAY_GATEWAY,
+            gateway = GatewayConfig.Custom(
+                gatewayName = "fatzebra",
+                gatewayMerchantId = GOOGLE_PAY_GATEWAY_MERCHANT_ID,
+            ),
             currencyCode = currencyCode,
             countryCode = countryCode,
             allowedCardNetworks = GOOGLE_PAY_CARD_NETWORKS,
