@@ -20,7 +20,10 @@ internal external interface PaymentData : JsAny {
     val paymentMethodData: PaymentMethodData
 }
 
-@JsFun("function(googlePayEnvironment) { return new google.payments.api.PaymentsClient({ environment: googlePayEnvironment }) } ")
+@JsFun(
+    "function(googlePayEnvironment) { " +
+        "return new google.payments.api.PaymentsClient({ environment: googlePayEnvironment }) }",
+)
 external fun createPaymentsClient(googlePayEnvironment: String): PaymentsClient
 
 external interface PaymentsClient : JsAny {
@@ -53,10 +56,8 @@ private fun buildPaymentDataRequest(
         assuranceDetailsRequired = config.assuranceDetailsRequired,
         allowCreditCards = config.allowCreditCards
     )
-    val tokenizationSpec = buildTokenizationSpecification(
-        gateway = config.googlePayGateway,
-        gatewayMerchantId = config.googlePayGatewayMerchantId
-    )
+    val parametersJson = config.gateway.toTokenizationParameters().toJsonObjectString()
+    val tokenizationSpec = buildTokenizationSpecification(parametersJson)
     return buildPaymentDataRequestJs(
         totalPrice = totalPrice,
         currencyCode = config.currencyCode,
@@ -121,21 +122,15 @@ private external fun buildReadyToPayRequest(cardPaymentMethod: JsAny): JsAny
 
 @JsFun(
     """
-    function(gateway, gatewayMerchantId) {
+    function(parametersJson) {
         return {
             type: 'PAYMENT_GATEWAY',
-            parameters: {
-                gateway: gateway,
-                gatewayMerchantId: gatewayMerchantId
-            }
+            parameters: JSON.parse(parametersJson)
         };
     }
 """
 )
-private external fun buildTokenizationSpecification(
-    gateway: String,
-    gatewayMerchantId: String
-): JsAny
+private external fun buildTokenizationSpecification(parametersJson: String): JsAny
 
 @JsFun(
     """

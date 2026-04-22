@@ -2,6 +2,7 @@ package com.kttipay.payment
 
 import com.kttipay.payment.api.PaymentEnvironment
 import com.kttipay.payment.api.PaymentProvider
+import com.kttipay.payment.api.config.GatewayConfig
 import com.kttipay.payment.api.config.GooglePayConfig
 import com.kttipay.payment.api.config.MobilePaymentConfig
 import com.kttipay.payment.api.config.PlatformPaymentConfig
@@ -137,8 +138,7 @@ class PaymentManagerImplTest {
             googlePay = GooglePayConfig(
                 merchantId = "test_merchant",
                 merchantName = "Test Merchant",
-                gateway = "test_gateway",
-                gatewayMerchantId = "test_gateway_id"
+                gateway = GatewayConfig.Custom(gatewayName = "test_gateway", gatewayMerchantId = "test_gateway_id"),
             )
         )
     }

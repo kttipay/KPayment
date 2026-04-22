@@ -72,8 +72,7 @@ val merchantId = System.getenv("MERCHANT_ID") ?: throw IllegalStateException("Me
 val config = GooglePayConfig(
     merchantId = merchantId,
     merchantName = "Your Store",
-    gateway = "stripe",
-    gatewayMerchantId = gatewayMerchantId
+    gateway = GatewayConfig.Stripe(publishableKey = "pk_live_...")
 )
 ```
 

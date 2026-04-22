@@ -28,7 +28,6 @@ class ApplePayWebLauncherTest {
         assertFalse(initialState)
     }
 
-
     private fun createLauncher(
         onResult: (PaymentResult) -> Unit = {}
     ): ApplePayWebLauncher {

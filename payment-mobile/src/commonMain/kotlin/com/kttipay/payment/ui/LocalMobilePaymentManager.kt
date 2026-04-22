@@ -4,6 +4,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import com.kttipay.payment.MobilePaymentManager
 import com.kttipay.payment.api.PaymentEnvironment
 import com.kttipay.payment.api.PaymentProvider
+import com.kttipay.payment.api.config.GatewayConfig
 import com.kttipay.payment.api.config.GooglePayConfig
 import com.kttipay.payment.api.config.MobilePaymentConfig
 import com.kttipay.payment.capability.CapabilityStatus
@@ -57,10 +58,13 @@ internal val MockPaymentManager = object : MobilePaymentManager {
                 merchantName = "Test Merchant",
                 countryCode = "US",
                 currencyCode = "USD",
-                gateway = "test_gateway",
-                gatewayMerchantId = "test_gateway_merchant_id",
+                gateway = GatewayConfig.Custom(
+                    gatewayName = "test_gateway",
+                    gatewayMerchantId = "test_gateway_merchant_id",
+                ),
             ),
-            environment = PaymentEnvironment.Development)
+            environment = PaymentEnvironment.Development
+        )
 
     override suspend fun checkCapabilities(): PaymentCapabilities = readyCapabilities
 

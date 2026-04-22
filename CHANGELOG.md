@@ -5,6 +5,66 @@ All notable changes to KPayment will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] — 2026-04-22
+
+### Breaking
+- `GooglePayConfig` now takes a single `gateway: GatewayConfig` instead of `gateway: String` + `gatewayMerchantId: String`. The old shape was incorrect for Stripe (missing `stripe:publishableKey` / `stripe:version`) and caused `OR_BIBED_06` errors at runtime. ([#7](https://github.com/kttipay/KPayment/issues/7))
+- `GooglePayWebConfig.googlePayGateway` / `.googlePayGatewayMerchantId` replaced by `.gateway: GatewayConfig`.
+- `PaymentConfigValidator.validateGooglePayValues(...)` signature drops the `gatewayMerchantId` parameter. Placeholder constant `GooglePayPlaceholders.GATEWAY_MERCHANT_ID` removed.
+
+### Added
+- `GatewayConfig` sealed class in `payment-core`:
+  - `GatewayConfig.Stripe(publishableKey, apiVersion, stripeAccountId?)` — type-safe Stripe support.
+  - `GatewayConfig.Custom(gatewayName, gatewayMerchantId?, additionalParameters)` — escape hatch for any other gateway (FatZebra, Braintree, Adyen, Checkout.com, ...).
+- Regression tests on Android and Web locking the tokenization JSON shape per gateway.
+
+### Fixed
+- Google Pay on Web + Stripe now works end-to-end. Resolves [#7](https://github.com/kttipay/KPayment/issues/7).
+
+### Migration
+
+```kotlin
+// Before (0.2.x)
+GooglePayConfig(
+    merchantId = "...",
+    merchantName = "...",
+    gateway = "stripe",
+    gatewayMerchantId = "pk_live_...",   // This was never valid for Stripe.
+    ...
+)
+
+// After (0.3.0) — Stripe
+GooglePayConfig(
+    merchantId = "...",
+    merchantName = "...",
+    gateway = GatewayConfig.Stripe(publishableKey = "pk_live_..."),
+    ...
+)
+
+// After (0.3.0) — FatZebra / Adyen / any other standard-shape gateway
+GooglePayConfig(
+    merchantId = "...",
+    merchantName = "...",
+    gateway = GatewayConfig.Custom(
+        gatewayName = "fatzebra",
+        gatewayMerchantId = "<your merchant id>",
+    ),
+    ...
+)
+
+// After (0.3.0) — Braintree / anything with gateway-specific keys
+GooglePayConfig(
+    ...,
+    gateway = GatewayConfig.Custom(
+        gatewayName = "braintree",
+        additionalParameters = mapOf(
+            "braintree:apiVersion" to "v1",
+            "braintree:clientKey" to "production_xyz_...",
+        ),
+    ),
+)
+```
+
 ## [0.1.0] - 2025-01-06
 
 ### Added

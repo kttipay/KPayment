@@ -7,10 +7,10 @@ import com.kttipay.payment.internal.googlepay.GooglePayWebClient
 import com.kttipay.payment.internal.googlepay.GooglePayWebClientImpl
 import com.kttipay.payment.internal.logging.KPaymentLogger
 import com.kttipay.payment.internal.utils.ScriptLoader
-import kotlin.JsFun
-import kotlin.js.ExperimentalWasmJsInterop
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.JsFun
 import kotlin.coroutines.resume
+import kotlin.js.ExperimentalWasmJsInterop
 
 private const val TAG = "WebCapabilityChecks"
 

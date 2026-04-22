@@ -46,8 +46,7 @@ sealed interface PlatformPaymentConfig {
  *     googlePay = GooglePayConfig(
  *         merchantId = "YOUR_MERCHANT_ID",
  *         merchantName = "Your Store",
- *         gateway = "stripe",
- *         gatewayMerchantId = "YOUR_GATEWAY_ID"
+ *         gateway = GatewayConfig.Stripe(publishableKey = "pk_live_...")
  *     ),
  *     applePayMobile = ApplePayMobileConfig(
  *         merchantId = "merchant.com.yourcompany.app",
@@ -90,8 +89,7 @@ data class MobilePaymentConfig(
  *     googlePay = GooglePayConfig(
  *         merchantId = "YOUR_MERCHANT_ID",
  *         merchantName = "Your Store",
- *         gateway = "stripe",
- *         gatewayMerchantId = "YOUR_GATEWAY_ID"
+ *         gateway = GatewayConfig.Stripe(publishableKey = "pk_live_...")
  *     ),
  *     applePayWeb = ApplePayWebConfig(
  *         base = ApplePayBaseConfig(merchantName = "Your Store"),

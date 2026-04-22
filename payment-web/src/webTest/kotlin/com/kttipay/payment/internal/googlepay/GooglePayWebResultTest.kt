@@ -92,5 +92,4 @@ class GooglePayWebResultTest {
 
         assertEquals(GooglePayWebErrorCode.TOKEN_EXTRACTION_FAILED.message, error.message)
     }
-
 }

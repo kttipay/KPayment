@@ -13,8 +13,7 @@ package com.kttipay.payment.api.validation
  * ```
  * val result = PaymentConfigValidator.validateGooglePayValues(
  *     merchantId = myMerchantId,
- *     merchantName = myMerchantName,
- *     gatewayMerchantId = myGatewayMerchantId
+ *     merchantName = myMerchantName
  * )
  * result.map { createGooglePayConfig() }
  * ```
@@ -28,7 +27,6 @@ object PaymentConfigValidator {
     object GooglePayPlaceholders {
         const val MERCHANT_ID = "YOUR_MERCHANT_ID_HERE"
         const val MERCHANT_NAME = "YOUR_MERCHANT_NAME_HERE"
-        const val GATEWAY_MERCHANT_ID = "YOUR_GATEWAY_MERCHANT_ID_HERE"
     }
 
     /**
@@ -49,13 +47,11 @@ object PaymentConfigValidator {
      *
      * @param merchantId The Google Pay merchant ID to validate
      * @param merchantName The merchant name to validate
-     * @param gatewayMerchantId The gateway merchant ID to validate
      * @return ConfigResult.Success with Unit if valid, ConfigResult.Failure with error messages if placeholders detected
      */
     fun validateGooglePayValues(
         merchantId: String,
-        merchantName: String,
-        gatewayMerchantId: String
+        merchantName: String
     ): ConfigResult<Unit> {
         val errors = mutableListOf<String>()
 
@@ -65,10 +61,6 @@ object PaymentConfigValidator {
 
         if (merchantName == GooglePayPlaceholders.MERCHANT_NAME) {
             errors.add("Please configure Google Pay merchant name in PaymentConfig.kt")
-        }
-
-        if (gatewayMerchantId == GooglePayPlaceholders.GATEWAY_MERCHANT_ID) {
-            errors.add("Please configure Google Pay gateway merchant ID in PaymentConfig.kt")
         }
 
         return if (errors.isEmpty()) {

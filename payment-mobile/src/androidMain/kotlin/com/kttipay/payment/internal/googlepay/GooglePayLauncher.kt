@@ -35,7 +35,8 @@ fun rememberGooglePayLauncher(
     val processingState = remember { MutableStateFlow(false) }
     val currentOnResult by rememberUpdatedState(onResult)
 
-    val launcher = rememberLauncherForActivityResult(contract = TaskResultContracts.GetPaymentDataResult()) { taskResult ->
+    val launcher =
+        rememberLauncherForActivityResult(contract = TaskResultContracts.GetPaymentDataResult()) { taskResult ->
             processingState.update { false }
             val provider = PaymentProvider.GooglePay
             when (taskResult.status.statusCode) {
@@ -124,7 +125,7 @@ private class AndroidPaymentLauncher(
     }
 }
 
-private fun statusToPaymentErrorReason(statusCode: Int): PaymentErrorReason {
+internal fun statusToPaymentErrorReason(statusCode: Int): PaymentErrorReason {
     return when (statusCode) {
         CommonStatusCodes.TIMEOUT -> PaymentErrorReason.Timeout
         CommonStatusCodes.API_NOT_CONNECTED -> PaymentErrorReason.ApiNotConnected

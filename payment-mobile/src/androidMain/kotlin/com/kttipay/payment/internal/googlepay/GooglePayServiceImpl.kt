@@ -7,6 +7,7 @@ import com.google.android.gms.wallet.WalletConstants
 import com.kttipay.payment.api.PaymentEnvironment
 import com.kttipay.payment.api.config.GooglePayConfig
 import com.kttipay.payment.internal.config.GooglePayApiConstants
+import com.kttipay.payment.internal.googlepay.toTokenizationParameters
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -93,19 +94,9 @@ internal class GooglePayServiceImpl : GooglePayService {
             }
         }
 
-        private fun gatewayTokenizationSpecification(): JSONObject {
-            return JSONObject().apply {
-                put("type", GooglePayApiConstants.TOKENIZATION_TYPE_GATEWAY)
-                put(
-                    "parameters",
-                    JSONObject(
-                        mapOf(
-                            "gateway" to config.gateway,
-                            "gatewayMerchantId" to config.gatewayMerchantId
-                        )
-                    )
-                )
-            }
+        private fun gatewayTokenizationSpecification(): JSONObject = JSONObject().apply {
+            put("type", GooglePayApiConstants.TOKENIZATION_TYPE_GATEWAY)
+            put("parameters", JSONObject(config.gateway.toTokenizationParameters()))
         }
 
         private fun cardPaymentMethod(): JSONObject {

@@ -37,8 +37,7 @@ dependencies {
 val googlePay = GooglePayConfig(
     merchantId = "YOUR_MERCHANT_ID",
     merchantName = "Your Store",
-    gateway = "stripe",
-    gatewayMerchantId = "YOUR_GATEWAY_ID",
+    gateway = GatewayConfig.Stripe(publishableKey = "pk_live_..."),
     allowedCardNetworks = setOf(GooglePayCardNetwork.VISA, GooglePayCardNetwork.MASTERCARD),
     allowedAuthMethods = GooglePayAuthMethod.DEFAULT,
     currencyCode = "AUD",
