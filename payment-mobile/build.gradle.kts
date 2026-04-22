@@ -70,6 +70,10 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
 
+        getByName("androidHostTest").dependencies {
+            implementation("org.json:json:20240303")
+        }
+
         iosMain.dependencies {}
     }
 }
