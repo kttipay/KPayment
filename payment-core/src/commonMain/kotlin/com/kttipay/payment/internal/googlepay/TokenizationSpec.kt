@@ -6,7 +6,7 @@ import com.kttipay.payment.api.config.GatewayConfig
  * Builds the `tokenizationSpecification.parameters` object that Google Pay expects for this
  * gateway. Both Android and Web consume this map — single source of truth for the spec.
  */
-internal fun GatewayConfig.toTokenizationParameters(): Map<String, String> = when (this) {
+fun GatewayConfig.toTokenizationParameters(): Map<String, String> = when (this) {
     is GatewayConfig.Stripe -> buildMap {
         put("gateway", "stripe")
         put("stripe:version", apiVersion)
@@ -30,7 +30,7 @@ internal fun GatewayConfig.toTokenizationParameters(): Map<String, String> = whe
  * callers are [GatewayConfig.toTokenizationParameters], whose values are gateway names,
  * merchant IDs, and similar ASCII tokens.
  */
-internal fun Map<String, String>.toJsonObjectString(): String {
+fun Map<String, String>.toJsonObjectString(): String {
     val sb = StringBuilder()
     sb.append('{')
     var first = true
