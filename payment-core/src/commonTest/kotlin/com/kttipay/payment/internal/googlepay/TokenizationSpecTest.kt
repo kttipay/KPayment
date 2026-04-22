@@ -8,7 +8,7 @@ import kotlin.test.assertTrue
 class TokenizationSpecTest {
 
     @Test
-    fun `Stripe minimal emits gateway + version + publishableKey, no gatewayMerchantId`() {
+    fun `Stripe minimal emits gateway and version and publishableKey without gatewayMerchantId`() {
         val params = GatewayConfig.Stripe(publishableKey = "pk_live_x")
             .toTokenizationParameters()
         assertEquals(
@@ -41,7 +41,7 @@ class TokenizationSpecTest {
     }
 
     @Test
-    fun `Custom emits gateway + gatewayMerchantId (FatZebra shape)`() {
+    fun `Custom emits gateway and gatewayMerchantId for FatZebra shape`() {
         val params = GatewayConfig.Custom(
             gatewayName = "fatzebra",
             gatewayMerchantId = "my_fz_merchant"
@@ -56,7 +56,7 @@ class TokenizationSpecTest {
     }
 
     @Test
-    fun `Custom emits gateway + additionalParameters (Braintree shape)`() {
+    fun `Custom emits gateway and additionalParameters for Braintree shape`() {
         val params = GatewayConfig.Custom(
             gatewayName = "braintree",
             additionalParameters = mapOf(

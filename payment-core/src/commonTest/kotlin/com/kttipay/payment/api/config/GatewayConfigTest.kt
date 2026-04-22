@@ -42,7 +42,7 @@ class GatewayConfigTest {
     }
 
     @Test
-    fun `Stripe blank stripeAccountId (non-null) throws`() {
+    fun `Stripe blank non-null stripeAccountId throws`() {
         assertFailsWith<IllegalArgumentException> {
             GatewayConfig.Stripe(publishableKey = "pk_x", stripeAccountId = "")
         }
@@ -97,7 +97,7 @@ class GatewayConfigTest {
     }
 
     @Test
-    fun `Custom blank gatewayMerchantId (non-null) throws`() {
+    fun `Custom blank non-null gatewayMerchantId throws`() {
         assertFailsWith<IllegalArgumentException> {
             GatewayConfig.Custom(gatewayName = "fatzebra", gatewayMerchantId = "")
         }
